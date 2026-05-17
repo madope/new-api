@@ -45,30 +45,6 @@ const LanguageSelector = ({ currentLang, onLanguageChange, t }) => {
           >
             English
           </Dropdown.Item>
-          <Dropdown.Item
-            onClick={() => onLanguageChange('fr')}
-            className={`!px-3 !py-1.5 !text-sm !text-semi-color-text-0 dark:!text-gray-200 ${currentLang === 'fr' ? '!bg-semi-color-primary-light-default dark:!bg-blue-600 !font-semibold' : 'hover:!bg-semi-color-fill-1 dark:hover:!bg-gray-600'}`}
-          >
-            Français
-          </Dropdown.Item>
-          <Dropdown.Item
-            onClick={() => onLanguageChange('ja')}
-            className={`!px-3 !py-1.5 !text-sm !text-semi-color-text-0 dark:!text-gray-200 ${currentLang === 'ja' ? '!bg-semi-color-primary-light-default dark:!bg-blue-600 !font-semibold' : 'hover:!bg-semi-color-fill-1 dark:hover:!bg-gray-600'}`}
-          >
-            日本語
-          </Dropdown.Item>
-          <Dropdown.Item
-            onClick={() => onLanguageChange('ru')}
-            className={`!px-3 !py-1.5 !text-sm !text-semi-color-text-0 dark:!text-gray-200 ${currentLang === 'ru' ? '!bg-semi-color-primary-light-default dark:!bg-blue-600 !font-semibold' : 'hover:!bg-semi-color-fill-1 dark:hover:!bg-gray-600'}`}
-          >
-            Русский
-          </Dropdown.Item>
-          <Dropdown.Item
-            onClick={() => onLanguageChange('vi')}
-            className={`!px-3 !py-1.5 !text-sm !text-semi-color-text-0 dark:!text-gray-200 ${currentLang === 'vi' ? '!bg-semi-color-primary-light-default dark:!bg-blue-600 !font-semibold' : 'hover:!bg-semi-color-fill-1 dark:hover:!bg-gray-600'}`}
-          >
-            Tiếng Việt
-          </Dropdown.Item>
         </Dropdown.Menu>
       }
     >
