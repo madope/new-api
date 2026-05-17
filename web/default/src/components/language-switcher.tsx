@@ -32,7 +32,6 @@ import {
 
 const languages = [
   { code: 'zh', label: '简体中文' },
-  { code: 'zh-TW', label: '繁體中文' },
   { code: 'en', label: 'English' },
 ]
 
