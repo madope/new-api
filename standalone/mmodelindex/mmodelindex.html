@@ -1,0 +1,311 @@
+<!DOCTYPE html><html class="light" lang="zh-CN" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>NexusAPI Gateway</title>
+<link href="./mmodelindex.generated.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+    <style>
+        .text-gradient {
+            background: linear-gradient(to right, #60a5fa, #a855f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .console-shadow {
+            box-shadow: 0 20px 40px -10px rgba(0,0,0,0.05), 0 0 0 1px rgba(0,0,0,0.02);
+        }
+    
+        @keyframes tech-gradient-flow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .animate-tech-gradient {
+            background: linear-gradient(-45deg, #6750A4, #4CC9F0, #4361EE, #6750A4);
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: tech-gradient-flow 5s linear infinite;
+        }
+
+        html.dark body {
+            background: #0b1220;
+            color: #e5e7eb;
+        }
+
+        html.dark .bg-hero-gradient {
+            background: radial-gradient(ellipse at top, #172554 0%, #0b1220 72%);
+        }
+
+        html.dark .bg-white,
+        html.dark .bg-console-bg {
+            background-color: #0f172a !important;
+        }
+
+        html.dark .bg-\[\#fafafa\] {
+            background-color: #111827 !important;
+        }
+
+        html.dark .border-gray-100,
+        html.dark .border-gray-50,
+        html.dark .border-outline-variant\/20 {
+            border-color: rgba(148, 163, 184, 0.18) !important;
+        }
+
+        html.dark .console-shadow {
+            box-shadow: 0 24px 48px -20px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(148, 163, 184, 0.08);
+        }
+
+        html.dark .text-on-surface,
+        html.dark .text-gray-700 {
+            color: #f8fafc !important;
+        }
+
+        html.dark .text-on-surface-variant,
+        html.dark .text-gray-600 {
+            color: #cbd5e1 !important;
+        }
+
+        html.dark .text-gray-500,
+        html.dark .text-gray-400 {
+            color: #94a3b8 !important;
+        }
+
+        html.dark .hover\:text-gray-800:hover {
+            color: #f8fafc !important;
+        }
+
+        html.dark .from-on-surface,
+        html.dark .to-on-surface-variant {
+            --tw-gradient-from: #f8fafc var(--tw-gradient-from-position) !important;
+            --tw-gradient-to: rgb(248 250 252 / 0) var(--tw-gradient-to-position) !important;
+            --tw-gradient-stops: var(--tw-gradient-from), #cbd5e1 var(--tw-gradient-via-position), var(--tw-gradient-to) !important;
+        }
+
+        html.dark .bg-black {
+            background-color: #2563eb !important;
+        }
+
+        html.dark .text-white {
+            color: #ffffff !important;
+        }
+
+        html.dark .bg-blue-50 {
+            background-color: rgba(37, 99, 235, 0.14) !important;
+        }
+
+        html.dark .bg-orange-50 {
+            background-color: rgba(234, 88, 12, 0.14) !important;
+        }
+
+        html.dark .bg-purple-50 {
+            background-color: rgba(147, 51, 234, 0.14) !important;
+        }
+
+        html.dark footer {
+            background-color: #111827 !important;
+        }
+    </style>
+</head>
+<body class="bg-surface font-body-md text-on-surface antialiased min-h-screen relative overflow-x-hidden selection:bg-primary-container selection:text-on-primary-container">
+<!-- Radial Background -->
+<div class="absolute inset-0 bg-hero-gradient -z-10 pointer-events-none h-[800px]"></div>
+<!-- Top Navigation (From JSON) -->
+<main class="w-full max-w-container-max mx-auto px-4 md:px-8 pt-section-padding-lg pb-section-padding-lg">
+<!-- Hero Section -->
+<section class="flex flex-col items-center text-center mb-8">
+<h1 class="font-display-hero text-display-hero text-on-surface mb-2 tracking-tighter"><span class="block text-8xl tracking-tighter font-black mb-2 bg-clip-text text-transparent animate-tech-gradient">MMODEL</span>
+<span class="block text-6xl tracking-tight font-bold bg-gradient-to-r from-on-surface to-on-surface-variant bg-clip-text text-transparent">一站式大模型 API 网关</span></h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl text-gray-500 mt-2 mb-8"></p><p class="" dir="auto" style="white-space: pre-wrap;">专业稳定的大模型 API 服务，<span class="" style="letter-spacing: 0px;">统一调用 100+ 大模型，简单高效</span></p><p class=""></p>
+<a class="inline-flex items-center justify-center bg-black text-white px-6 py-3 rounded-full font-body-md text-body-md font-medium hover:opacity-90 transition-opacity mt-6" href="/console">开始&nbsp;<span class="material-symbols-outlined ml-2 text-[18px]">arrow_forward</span>
+</a>
+</section>
+<!-- API Console Section -->
+<section class="w-full max-w-4xl mx-auto -mt-4">
+<div class="bg-console-bg rounded-2xl console-shadow border border-gray-100 overflow-hidden flex flex-col">
+<!-- Console Header / Tabs -->
+<div class="flex items-center justify-between px-6 border-b border-gray-100 bg-white">
+<div class="flex space-x-6">
+<button class="tab-btn px-2 py-4 font-body-md text-sm border-b-2 font-medium border-green-500 text-green-600" data-active-class="border-green-500 text-green-600" data-target="tab-chat">Chat</button>
+<button class="tab-btn px-2 py-4 font-body-md text-sm transition-colors text-gray-400 hover:text-gray-800 border-b-2 border-transparent" data-active-class="border-orange-500 text-orange-600" data-target="tab-responses">Responses</button>
+<button class="tab-btn px-2 py-4 font-body-md text-sm transition-colors text-gray-400 hover:text-gray-800 border-transparent border-b-2" data-active-class="border-blue-500 text-blue-600" data-target="tab-claude">Claude</button>
+<button class="tab-btn px-2 py-4 font-body-md text-sm transition-colors text-gray-400 hover:text-gray-800 border-transparent border-b-2" data-active-class="border-purple-500 text-purple-600" data-target="tab-gemini">Gemini</button>
+</div>
+<div class="flex items-center space-x-2 text-xs font-label-mono text-gray-400">
+<span class="w-2 h-2 rounded-full bg-green-500"></span>
+</div>
+</div>
+<!-- Tab Contents -->
+<div id="tab-contents">
+<!-- Chat Tab -->
+<div class="tab-content bg-white block" id="tab-chat">
+<div class="px-6 py-4 flex items-center gap-4 border-b border-gray-50 bg-white">
+<span class="px-2 py-1 bg-blue-50 text-blue-600 rounded font-label-mono text-xs font-bold">POST</span>
+<span class="font-label-mono text-sm text-gray-700">/v1/chat/completions</span>
+</div>
+<div class="flex flex-col bg-white">
+<div class="p-6 border-b border-gray-50">
+<div class="font-label-mono text-xs text-gray-400 font-semibold tracking-widest mb-4 uppercase">请求</div>
+<pre class="font-label-mono text-[13px] leading-relaxed text-gray-600 overflow-x-auto"><code><span class="text-console-keyword">curl</span> <span class="text-console-method">-X</span> POST <span class="text-console-string">"/v1/chat/completions"</span> \
+  <span class="text-console-method">-H</span> <span class="text-console-string">"Authorization: Bearer sk-••••"</span> \
+  <span class="text-console-method">-d</span> '{
+    <span class="text-console-variable">"model"</span>: <span class="text-console-string">"your-model"</span>,
+    <span class="text-console-variable">"messages"</span>: [
+      { <span class="text-console-variable">"role"</span>: <span class="text-console-string">"user"</span>, <span class="text-console-variable">"content"</span>: <span class="text-console-string">"..."</span> }
+    ]
+  }'</code></pre>
+</div>
+<div class="p-6 bg-[#fafafa]">
+<div class="font-label-mono text-xs text-gray-400 font-semibold tracking-widest mb-4 uppercase">响应</div>
+<pre class="font-label-mono text-[13px] leading-relaxed text-gray-600 overflow-x-auto"><code>{
+  <span class="text-console-variable">"choices"</span>: [{ <span class="text-console-variable">"message"</span>: { <span class="text-console-variable">"content"</span>: <span class="text-green-600">"Chat request routed."</span> } }],
+  <span class="text-console-variable">"usage"</span>: { <span class="text-console-variable">"total_tokens"</span>: <span class="text-[#a855f7]">27</span> }
+}</code></pre>
+</div>
+</div>
+</div>
+<!-- Responses Tab -->
+<div class="tab-content bg-white hidden" id="tab-responses">
+<div class="px-6 py-4 flex items-center gap-4 border-b border-gray-50 bg-white">
+<span class="px-2 py-1 bg-orange-50 text-orange-600 rounded font-label-mono text-xs font-bold">POST</span>
+<span class="font-label-mono text-sm text-gray-700">/v1/responses</span>
+</div>
+<div class="flex flex-col bg-white">
+<div class="p-6 border-b border-gray-50">
+<div class="font-label-mono text-xs text-gray-400 font-semibold tracking-widest mb-4 uppercase">请求</div>
+<pre class="font-label-mono text-[13px] leading-relaxed text-gray-600 overflow-x-auto"><code><span class="text-green-600">curl</span> <span class="text-blue-600">-X</span> POST <span class="text-orange-600">"/v1/responses"</span> \
+  <span class="text-blue-600">-H</span> <span class="text-orange-600">"Authorization: Bearer sk-••••"</span> \
+  <span class="text-blue-600">-d</span> <span class="text-orange-600">'{
+    "model": "your-model",
+    "input": "..."
+  }'</span></code></pre>
+</div>
+<div class="p-6 bg-[#fafafa]">
+<div class="font-label-mono text-xs text-gray-400 font-semibold tracking-widest mb-4 uppercase">响应</div>
+<pre class="font-label-mono text-[13px] leading-relaxed text-gray-600 overflow-x-auto"><code>{
+  <span class="text-blue-600">"output"</span>: [{ <span class="text-blue-600">"type"</span>: <span class="text-orange-600">"output_text"</span>, <span class="text-blue-600">"text"</span>: <span class="text-orange-600">"Response workflow ready."</span> }],
+  <span class="text-blue-600">"usage"</span>: { <span class="text-blue-600">"total_tokens"</span>: <span class="text-purple-600">31</span> }
+}</code></pre>
+</div>
+</div>
+</div>
+<!-- Claude Tab -->
+<div class="tab-content bg-white hidden" id="tab-claude">
+<div class="px-6 py-4 flex items-center gap-4 border-b border-gray-50 bg-white">
+<span class="px-2 py-1 bg-blue-50 text-blue-600 rounded font-label-mono text-xs font-bold">POST</span>
+<span class="font-label-mono text-sm text-gray-700">/v1/messages</span>
+</div>
+<div class="flex flex-col bg-white">
+<div class="p-6 border-b border-gray-50">
+<div class="font-label-mono text-xs text-gray-400 font-semibold tracking-widest mb-4 uppercase">请求</div>
+<pre class="font-label-mono text-[13px] leading-relaxed text-gray-600 overflow-x-auto"><code><span class="text-green-600">curl</span> <span class="text-blue-600">-X</span> POST <span class="text-orange-600">"/v1/messages"</span> \
+  <span class="text-blue-600">-H</span> <span class="text-orange-600">"x-api-key: sk-••••"</span> \
+  <span class="text-blue-600">-H</span> <span class="text-orange-600">"anthropic-version: 2023-06-01"</span> \
+  <span class="text-blue-600">-d</span> <span class="text-orange-600">'{
+    <span class="text-blue-600">"model"</span>: "your-model",
+    <span class="text-blue-600">"max_tokens"</span>: 1024,
+    <span class="text-blue-600">"messages"</span>: [
+      { <span class="text-blue-600">"role"</span>: "user", <span class="text-blue-600">"content"</span>: "..." }
+    ]
+  }'</span></code></pre>
+</div>
+<div class="p-6 bg-[#fafafa]">
+<div class="font-label-mono text-xs text-gray-400 font-semibold tracking-widest mb-4 uppercase">响应</div>
+<pre class="font-label-mono text-[13px] leading-relaxed text-gray-600 overflow-x-auto"><code>{
+  <span class="text-blue-600">"content"</span>: [{ <span class="text-blue-600">"type"</span>: <span class="text-orange-600">"text"</span>, <span class="text-blue-600">"text"</span>: <span class="text-blue-600">"Claude message routed."</span> }],
+  <span class="text-blue-600">"usage"</span>: { <span class="text-blue-600">"input_tokens"</span>: <span class="text-purple-600">11</span>, <span class="text-blue-600">"output_tokens"</span>: <span class="text-purple-600">18</span> }
+}</code></pre>
+</div>
+</div>
+</div>
+<!-- Gemini Tab -->
+<div class="tab-content bg-white hidden" id="tab-gemini">
+<div class="px-6 py-4 flex items-center gap-4 border-b border-gray-50 bg-white">
+<span class="px-2 py-1 bg-purple-50 text-purple-600 rounded font-label-mono text-xs font-bold">POST</span>
+<span class="font-label-mono text-sm text-gray-700">/v1beta/models/{model}:generateContent</span>
+</div>
+<div class="flex flex-col bg-white">
+<div class="p-6 border-b border-gray-50">
+<div class="font-label-mono text-xs text-gray-400 font-semibold tracking-widest mb-4 uppercase">请求</div>
+<pre class="font-label-mono text-[13px] leading-relaxed text-gray-600 overflow-x-auto"><code><span class="text-green-600">curl</span> <span class="text-blue-600">-X</span> POST <span class="text-orange-600">"/v1beta/models/{model}:generateContent"</span> \
+  <span class="text-blue-600">-H</span> <span class="text-orange-600">"x-goog-api-key: sk-••••"</span> \
+  <span class="text-blue-600">-d</span> <span class="text-orange-600">'{
+    <span class="text-blue-600">"contents"</span>: [
+      { <span class="text-blue-600">"role"</span>: "user",
+        <span class="text-blue-600">"parts"</span>: [{ <span class="text-blue-600">"text"</span>: "..." }] }
+    ]
+  }'</span></code></pre>
+</div>
+<div class="p-6 bg-[#fafafa]">
+<div class="font-label-mono text-xs text-gray-400 font-semibold tracking-widest mb-4 uppercase">响应</div>
+<pre class="font-label-mono text-[13px] leading-relaxed text-gray-600 overflow-x-auto"><code>{
+  <span class="text-blue-600">"candidates"</span>: [{ <span class="text-blue-600">"content"</span>: { <span class="text-blue-600">"parts"</span>: [{ <span class="text-blue-600">"text"</span>: <span class="text-purple-600">"Gemini request served."</span> }] } }],
+  <span class="text-blue-600">"usageMetadata"</span>: { <span class="text-blue-600">"totalTokenCount"</span>: <span class="text-purple-600">25</span> }
+}</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer (From JSON) -->
+<footer class="bg-surface-container-lowest dark:bg-surface-dim full-width border-t border-outline-variant/20 flat">
+</footer>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const tabs = document.querySelectorAll('.tab-btn');
+        const contents = document.querySelectorAll('.tab-content');
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const target = tab.getAttribute('data-target');
+                
+                // Hide all contents
+                contents.forEach(c => {
+                    c.classList.remove('block');
+                    c.classList.add('hidden');
+                });
+                
+                // Show target content
+                const targetEl = document.getElementById(target);
+                if (targetEl) {
+                    targetEl.classList.remove('hidden');
+                    targetEl.classList.add('block');
+                }
+                
+                // Reset tab styles
+                tabs.forEach(t => {
+                    const activeClass = t.getAttribute('data-active-class');
+                    const classesToRemove = activeClass.split(' ');
+                    t.classList.remove('font-medium', 'border-b-2', ...classesToRemove);
+                    t.classList.add('text-gray-400', 'hover:text-gray-800', 'border-b-2', 'border-transparent');
+                });
+                
+                // Set active tab style
+                const activeClass = tab.getAttribute('data-active-class');
+                const classesToAdd = activeClass.split(' ');
+                tab.classList.remove('text-gray-400', 'hover:text-gray-800', 'border-transparent');
+                tab.classList.add('font-medium', 'border-b-2', ...classesToAdd);
+            });
+        });
+    });
+
+    window.addEventListener('message', (event) => {
+        const themeMode = event.data && event.data.themeMode;
+        if (themeMode !== 'dark' && themeMode !== 'light') return;
+        document.documentElement.classList.remove('light', 'dark');
+        document.documentElement.classList.add(themeMode);
+    });
+
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.documentElement.classList.remove('light');
+        document.documentElement.classList.add('dark');
+    }
+</script>
+
+
+</body></html>
