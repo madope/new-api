@@ -1,7 +1,7 @@
 <!DOCTYPE html><html class="light" lang="zh-CN" style=""><head>
 <meta charset="utf-8">
 <meta content="width=device-width, initial-scale=1.0" name="viewport">
-<title>NexusAPI Gateway</title>
+<title>MMODEL</title>
 <link href="./mmodelindex.generated.css" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet">
@@ -118,9 +118,9 @@
 <!-- Hero Section -->
 <section class="flex flex-col items-center text-center mb-8">
 <h1 class="font-display-hero text-display-hero text-on-surface mb-2 tracking-tighter"><span class="block text-8xl tracking-tighter font-black mb-2 bg-clip-text text-transparent animate-tech-gradient">MMODEL</span>
-<span class="block text-6xl tracking-tight font-bold bg-gradient-to-r from-on-surface to-on-surface-variant bg-clip-text text-transparent">一站式大模型 API 网关</span></h1>
-<p class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl text-gray-500 mt-2 mb-8"></p><p class="" dir="auto" style="white-space: pre-wrap;">专业稳定的大模型 API 服务，<span class="" style="letter-spacing: 0px;">统一调用 100+ 大模型，简单高效</span></p><p class=""></p>
-<a class="inline-flex items-center justify-center bg-black text-white px-6 py-3 rounded-full font-body-md text-body-md font-medium hover:opacity-90 transition-opacity mt-6" href="/console">开始&nbsp;<span class="material-symbols-outlined ml-2 text-[18px]">arrow_forward</span>
+<span class="block text-6xl tracking-tight font-bold bg-gradient-to-r from-on-surface to-on-surface-variant bg-clip-text text-transparent" id="hero-title">一站式大模型 API 网关</span></h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl text-gray-500 mt-2 mb-8"></p><p class="" dir="auto" id="hero-subtitle" style="white-space: pre-wrap;">专业稳定的大模型 API 服务，统一调用 100+ 大模型，简单高效</p><p class=""></p>
+<a class="inline-flex items-center justify-center bg-black text-white px-6 py-3 rounded-full font-body-md text-body-md font-medium hover:opacity-90 transition-opacity mt-6" href="/console"><span id="hero-cta">开始</span>&nbsp;<span class="material-symbols-outlined ml-2 text-[18px]">arrow_forward</span>
 </a>
 </section>
 <!-- API Console Section -->
@@ -129,8 +129,8 @@
 <!-- Console Header / Tabs -->
 <div class="flex items-center justify-between px-6 border-b border-gray-100 bg-white">
 <div class="flex space-x-6">
-<button class="tab-btn px-2 py-4 font-body-md text-sm border-b-2 font-medium border-green-500 text-green-600" data-active-class="border-green-500 text-green-600" data-target="tab-chat">Chat</button>
-<button class="tab-btn px-2 py-4 font-body-md text-sm transition-colors text-gray-400 hover:text-gray-800 border-b-2 border-transparent" data-active-class="border-orange-500 text-orange-600" data-target="tab-responses">Responses</button>
+<button class="tab-btn px-2 py-4 font-body-md text-sm border-b-2 font-medium border-green-500 text-green-600" data-active-class="border-green-500 text-green-600" data-target="tab-chat" id="tab-label-chat">Chat</button>
+<button class="tab-btn px-2 py-4 font-body-md text-sm transition-colors text-gray-400 hover:text-gray-800 border-b-2 border-transparent" data-active-class="border-orange-500 text-orange-600" data-target="tab-responses" id="tab-label-responses">Responses</button>
 <button class="tab-btn px-2 py-4 font-body-md text-sm transition-colors text-gray-400 hover:text-gray-800 border-transparent border-b-2" data-active-class="border-blue-500 text-blue-600" data-target="tab-claude">Claude</button>
 <button class="tab-btn px-2 py-4 font-body-md text-sm transition-colors text-gray-400 hover:text-gray-800 border-transparent border-b-2" data-active-class="border-purple-500 text-purple-600" data-target="tab-gemini">Gemini</button>
 </div>
@@ -148,7 +148,7 @@
 </div>
 <div class="flex flex-col bg-white">
 <div class="p-6 border-b border-gray-50">
-<div class="font-label-mono text-xs text-gray-400 font-semibold tracking-widest mb-4 uppercase">请求</div>
+<div class="font-label-mono text-xs text-gray-400 font-semibold tracking-widest mb-4 uppercase section-request-label">请求</div>
 <pre class="font-label-mono text-[13px] leading-relaxed text-gray-600 overflow-x-auto"><code><span class="text-console-keyword">curl</span> <span class="text-console-method">-X</span> POST <span class="text-console-string">"/v1/chat/completions"</span> \
   <span class="text-console-method">-H</span> <span class="text-console-string">"Authorization: Bearer sk-••••"</span> \
   <span class="text-console-method">-d</span> '{
@@ -159,7 +159,7 @@
   }'</code></pre>
 </div>
 <div class="p-6 bg-[#fafafa]">
-<div class="font-label-mono text-xs text-gray-400 font-semibold tracking-widest mb-4 uppercase">响应</div>
+<div class="font-label-mono text-xs text-gray-400 font-semibold tracking-widest mb-4 uppercase section-response-label">响应</div>
 <pre class="font-label-mono text-[13px] leading-relaxed text-gray-600 overflow-x-auto"><code>{
   <span class="text-console-variable">"choices"</span>: [{ <span class="text-console-variable">"message"</span>: { <span class="text-console-variable">"content"</span>: <span class="text-green-600">"Chat request routed."</span> } }],
   <span class="text-console-variable">"usage"</span>: { <span class="text-console-variable">"total_tokens"</span>: <span class="text-[#a855f7]">27</span> }
@@ -175,7 +175,7 @@
 </div>
 <div class="flex flex-col bg-white">
 <div class="p-6 border-b border-gray-50">
-<div class="font-label-mono text-xs text-gray-400 font-semibold tracking-widest mb-4 uppercase">请求</div>
+<div class="font-label-mono text-xs text-gray-400 font-semibold tracking-widest mb-4 uppercase section-request-label">请求</div>
 <pre class="font-label-mono text-[13px] leading-relaxed text-gray-600 overflow-x-auto"><code><span class="text-green-600">curl</span> <span class="text-blue-600">-X</span> POST <span class="text-orange-600">"/v1/responses"</span> \
   <span class="text-blue-600">-H</span> <span class="text-orange-600">"Authorization: Bearer sk-••••"</span> \
   <span class="text-blue-600">-d</span> <span class="text-orange-600">'{
@@ -184,7 +184,7 @@
   }'</span></code></pre>
 </div>
 <div class="p-6 bg-[#fafafa]">
-<div class="font-label-mono text-xs text-gray-400 font-semibold tracking-widest mb-4 uppercase">响应</div>
+<div class="font-label-mono text-xs text-gray-400 font-semibold tracking-widest mb-4 uppercase section-response-label">响应</div>
 <pre class="font-label-mono text-[13px] leading-relaxed text-gray-600 overflow-x-auto"><code>{
   <span class="text-blue-600">"output"</span>: [{ <span class="text-blue-600">"type"</span>: <span class="text-orange-600">"output_text"</span>, <span class="text-blue-600">"text"</span>: <span class="text-orange-600">"Response workflow ready."</span> }],
   <span class="text-blue-600">"usage"</span>: { <span class="text-blue-600">"total_tokens"</span>: <span class="text-purple-600">31</span> }
@@ -200,7 +200,7 @@
 </div>
 <div class="flex flex-col bg-white">
 <div class="p-6 border-b border-gray-50">
-<div class="font-label-mono text-xs text-gray-400 font-semibold tracking-widest mb-4 uppercase">请求</div>
+<div class="font-label-mono text-xs text-gray-400 font-semibold tracking-widest mb-4 uppercase section-request-label">请求</div>
 <pre class="font-label-mono text-[13px] leading-relaxed text-gray-600 overflow-x-auto"><code><span class="text-green-600">curl</span> <span class="text-blue-600">-X</span> POST <span class="text-orange-600">"/v1/messages"</span> \
   <span class="text-blue-600">-H</span> <span class="text-orange-600">"x-api-key: sk-••••"</span> \
   <span class="text-blue-600">-H</span> <span class="text-orange-600">"anthropic-version: 2023-06-01"</span> \
@@ -213,7 +213,7 @@
   }'</span></code></pre>
 </div>
 <div class="p-6 bg-[#fafafa]">
-<div class="font-label-mono text-xs text-gray-400 font-semibold tracking-widest mb-4 uppercase">响应</div>
+<div class="font-label-mono text-xs text-gray-400 font-semibold tracking-widest mb-4 uppercase section-response-label">响应</div>
 <pre class="font-label-mono text-[13px] leading-relaxed text-gray-600 overflow-x-auto"><code>{
   <span class="text-blue-600">"content"</span>: [{ <span class="text-blue-600">"type"</span>: <span class="text-orange-600">"text"</span>, <span class="text-blue-600">"text"</span>: <span class="text-blue-600">"Claude message routed."</span> }],
   <span class="text-blue-600">"usage"</span>: { <span class="text-blue-600">"input_tokens"</span>: <span class="text-purple-600">11</span>, <span class="text-blue-600">"output_tokens"</span>: <span class="text-purple-600">18</span> }
@@ -229,7 +229,7 @@
 </div>
 <div class="flex flex-col bg-white">
 <div class="p-6 border-b border-gray-50">
-<div class="font-label-mono text-xs text-gray-400 font-semibold tracking-widest mb-4 uppercase">请求</div>
+<div class="font-label-mono text-xs text-gray-400 font-semibold tracking-widest mb-4 uppercase section-request-label">请求</div>
 <pre class="font-label-mono text-[13px] leading-relaxed text-gray-600 overflow-x-auto"><code><span class="text-green-600">curl</span> <span class="text-blue-600">-X</span> POST <span class="text-orange-600">"/v1beta/models/{model}:generateContent"</span> \
   <span class="text-blue-600">-H</span> <span class="text-orange-600">"x-goog-api-key: sk-••••"</span> \
   <span class="text-blue-600">-d</span> <span class="text-orange-600">'{
@@ -240,7 +240,7 @@
   }'</span></code></pre>
 </div>
 <div class="p-6 bg-[#fafafa]">
-<div class="font-label-mono text-xs text-gray-400 font-semibold tracking-widest mb-4 uppercase">响应</div>
+<div class="font-label-mono text-xs text-gray-400 font-semibold tracking-widest mb-4 uppercase section-response-label">响应</div>
 <pre class="font-label-mono text-[13px] leading-relaxed text-gray-600 overflow-x-auto"><code>{
   <span class="text-blue-600">"candidates"</span>: [{ <span class="text-blue-600">"content"</span>: { <span class="text-blue-600">"parts"</span>: [{ <span class="text-blue-600">"text"</span>: <span class="text-purple-600">"Gemini request served."</span> }] } }],
   <span class="text-blue-600">"usageMetadata"</span>: { <span class="text-blue-600">"totalTokenCount"</span>: <span class="text-purple-600">25</span> }
@@ -256,6 +256,60 @@
 <footer class="bg-surface-container-lowest dark:bg-surface-dim full-width border-t border-outline-variant/20 flat">
 </footer>
 <script>
+    const translations = {
+        zh: {
+            title: 'MMODEL',
+            heroTitle: '一站式大模型 API 网关',
+            heroSubtitle: '专业稳定的大模型 API 服务，统一调用 100+ 大模型，简单高效',
+            heroCta: '开始',
+            chat: 'Chat',
+            responses: 'Responses',
+            request: '请求',
+            response: '响应',
+        },
+        en: {
+            title: 'MMODEL',
+            heroTitle: 'One-stop LLM API Gateway',
+            heroSubtitle: 'Stable and professional LLM API service with unified access to 100+ models.',
+            heroCta: 'Get Started',
+            chat: 'Chat',
+            responses: 'Responses',
+            request: 'Request',
+            response: 'Response',
+        }
+    };
+
+    function normalizeLang(lang) {
+        if (!lang) return 'zh';
+        const normalized = String(lang).toLowerCase();
+        return normalized.startsWith('en') ? 'en' : 'zh';
+    }
+
+    function applyLanguage(lang) {
+        const locale = translations[normalizeLang(lang)];
+        document.documentElement.lang = locale === translations.en ? 'en' : 'zh-CN';
+        document.title = locale.title;
+
+        const heroTitle = document.getElementById('hero-title');
+        const heroSubtitle = document.getElementById('hero-subtitle');
+        const heroCta = document.getElementById('hero-cta');
+        const tabChat = document.getElementById('tab-label-chat');
+        const tabResponses = document.getElementById('tab-label-responses');
+
+        if (heroTitle) heroTitle.textContent = locale.heroTitle;
+        if (heroSubtitle) heroSubtitle.textContent = locale.heroSubtitle;
+        if (heroCta) heroCta.textContent = locale.heroCta;
+        if (tabChat) tabChat.textContent = locale.chat;
+        if (tabResponses) tabResponses.textContent = locale.responses;
+
+        document.querySelectorAll('.section-request-label').forEach((el) => {
+            el.textContent = locale.request;
+        });
+        document.querySelectorAll('.section-response-label').forEach((el) => {
+            el.textContent = locale.response;
+        });
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
         const tabs = document.querySelectorAll('.tab-btn');
         const contents = document.querySelectorAll('.tab-content');
@@ -292,13 +346,21 @@
                 tab.classList.add('font-medium', 'border-b-2', ...classesToAdd);
             });
         });
+
+        applyLanguage(document.documentElement.lang);
     });
 
     window.addEventListener('message', (event) => {
-        const themeMode = event.data && event.data.themeMode;
-        if (themeMode !== 'dark' && themeMode !== 'light') return;
-        document.documentElement.classList.remove('light', 'dark');
-        document.documentElement.classList.add(themeMode);
+        const data = event.data || {};
+        const themeMode = data.themeMode;
+        if (themeMode === 'dark' || themeMode === 'light') {
+            document.documentElement.classList.remove('light', 'dark');
+            document.documentElement.classList.add(themeMode);
+        }
+
+        if (data.lang) {
+            applyLanguage(data.lang);
+        }
     });
 
     if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {

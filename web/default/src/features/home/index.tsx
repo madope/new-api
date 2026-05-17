@@ -27,7 +27,7 @@ import { CTA, Features, Hero, HowItWorks, Stats } from './components'
 import { useHomePageContent } from './hooks'
 
 export function Home() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const { auth } = useAuthStore()
   const isAuthenticated = !!auth.user
   const { content, isLoaded, isUrl } = useHomePageContent()
@@ -37,21 +37,24 @@ export function Home() {
   useEffect(() => {
     if (!isUrl) return
 
-    const postTheme = () => {
+    const postFrameState = () => {
       iframeRef.current?.contentWindow?.postMessage(
-        { themeMode: resolvedTheme },
+        {
+          themeMode: resolvedTheme,
+          lang: i18n.language,
+        },
         '*'
       )
     }
 
-    postTheme()
+    postFrameState()
 
     const iframe = iframeRef.current
     if (!iframe) return
 
-    iframe.addEventListener('load', postTheme)
-    return () => iframe.removeEventListener('load', postTheme)
-  }, [isUrl, resolvedTheme, content])
+    iframe.addEventListener('load', postFrameState)
+    return () => iframe.removeEventListener('load', postFrameState)
+  }, [content, i18n.language, isUrl, resolvedTheme])
 
   if (!isLoaded) {
     return (
