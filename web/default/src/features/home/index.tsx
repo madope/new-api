@@ -16,11 +16,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
+import { useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '@/stores/auth-store'
 import { Markdown } from '@/components/ui/markdown'
 import { PublicLayout } from '@/components/layout'
 import { Footer } from '@/components/layout/components/footer'
+import { useTheme } from '@/context/theme-provider'
 import { CTA, Features, Hero, HowItWorks, Stats } from './components'
 import { useHomePageContent } from './hooks'
 
@@ -29,6 +31,27 @@ export function Home() {
   const { auth } = useAuthStore()
   const isAuthenticated = !!auth.user
   const { content, isLoaded, isUrl } = useHomePageContent()
+  const { resolvedTheme } = useTheme()
+  const iframeRef = useRef<HTMLIFrameElement | null>(null)
+
+  useEffect(() => {
+    if (!isUrl) return
+
+    const postTheme = () => {
+      iframeRef.current?.contentWindow?.postMessage(
+        { themeMode: resolvedTheme },
+        '*'
+      )
+    }
+
+    postTheme()
+
+    const iframe = iframeRef.current
+    if (!iframe) return
+
+    iframe.addEventListener('load', postTheme)
+    return () => iframe.removeEventListener('load', postTheme)
+  }, [isUrl, resolvedTheme, content])
 
   if (!isLoaded) {
     return (
@@ -42,10 +65,14 @@ export function Home() {
 
   if (content) {
     return (
-      <PublicLayout showMainContainer={false}>
+      <PublicLayout
+        showMainContainer={false}
+        headerProps={{ alwaysElevated: true }}
+      >
         <main className='overflow-x-hidden'>
           {isUrl ? (
             <iframe
+              ref={iframeRef}
               src={content}
               className='h-screen w-full border-none'
               title={t('Custom Home Page')}
