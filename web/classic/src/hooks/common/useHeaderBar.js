@@ -138,6 +138,28 @@ export const useHeaderBar = ({ onMobileMenuToggle, drawerOpen }) => {
     };
   }, [i18n]);
 
+  useEffect(() => {
+    const handleIframeReady = (event) => {
+      const iframe = document.querySelector('iframe');
+      const cw = iframe && iframe.contentWindow;
+      if (!cw || event.source !== cw || event.data?.type !== 'mmodelindex-ready') {
+        return;
+      }
+
+      try {
+        cw.postMessage({ themeMode: actualTheme }, '*');
+        cw.postMessage({ lang: normalizeLanguage(i18n.language) }, '*');
+      } catch (e) {
+        // Silently ignore cross-origin or access errors
+      }
+    };
+
+    window.addEventListener('message', handleIframeReady);
+    return () => {
+      window.removeEventListener('message', handleIframeReady);
+    };
+  }, [actualTheme, i18n.language]);
+
   // Actions
   const logout = useCallback(async () => {
     await API.get('/api/user/logout');

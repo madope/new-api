@@ -310,6 +310,16 @@
         });
     }
 
+    function notifyParentReady() {
+        try {
+            if (window.parent && window.parent !== window) {
+                window.parent.postMessage({ type: 'mmodelindex-ready' }, '*');
+            }
+        } catch (e) {
+            // Ignore parent messaging failures
+        }
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
         const tabs = document.querySelectorAll('.tab-btn');
         const contents = document.querySelectorAll('.tab-content');
@@ -348,6 +358,7 @@
         });
 
         applyLanguage(document.documentElement.lang);
+        notifyParentReady();
     });
 
     window.addEventListener('message', (event) => {
@@ -367,6 +378,8 @@
         document.documentElement.classList.remove('light');
         document.documentElement.classList.add('dark');
     }
+
+    window.addEventListener('load', notifyParentReady);
 </script>
 
 

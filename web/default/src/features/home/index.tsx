@@ -51,9 +51,18 @@ export function Home() {
 
     const iframe = iframeRef.current
     if (!iframe) return
+    const handleMessage = (event: MessageEvent) => {
+      if (event.source !== iframe.contentWindow) return
+      if (event.data?.type !== 'mmodelindex-ready') return
+      postFrameState()
+    }
 
     iframe.addEventListener('load', postFrameState)
-    return () => iframe.removeEventListener('load', postFrameState)
+    window.addEventListener('message', handleMessage)
+    return () => {
+      iframe.removeEventListener('load', postFrameState)
+      window.removeEventListener('message', handleMessage)
+    }
   }, [content, i18n.language, isUrl, resolvedTheme])
 
   if (!isLoaded) {
