@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"encoding/json"
+	"net/http/httptest"
 	"net/http"
 	"os"
 	"testing"
@@ -11,6 +12,7 @@ import (
 	"github.com/QuantumNous/new-api/common"
 	"github.com/QuantumNous/new-api/model"
 	relaycommon "github.com/QuantumNous/new-api/relay/common"
+	"github.com/gin-gonic/gin"
 	"github.com/glebarez/sqlite"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -217,6 +219,32 @@ func TestRefundTaskQuota_Wallet(t *testing.T) {
 	assert.Equal(t, model.LogTypeRefund, log.Type)
 	assert.Equal(t, preConsumed, log.Quota)
 	assert.Equal(t, "test-model", log.ModelName)
+}
+
+func TestRecordConsumeLogPersistsChannelName(t *testing.T) {
+	truncate(t)
+
+	const userID, channelID = 1, 1
+	seedUser(t, userID, 10000)
+	seedChannel(t, channelID)
+
+	ginCtx, _ := gin.CreateTestContext(httptest.NewRecorder())
+	ginCtx.Set("username", "test_user")
+	ginCtx.Set("channel_name", "test_channel")
+
+	model.RecordConsumeLog(ginCtx, userID, model.RecordConsumeLogParams{
+		ChannelId: channelID,
+		ModelName: "test-model",
+		TokenName: "test-token",
+		Quota:     123,
+		Content:   "consume log",
+		Group:     "default",
+	})
+
+	log := getLastLog(t)
+	require.NotNil(t, log)
+	assert.Equal(t, channelID, log.ChannelId)
+	assert.Equal(t, "test_channel", log.ChannelName)
 }
 
 func TestRefundTaskQuota_Subscription(t *testing.T) {

@@ -31,7 +31,7 @@ type Log struct {
 	UseTime          int    `json:"use_time" gorm:"default:0"`
 	IsStream         bool   `json:"is_stream"`
 	ChannelId        int    `json:"channel" gorm:"index"`
-	ChannelName      string `json:"channel_name" gorm:"->"`
+	ChannelName      string `json:"channel_name" gorm:"default:''"`
 	TokenId          int    `json:"token_id" gorm:"default:0;index"`
 	Group            string `json:"group" gorm:"index"`
 	Ip               string `json:"ip" gorm:"index;default:''"`
@@ -143,6 +143,29 @@ func RecordTopupLog(userId int, content string, callerIp string, paymentMethod s
 	}
 }
 
+func resolveLogChannelName(channelId int, fallback string) string {
+	if fallback != "" {
+		return fallback
+	}
+	if channelId == 0 {
+		return ""
+	}
+
+	if common.MemoryCacheEnabled {
+		if cacheChannel, err := CacheGetChannel(channelId); err == nil && cacheChannel.Name != "" {
+			return cacheChannel.Name
+		}
+	}
+
+	var channel struct {
+		Name string `gorm:"column:name"`
+	}
+	if err := DB.Table("channels").Select("name").Where("id = ?", channelId).Take(&channel).Error; err == nil {
+		return channel.Name
+	}
+	return ""
+}
+
 func RecordErrorLog(c *gin.Context, userId int, channelId int, modelName string, tokenName string, content string, tokenId int, useTimeSeconds int,
 	isStream bool, group string, other map[string]interface{}) {
 	logger.LogInfo(c, fmt.Sprintf("record error log: userId=%d, channelId=%d, modelName=%s, tokenName=%s, content=%s", userId, channelId, modelName, tokenName, content))
@@ -169,6 +192,7 @@ func RecordErrorLog(c *gin.Context, userId int, channelId int, modelName string,
 		ModelName:        modelName,
 		Quota:            0,
 		ChannelId:        channelId,
+		ChannelName:      resolveLogChannelName(channelId, c.GetString("channel_name")),
 		TokenId:          tokenId,
 		UseTime:          useTimeSeconds,
 		IsStream:         isStream,
@@ -232,6 +256,7 @@ func RecordConsumeLog(c *gin.Context, userId int, params RecordConsumeLogParams)
 		ModelName:        params.ModelName,
 		Quota:            params.Quota,
 		ChannelId:        params.ChannelId,
+		ChannelName:      resolveLogChannelName(params.ChannelId, c.GetString("channel_name")),
 		TokenId:          params.TokenId,
 		UseTime:          params.UseTimeSeconds,
 		IsStream:         params.IsStream,
@@ -290,6 +315,7 @@ func RecordTaskBillingLog(params RecordTaskBillingLogParams) {
 		ModelName: params.ModelName,
 		Quota:     params.Quota,
 		ChannelId: params.ChannelId,
+		ChannelName: resolveLogChannelName(params.ChannelId, ""),
 		TokenId:   params.TokenId,
 		Group:     params.Group,
 		Other:     common.MapToJsonStr(params.Other),
