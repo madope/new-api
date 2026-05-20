@@ -1,0 +1,1743 @@
+{
+  "dashboard": {
+    "annotations": {
+      "list": []
+    },
+    "editable": true,
+    "fiscalYearStartMonth": 0,
+    "graphTooltip": 0,
+    "id": null,
+    "links": [],
+    "liveNow": false,
+    "panels": [
+      {
+        "collapsed": false,
+        "gridPos": {
+          "h": 1,
+          "w": 24,
+          "x": 0,
+          "y": 0
+        },
+        "id": 1,
+        "panels": [],
+        "title": "用户维度",
+        "type": "row"
+      },
+      {
+        "datasource": {
+          "type": "postgres",
+          "uid": "__DATASOURCE_UID__"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 1
+        },
+        "id": 2,
+        "options": {
+          "legend": {
+            "displayMode": "list",
+            "placement": "bottom",
+            "showLegend": true
+          },
+          "tooltip": {
+            "mode": "multi",
+            "sort": "desc"
+          }
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "postgres",
+              "uid": "__DATASOURCE_UID__"
+            },
+            "format": "time_series",
+            "rawQuery": true,
+            "rawSql": "SELECT $__timeGroupAlias(bucket_ts, '1m'), username AS metric, SUM(count) AS value FROM logs_1m WHERE $__timeFilter(bucket_ts) AND type = 2 AND (LOWER('${v_group:raw}') = 'all' OR group_name = '${v_group:raw}') AND (LOWER('${v_model:raw}') = 'all' OR model_name = '${v_model:raw}') AND (LOWER('${v_channel:raw}') = 'all' OR channel_name = '${v_channel:raw}') AND (LOWER('${v_user:raw}') = 'all' OR username = '${v_user:raw}') AND (LOWER('${v_token:raw}') = 'all' OR token_name = '${v_token:raw}') AND (LOWER('${v_stream:raw}') = 'all' OR is_stream = ('${v_stream:raw}' = 'true')) GROUP BY 1, 2 ORDER BY 1, 2;",
+            "refId": "A"
+          }
+        ],
+        "title": "用户请求数",
+        "type": "timeseries"
+      },
+      {
+        "datasource": {
+          "type": "postgres",
+          "uid": "__DATASOURCE_UID__"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 1
+        },
+        "id": 5,
+        "options": {
+          "legend": {
+            "displayMode": "list",
+            "placement": "bottom",
+            "showLegend": true
+          },
+          "tooltip": {
+            "mode": "multi",
+            "sort": "desc"
+          }
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "postgres",
+              "uid": "__DATASOURCE_UID__"
+            },
+            "format": "time_series",
+            "rawQuery": true,
+            "rawSql": "SELECT $__timeGroupAlias(bucket_ts, '1m'), username AS metric, SUM(sum_quota) AS value FROM logs_1m WHERE $__timeFilter(bucket_ts) AND type = 2 AND (LOWER('${v_group:raw}') = 'all' OR group_name = '${v_group:raw}') AND (LOWER('${v_model:raw}') = 'all' OR model_name = '${v_model:raw}') AND (LOWER('${v_channel:raw}') = 'all' OR channel_name = '${v_channel:raw}') AND (LOWER('${v_user:raw}') = 'all' OR username = '${v_user:raw}') AND (LOWER('${v_token:raw}') = 'all' OR token_name = '${v_token:raw}') AND (LOWER('${v_stream:raw}') = 'all' OR is_stream = ('${v_stream:raw}' = 'true')) GROUP BY 1, 2 ORDER BY 1, 2;",
+            "refId": "A"
+          }
+        ],
+        "title": "用户额度消耗",
+        "type": "timeseries"
+      },
+      {
+        "datasource": {
+          "type": "postgres",
+          "uid": "__DATASOURCE_UID__"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 8,
+          "x": 0,
+          "y": 9
+        },
+        "id": 4,
+        "options": {
+          "legend": {
+            "displayMode": "list",
+            "placement": "bottom",
+            "showLegend": true
+          },
+          "tooltip": {
+            "mode": "multi",
+            "sort": "desc"
+          }
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "postgres",
+              "uid": "__DATASOURCE_UID__"
+            },
+            "format": "time_series",
+            "rawQuery": true,
+            "rawSql": "SELECT $__timeGroupAlias(bucket_ts, '1m'), username AS metric, SUM(sum_prompt_tokens + sum_completion_tokens) AS value FROM logs_1m WHERE $__timeFilter(bucket_ts) AND type = 2 AND (LOWER('${v_group:raw}') = 'all' OR group_name = '${v_group:raw}') AND (LOWER('${v_model:raw}') = 'all' OR model_name = '${v_model:raw}') AND (LOWER('${v_channel:raw}') = 'all' OR channel_name = '${v_channel:raw}') AND (LOWER('${v_user:raw}') = 'all' OR username = '${v_user:raw}') AND (LOWER('${v_token:raw}') = 'all' OR token_name = '${v_token:raw}') AND (LOWER('${v_stream:raw}') = 'all' OR is_stream = ('${v_stream:raw}' = 'true')) GROUP BY 1, 2 ORDER BY 1, 2;",
+            "refId": "A"
+          }
+        ],
+        "title": "用户 Token 消耗",
+        "type": "timeseries"
+      },
+      {
+        "datasource": {
+          "type": "postgres",
+          "uid": "__DATASOURCE_UID__"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 8,
+          "x": 8,
+          "y": 9
+        },
+        "id": 3,
+        "options": {
+          "legend": {
+            "displayMode": "list",
+            "placement": "bottom",
+            "showLegend": true
+          },
+          "tooltip": {
+            "mode": "multi",
+            "sort": "desc"
+          }
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "postgres",
+              "uid": "__DATASOURCE_UID__"
+            },
+            "format": "time_series",
+            "rawQuery": true,
+            "rawSql": "SELECT $__timeGroupAlias(bucket_ts, '1m'), username AS metric, SUM(sum_prompt_tokens) AS value FROM logs_1m WHERE $__timeFilter(bucket_ts) AND type = 2 AND (LOWER('${v_group:raw}') = 'all' OR group_name = '${v_group:raw}') AND (LOWER('${v_model:raw}') = 'all' OR model_name = '${v_model:raw}') AND (LOWER('${v_channel:raw}') = 'all' OR channel_name = '${v_channel:raw}') AND (LOWER('${v_user:raw}') = 'all' OR username = '${v_user:raw}') AND (LOWER('${v_token:raw}') = 'all' OR token_name = '${v_token:raw}') AND (LOWER('${v_stream:raw}') = 'all' OR is_stream = ('${v_stream:raw}' = 'true')) GROUP BY 1, 2 ORDER BY 1, 2;",
+            "refId": "A"
+          }
+        ],
+        "title": "用户输入 Token 消耗",
+        "type": "timeseries"
+      },
+      {
+        "datasource": {
+          "type": "postgres",
+          "uid": "__DATASOURCE_UID__"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 8,
+          "x": 16,
+          "y": 9
+        },
+        "id": 33,
+        "options": {
+          "legend": {
+            "displayMode": "list",
+            "placement": "bottom",
+            "showLegend": true
+          },
+          "tooltip": {
+            "mode": "multi",
+            "sort": "desc"
+          }
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "postgres",
+              "uid": "__DATASOURCE_UID__"
+            },
+            "format": "time_series",
+            "rawQuery": true,
+            "rawSql": "SELECT $__timeGroupAlias(bucket_ts, '1m'), username AS metric, SUM(sum_completion_tokens) AS value FROM logs_1m WHERE $__timeFilter(bucket_ts) AND type = 2 AND (LOWER('${v_group:raw}') = 'all' OR group_name = '${v_group:raw}') AND (LOWER('${v_model:raw}') = 'all' OR model_name = '${v_model:raw}') AND (LOWER('${v_channel:raw}') = 'all' OR channel_name = '${v_channel:raw}') AND (LOWER('${v_user:raw}') = 'all' OR username = '${v_user:raw}') AND (LOWER('${v_token:raw}') = 'all' OR token_name = '${v_token:raw}') AND (LOWER('${v_stream:raw}') = 'all' OR is_stream = ('${v_stream:raw}' = 'true')) GROUP BY 1, 2 ORDER BY 1, 2;",
+            "refId": "A"
+          }
+        ],
+        "title": "用户输出 Token 消耗",
+        "type": "timeseries"
+      },
+      {
+        "datasource": {
+          "type": "postgres",
+          "uid": "__DATASOURCE_UID__"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "align": "auto"
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 9,
+          "w": 12,
+          "x": 0,
+          "y": 17
+        },
+        "id": 6,
+        "options": {
+          "cellHeight": "sm",
+          "footer": {
+            "countRows": false,
+            "fields": "",
+            "reducer": [
+              "sum"
+            ],
+            "show": false
+          },
+          "showHeader": true
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "postgres",
+              "uid": "__DATASOURCE_UID__"
+            },
+            "format": "table",
+            "rawQuery": true,
+            "rawSql": "SELECT username, SUM(count) AS requests, SUM(sum_prompt_tokens) AS prompt_tokens, SUM(sum_completion_tokens) AS completion_tokens, SUM(sum_prompt_tokens + sum_completion_tokens) AS total_tokens, SUM(sum_quota) AS quota_used, SUM(sum_use_time)::double precision / NULLIF(SUM(count), 0) AS avg_use_time_ms, MAX(max_use_time) AS max_use_time_ms FROM logs_1m WHERE $__timeFilter(bucket_ts) AND type = 2 AND (LOWER('${v_group:raw}') = 'all' OR group_name = '${v_group:raw}') AND (LOWER('${v_model:raw}') = 'all' OR model_name = '${v_model:raw}') AND (LOWER('${v_channel:raw}') = 'all' OR channel_name = '${v_channel:raw}') AND (LOWER('${v_user:raw}') = 'all' OR username = '${v_user:raw}') AND (LOWER('${v_token:raw}') = 'all' OR token_name = '${v_token:raw}') AND (LOWER('${v_stream:raw}') = 'all' OR is_stream = ('${v_stream:raw}' = 'true')) GROUP BY username ORDER BY requests DESC LIMIT 100;",
+            "refId": "A"
+          }
+        ],
+        "title": "用户总览明细",
+        "type": "table"
+      },
+      {
+        "datasource": {
+          "type": "postgres",
+          "uid": "__DATASOURCE_UID__"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "align": "auto"
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 9,
+          "w": 12,
+          "x": 12,
+          "y": 17
+        },
+        "id": 7,
+        "options": {
+          "cellHeight": "sm",
+          "footer": {
+            "countRows": false,
+            "fields": "",
+            "reducer": [
+              "sum"
+            ],
+            "show": false
+          },
+          "showHeader": true
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "postgres",
+              "uid": "__DATASOURCE_UID__"
+            },
+            "format": "table",
+            "rawQuery": true,
+            "rawSql": "SELECT username, token_id, token_name, SUM(count) AS requests, SUM(sum_prompt_tokens) AS prompt_tokens, SUM(sum_completion_tokens) AS completion_tokens, SUM(sum_prompt_tokens + sum_completion_tokens) AS total_tokens, SUM(sum_quota) AS quota_used, SUM(sum_use_time)::double precision / NULLIF(SUM(count), 0) AS avg_use_time_ms, MAX(max_use_time) AS max_use_time_ms FROM logs_1m WHERE $__timeFilter(bucket_ts) AND type = 2 AND (LOWER('${v_group:raw}') = 'all' OR group_name = '${v_group:raw}') AND (LOWER('${v_model:raw}') = 'all' OR model_name = '${v_model:raw}') AND (LOWER('${v_channel:raw}') = 'all' OR channel_name = '${v_channel:raw}') AND (LOWER('${v_user:raw}') = 'all' OR username = '${v_user:raw}') AND (LOWER('${v_token:raw}') = 'all' OR token_name = '${v_token:raw}') AND (LOWER('${v_stream:raw}') = 'all' OR is_stream = ('${v_stream:raw}' = 'true')) GROUP BY username, token_id, token_name ORDER BY requests DESC LIMIT 100;",
+            "refId": "A"
+          }
+        ],
+        "title": "用户-令牌明细",
+        "type": "table"
+      },
+      {
+        "collapsed": false,
+        "gridPos": {
+          "h": 1,
+          "w": 24,
+          "x": 0,
+          "y": 26
+        },
+        "id": 8,
+        "panels": [],
+        "title": "渠道维度",
+        "type": "row"
+      },
+      {
+        "datasource": {
+          "type": "postgres",
+          "uid": "__DATASOURCE_UID__"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 27
+        },
+        "id": 9,
+        "options": {
+          "legend": {
+            "displayMode": "list",
+            "placement": "bottom",
+            "showLegend": true
+          },
+          "tooltip": {
+            "mode": "multi",
+            "sort": "desc"
+          }
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "postgres",
+              "uid": "__DATASOURCE_UID__"
+            },
+            "format": "time_series",
+            "rawQuery": true,
+            "rawSql": "SELECT $__timeGroupAlias(bucket_ts, '1m'), CAST(channel_id AS TEXT) || ':' || COALESCE(NULLIF(channel_name, ''), 'unknown') AS metric, SUM(count) AS value FROM logs_1m WHERE $__timeFilter(bucket_ts) AND type = 2 AND (LOWER('${v_group:raw}') = 'all' OR group_name = '${v_group:raw}') AND (LOWER('${v_model:raw}') = 'all' OR model_name = '${v_model:raw}') AND (LOWER('${v_channel:raw}') = 'all' OR channel_name = '${v_channel:raw}') AND (LOWER('${v_user:raw}') = 'all' OR username = '${v_user:raw}') AND (LOWER('${v_token:raw}') = 'all' OR token_name = '${v_token:raw}') AND (LOWER('${v_stream:raw}') = 'all' OR is_stream = ('${v_stream:raw}' = 'true')) GROUP BY 1, 2 ORDER BY 1, 2;",
+            "refId": "A"
+          }
+        ],
+        "title": "渠道请求数",
+        "type": "timeseries"
+      },
+      {
+        "datasource": {
+          "type": "postgres",
+          "uid": "__DATASOURCE_UID__"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 27
+        },
+        "id": 12,
+        "options": {
+          "legend": {
+            "displayMode": "list",
+            "placement": "bottom",
+            "showLegend": true
+          },
+          "tooltip": {
+            "mode": "multi",
+            "sort": "desc"
+          }
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "postgres",
+              "uid": "__DATASOURCE_UID__"
+            },
+            "format": "time_series",
+            "rawQuery": true,
+            "rawSql": "SELECT $__timeGroupAlias(bucket_ts, '1m'), CAST(channel_id AS TEXT) || ':' || COALESCE(NULLIF(channel_name, ''), 'unknown') AS metric, SUM(sum_quota) AS value FROM logs_1m WHERE $__timeFilter(bucket_ts) AND type = 2 AND (LOWER('${v_group:raw}') = 'all' OR group_name = '${v_group:raw}') AND (LOWER('${v_model:raw}') = 'all' OR model_name = '${v_model:raw}') AND (LOWER('${v_channel:raw}') = 'all' OR channel_name = '${v_channel:raw}') AND (LOWER('${v_user:raw}') = 'all' OR username = '${v_user:raw}') AND (LOWER('${v_token:raw}') = 'all' OR token_name = '${v_token:raw}') AND (LOWER('${v_stream:raw}') = 'all' OR is_stream = ('${v_stream:raw}' = 'true')) GROUP BY 1, 2 ORDER BY 1, 2;",
+            "refId": "A"
+          }
+        ],
+        "title": "渠道额度消耗",
+        "type": "timeseries"
+      },
+      {
+        "datasource": {
+          "type": "postgres",
+          "uid": "__DATASOURCE_UID__"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 8,
+          "x": 0,
+          "y": 35
+        },
+        "id": 11,
+        "options": {
+          "legend": {
+            "displayMode": "list",
+            "placement": "bottom",
+            "showLegend": true
+          },
+          "tooltip": {
+            "mode": "multi",
+            "sort": "desc"
+          }
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "postgres",
+              "uid": "__DATASOURCE_UID__"
+            },
+            "format": "time_series",
+            "rawQuery": true,
+            "rawSql": "SELECT $__timeGroupAlias(bucket_ts, '1m'), CAST(channel_id AS TEXT) || ':' || COALESCE(NULLIF(channel_name, ''), 'unknown') AS metric, SUM(sum_prompt_tokens + sum_completion_tokens) AS value FROM logs_1m WHERE $__timeFilter(bucket_ts) AND type = 2 AND (LOWER('${v_group:raw}') = 'all' OR group_name = '${v_group:raw}') AND (LOWER('${v_model:raw}') = 'all' OR model_name = '${v_model:raw}') AND (LOWER('${v_channel:raw}') = 'all' OR channel_name = '${v_channel:raw}') AND (LOWER('${v_user:raw}') = 'all' OR username = '${v_user:raw}') AND (LOWER('${v_token:raw}') = 'all' OR token_name = '${v_token:raw}') AND (LOWER('${v_stream:raw}') = 'all' OR is_stream = ('${v_stream:raw}' = 'true')) GROUP BY 1, 2 ORDER BY 1, 2;",
+            "refId": "A"
+          }
+        ],
+        "title": "渠道 Token 消耗",
+        "type": "timeseries"
+      },
+      {
+        "datasource": {
+          "type": "postgres",
+          "uid": "__DATASOURCE_UID__"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 8,
+          "x": 8,
+          "y": 35
+        },
+        "id": 10,
+        "options": {
+          "legend": {
+            "displayMode": "list",
+            "placement": "bottom",
+            "showLegend": true
+          },
+          "tooltip": {
+            "mode": "multi",
+            "sort": "desc"
+          }
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "postgres",
+              "uid": "__DATASOURCE_UID__"
+            },
+            "format": "time_series",
+            "rawQuery": true,
+            "rawSql": "SELECT $__timeGroupAlias(bucket_ts, '1m'), CAST(channel_id AS TEXT) || ':' || COALESCE(NULLIF(channel_name, ''), 'unknown') AS metric, SUM(sum_prompt_tokens) AS value FROM logs_1m WHERE $__timeFilter(bucket_ts) AND type = 2 AND (LOWER('${v_group:raw}') = 'all' OR group_name = '${v_group:raw}') AND (LOWER('${v_model:raw}') = 'all' OR model_name = '${v_model:raw}') AND (LOWER('${v_channel:raw}') = 'all' OR channel_name = '${v_channel:raw}') AND (LOWER('${v_user:raw}') = 'all' OR username = '${v_user:raw}') AND (LOWER('${v_token:raw}') = 'all' OR token_name = '${v_token:raw}') AND (LOWER('${v_stream:raw}') = 'all' OR is_stream = ('${v_stream:raw}' = 'true')) GROUP BY 1, 2 ORDER BY 1, 2;",
+            "refId": "A"
+          }
+        ],
+        "title": "渠道输入 Token 消耗",
+        "type": "timeseries"
+      },
+      {
+        "datasource": {
+          "type": "postgres",
+          "uid": "__DATASOURCE_UID__"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 8,
+          "x": 16,
+          "y": 35
+        },
+        "id": 34,
+        "options": {
+          "legend": {
+            "displayMode": "list",
+            "placement": "bottom",
+            "showLegend": true
+          },
+          "tooltip": {
+            "mode": "multi",
+            "sort": "desc"
+          }
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "postgres",
+              "uid": "__DATASOURCE_UID__"
+            },
+            "format": "time_series",
+            "rawQuery": true,
+            "rawSql": "SELECT $__timeGroupAlias(bucket_ts, '1m'), CAST(channel_id AS TEXT) || ':' || COALESCE(NULLIF(channel_name, ''), 'unknown') AS metric, SUM(sum_completion_tokens) AS value FROM logs_1m WHERE $__timeFilter(bucket_ts) AND type = 2 AND (LOWER('${v_group:raw}') = 'all' OR group_name = '${v_group:raw}') AND (LOWER('${v_model:raw}') = 'all' OR model_name = '${v_model:raw}') AND (LOWER('${v_channel:raw}') = 'all' OR channel_name = '${v_channel:raw}') AND (LOWER('${v_user:raw}') = 'all' OR username = '${v_user:raw}') AND (LOWER('${v_token:raw}') = 'all' OR token_name = '${v_token:raw}') AND (LOWER('${v_stream:raw}') = 'all' OR is_stream = ('${v_stream:raw}' = 'true')) GROUP BY 1, 2 ORDER BY 1, 2;",
+            "refId": "A"
+          }
+        ],
+        "title": "渠道输出 Token 消耗",
+        "type": "timeseries"
+      },
+      {
+        "datasource": {
+          "type": "postgres",
+          "uid": "__DATASOURCE_UID__"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "align": "auto"
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 9,
+          "w": 12,
+          "x": 0,
+          "y": 43
+        },
+        "id": 13,
+        "options": {
+          "cellHeight": "sm",
+          "footer": {
+            "countRows": false,
+            "fields": "",
+            "reducer": [
+              "sum"
+            ],
+            "show": false
+          },
+          "showHeader": true
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "postgres",
+              "uid": "__DATASOURCE_UID__"
+            },
+            "format": "table",
+            "rawQuery": true,
+            "rawSql": "SELECT channel_id, channel_name, SUM(count) AS requests, SUM(sum_prompt_tokens) AS prompt_tokens, SUM(sum_completion_tokens) AS completion_tokens, SUM(sum_prompt_tokens + sum_completion_tokens) AS total_tokens, SUM(sum_quota) AS quota_used, SUM(sum_use_time)::double precision / NULLIF(SUM(count), 0) AS avg_use_time_ms, MAX(max_use_time) AS max_use_time_ms FROM logs_1m WHERE $__timeFilter(bucket_ts) AND type = 2 AND (LOWER('${v_group:raw}') = 'all' OR group_name = '${v_group:raw}') AND (LOWER('${v_model:raw}') = 'all' OR model_name = '${v_model:raw}') AND (LOWER('${v_channel:raw}') = 'all' OR channel_name = '${v_channel:raw}') AND (LOWER('${v_user:raw}') = 'all' OR username = '${v_user:raw}') AND (LOWER('${v_token:raw}') = 'all' OR token_name = '${v_token:raw}') AND (LOWER('${v_stream:raw}') = 'all' OR is_stream = ('${v_stream:raw}' = 'true')) GROUP BY channel_id, channel_name ORDER BY requests DESC LIMIT 100;",
+            "refId": "A"
+          }
+        ],
+        "title": "渠道总览明细",
+        "type": "table"
+      },
+      {
+        "datasource": {
+          "type": "postgres",
+          "uid": "__DATASOURCE_UID__"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "align": "auto"
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 9,
+          "w": 12,
+          "x": 12,
+          "y": 43
+        },
+        "id": 14,
+        "options": {
+          "cellHeight": "sm",
+          "footer": {
+            "countRows": false,
+            "fields": "",
+            "reducer": [
+              "sum"
+            ],
+            "show": false
+          },
+          "showHeader": true
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "postgres",
+              "uid": "__DATASOURCE_UID__"
+            },
+            "format": "table",
+            "rawQuery": true,
+            "rawSql": "SELECT channel_id, channel_name, model_name, SUM(count) AS requests, SUM(sum_prompt_tokens) AS prompt_tokens, SUM(sum_completion_tokens) AS completion_tokens, SUM(sum_prompt_tokens + sum_completion_tokens) AS total_tokens, SUM(sum_quota) AS quota_used, SUM(sum_use_time)::double precision / NULLIF(SUM(count), 0) AS avg_use_time_ms, MAX(max_use_time) AS max_use_time_ms FROM logs_1m WHERE $__timeFilter(bucket_ts) AND type = 2 AND (LOWER('${v_group:raw}') = 'all' OR group_name = '${v_group:raw}') AND (LOWER('${v_model:raw}') = 'all' OR model_name = '${v_model:raw}') AND (LOWER('${v_channel:raw}') = 'all' OR channel_name = '${v_channel:raw}') AND (LOWER('${v_user:raw}') = 'all' OR username = '${v_user:raw}') AND (LOWER('${v_token:raw}') = 'all' OR token_name = '${v_token:raw}') AND (LOWER('${v_stream:raw}') = 'all' OR is_stream = ('${v_stream:raw}' = 'true')) GROUP BY channel_id, channel_name, model_name ORDER BY requests DESC LIMIT 100;",
+            "refId": "A"
+          }
+        ],
+        "title": "渠道-模型明细",
+        "type": "table"
+      },
+      {
+        "collapsed": false,
+        "gridPos": {
+          "h": 1,
+          "w": 24,
+          "x": 0,
+          "y": 52
+        },
+        "id": 15,
+        "panels": [],
+        "title": "令牌维度",
+        "type": "row"
+      },
+      {
+        "datasource": {
+          "type": "postgres",
+          "uid": "__DATASOURCE_UID__"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 53
+        },
+        "id": 16,
+        "options": {
+          "legend": {
+            "displayMode": "list",
+            "placement": "bottom",
+            "showLegend": true
+          },
+          "tooltip": {
+            "mode": "multi",
+            "sort": "desc"
+          }
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "postgres",
+              "uid": "__DATASOURCE_UID__"
+            },
+            "format": "time_series",
+            "rawQuery": true,
+            "rawSql": "SELECT $__timeGroupAlias(bucket_ts, '1m'), CAST(token_id AS TEXT) || ':' || COALESCE(NULLIF(token_name, ''), 'unknown') AS metric, SUM(count) AS value FROM logs_1m WHERE $__timeFilter(bucket_ts) AND type = 2 AND (LOWER('${v_group:raw}') = 'all' OR group_name = '${v_group:raw}') AND (LOWER('${v_model:raw}') = 'all' OR model_name = '${v_model:raw}') AND (LOWER('${v_channel:raw}') = 'all' OR channel_name = '${v_channel:raw}') AND (LOWER('${v_user:raw}') = 'all' OR username = '${v_user:raw}') AND (LOWER('${v_token:raw}') = 'all' OR token_name = '${v_token:raw}') AND (LOWER('${v_stream:raw}') = 'all' OR is_stream = ('${v_stream:raw}' = 'true')) GROUP BY 1, 2 ORDER BY 1, 2;",
+            "refId": "A"
+          }
+        ],
+        "title": "令牌请求数",
+        "type": "timeseries"
+      },
+      {
+        "datasource": {
+          "type": "postgres",
+          "uid": "__DATASOURCE_UID__"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 53
+        },
+        "id": 19,
+        "options": {
+          "legend": {
+            "displayMode": "list",
+            "placement": "bottom",
+            "showLegend": true
+          },
+          "tooltip": {
+            "mode": "multi",
+            "sort": "desc"
+          }
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "postgres",
+              "uid": "__DATASOURCE_UID__"
+            },
+            "format": "time_series",
+            "rawQuery": true,
+            "rawSql": "SELECT $__timeGroupAlias(bucket_ts, '1m'), CAST(token_id AS TEXT) || ':' || COALESCE(NULLIF(token_name, ''), 'unknown') AS metric, SUM(sum_quota) AS value FROM logs_1m WHERE $__timeFilter(bucket_ts) AND type = 2 AND (LOWER('${v_group:raw}') = 'all' OR group_name = '${v_group:raw}') AND (LOWER('${v_model:raw}') = 'all' OR model_name = '${v_model:raw}') AND (LOWER('${v_channel:raw}') = 'all' OR channel_name = '${v_channel:raw}') AND (LOWER('${v_user:raw}') = 'all' OR username = '${v_user:raw}') AND (LOWER('${v_token:raw}') = 'all' OR token_name = '${v_token:raw}') AND (LOWER('${v_stream:raw}') = 'all' OR is_stream = ('${v_stream:raw}' = 'true')) GROUP BY 1, 2 ORDER BY 1, 2;",
+            "refId": "A"
+          }
+        ],
+        "title": "令牌额度消耗",
+        "type": "timeseries"
+      },
+      {
+        "datasource": {
+          "type": "postgres",
+          "uid": "__DATASOURCE_UID__"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 8,
+          "x": 0,
+          "y": 61
+        },
+        "id": 18,
+        "options": {
+          "legend": {
+            "displayMode": "list",
+            "placement": "bottom",
+            "showLegend": true
+          },
+          "tooltip": {
+            "mode": "multi",
+            "sort": "desc"
+          }
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "postgres",
+              "uid": "__DATASOURCE_UID__"
+            },
+            "format": "time_series",
+            "rawQuery": true,
+            "rawSql": "SELECT $__timeGroupAlias(bucket_ts, '1m'), CAST(token_id AS TEXT) || ':' || COALESCE(NULLIF(token_name, ''), 'unknown') AS metric, SUM(sum_prompt_tokens + sum_completion_tokens) AS value FROM logs_1m WHERE $__timeFilter(bucket_ts) AND type = 2 AND (LOWER('${v_group:raw}') = 'all' OR group_name = '${v_group:raw}') AND (LOWER('${v_model:raw}') = 'all' OR model_name = '${v_model:raw}') AND (LOWER('${v_channel:raw}') = 'all' OR channel_name = '${v_channel:raw}') AND (LOWER('${v_user:raw}') = 'all' OR username = '${v_user:raw}') AND (LOWER('${v_token:raw}') = 'all' OR token_name = '${v_token:raw}') AND (LOWER('${v_stream:raw}') = 'all' OR is_stream = ('${v_stream:raw}' = 'true')) GROUP BY 1, 2 ORDER BY 1, 2;",
+            "refId": "A"
+          }
+        ],
+        "title": "令牌 Token 消耗",
+        "type": "timeseries"
+      },
+      {
+        "datasource": {
+          "type": "postgres",
+          "uid": "__DATASOURCE_UID__"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 8,
+          "x": 8,
+          "y": 61
+        },
+        "id": 17,
+        "options": {
+          "legend": {
+            "displayMode": "list",
+            "placement": "bottom",
+            "showLegend": true
+          },
+          "tooltip": {
+            "mode": "multi",
+            "sort": "desc"
+          }
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "postgres",
+              "uid": "__DATASOURCE_UID__"
+            },
+            "format": "time_series",
+            "rawQuery": true,
+            "rawSql": "SELECT $__timeGroupAlias(bucket_ts, '1m'), CAST(token_id AS TEXT) || ':' || COALESCE(NULLIF(token_name, ''), 'unknown') AS metric, SUM(sum_prompt_tokens) AS value FROM logs_1m WHERE $__timeFilter(bucket_ts) AND type = 2 AND (LOWER('${v_group:raw}') = 'all' OR group_name = '${v_group:raw}') AND (LOWER('${v_model:raw}') = 'all' OR model_name = '${v_model:raw}') AND (LOWER('${v_channel:raw}') = 'all' OR channel_name = '${v_channel:raw}') AND (LOWER('${v_user:raw}') = 'all' OR username = '${v_user:raw}') AND (LOWER('${v_token:raw}') = 'all' OR token_name = '${v_token:raw}') AND (LOWER('${v_stream:raw}') = 'all' OR is_stream = ('${v_stream:raw}' = 'true')) GROUP BY 1, 2 ORDER BY 1, 2;",
+            "refId": "A"
+          }
+        ],
+        "title": "令牌输入 Token 消耗",
+        "type": "timeseries"
+      },
+      {
+        "datasource": {
+          "type": "postgres",
+          "uid": "__DATASOURCE_UID__"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 8,
+          "x": 16,
+          "y": 61
+        },
+        "id": 35,
+        "options": {
+          "legend": {
+            "displayMode": "list",
+            "placement": "bottom",
+            "showLegend": true
+          },
+          "tooltip": {
+            "mode": "multi",
+            "sort": "desc"
+          }
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "postgres",
+              "uid": "__DATASOURCE_UID__"
+            },
+            "format": "time_series",
+            "rawQuery": true,
+            "rawSql": "SELECT $__timeGroupAlias(bucket_ts, '1m'), CAST(token_id AS TEXT) || ':' || COALESCE(NULLIF(token_name, ''), 'unknown') AS metric, SUM(sum_completion_tokens) AS value FROM logs_1m WHERE $__timeFilter(bucket_ts) AND type = 2 AND (LOWER('${v_group:raw}') = 'all' OR group_name = '${v_group:raw}') AND (LOWER('${v_model:raw}') = 'all' OR model_name = '${v_model:raw}') AND (LOWER('${v_channel:raw}') = 'all' OR channel_name = '${v_channel:raw}') AND (LOWER('${v_user:raw}') = 'all' OR username = '${v_user:raw}') AND (LOWER('${v_token:raw}') = 'all' OR token_name = '${v_token:raw}') AND (LOWER('${v_stream:raw}') = 'all' OR is_stream = ('${v_stream:raw}' = 'true')) GROUP BY 1, 2 ORDER BY 1, 2;",
+            "refId": "A"
+          }
+        ],
+        "title": "令牌输出 Token 消耗",
+        "type": "timeseries"
+      },
+      {
+        "datasource": {
+          "type": "postgres",
+          "uid": "__DATASOURCE_UID__"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "align": "auto"
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 9,
+          "w": 12,
+          "x": 0,
+          "y": 69
+        },
+        "id": 20,
+        "options": {
+          "cellHeight": "sm",
+          "footer": {
+            "countRows": false,
+            "fields": "",
+            "reducer": [
+              "sum"
+            ],
+            "show": false
+          },
+          "showHeader": true
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "postgres",
+              "uid": "__DATASOURCE_UID__"
+            },
+            "format": "table",
+            "rawQuery": true,
+            "rawSql": "SELECT token_id, token_name, SUM(count) AS requests, SUM(sum_prompt_tokens) AS prompt_tokens, SUM(sum_completion_tokens) AS completion_tokens, SUM(sum_prompt_tokens + sum_completion_tokens) AS total_tokens, SUM(sum_quota) AS quota_used, SUM(sum_use_time)::double precision / NULLIF(SUM(count), 0) AS avg_use_time_ms, MAX(max_use_time) AS max_use_time_ms FROM logs_1m WHERE $__timeFilter(bucket_ts) AND type = 2 AND (LOWER('${v_group:raw}') = 'all' OR group_name = '${v_group:raw}') AND (LOWER('${v_model:raw}') = 'all' OR model_name = '${v_model:raw}') AND (LOWER('${v_channel:raw}') = 'all' OR channel_name = '${v_channel:raw}') AND (LOWER('${v_user:raw}') = 'all' OR username = '${v_user:raw}') AND (LOWER('${v_token:raw}') = 'all' OR token_name = '${v_token:raw}') AND (LOWER('${v_stream:raw}') = 'all' OR is_stream = ('${v_stream:raw}' = 'true')) GROUP BY token_id, token_name ORDER BY requests DESC LIMIT 100;",
+            "refId": "A"
+          }
+        ],
+        "title": "令牌总览明细",
+        "type": "table"
+      },
+      {
+        "datasource": {
+          "type": "postgres",
+          "uid": "__DATASOURCE_UID__"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "align": "auto"
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 9,
+          "w": 12,
+          "x": 12,
+          "y": 69
+        },
+        "id": 21,
+        "options": {
+          "cellHeight": "sm",
+          "footer": {
+            "countRows": false,
+            "fields": "",
+            "reducer": [
+              "sum"
+            ],
+            "show": false
+          },
+          "showHeader": true
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "postgres",
+              "uid": "__DATASOURCE_UID__"
+            },
+            "format": "table",
+            "rawQuery": true,
+            "rawSql": "SELECT token_id, token_name, model_name, SUM(count) AS requests, SUM(sum_prompt_tokens) AS prompt_tokens, SUM(sum_completion_tokens) AS completion_tokens, SUM(sum_prompt_tokens + sum_completion_tokens) AS total_tokens, SUM(sum_quota) AS quota_used, SUM(sum_use_time)::double precision / NULLIF(SUM(count), 0) AS avg_use_time_ms, MAX(max_use_time) AS max_use_time_ms FROM logs_1m WHERE $__timeFilter(bucket_ts) AND type = 2 AND (LOWER('${v_group:raw}') = 'all' OR group_name = '${v_group:raw}') AND (LOWER('${v_model:raw}') = 'all' OR model_name = '${v_model:raw}') AND (LOWER('${v_channel:raw}') = 'all' OR channel_name = '${v_channel:raw}') AND (LOWER('${v_user:raw}') = 'all' OR username = '${v_user:raw}') AND (LOWER('${v_token:raw}') = 'all' OR token_name = '${v_token:raw}') AND (LOWER('${v_stream:raw}') = 'all' OR is_stream = ('${v_stream:raw}' = 'true')) GROUP BY token_id, token_name, model_name ORDER BY requests DESC LIMIT 100;",
+            "refId": "A"
+          }
+        ],
+        "title": "令牌-模型明细",
+        "type": "table"
+      },
+      {
+        "collapsed": false,
+        "gridPos": {
+          "h": 1,
+          "w": 24,
+          "x": 0,
+          "y": 78
+        },
+        "id": 22,
+        "panels": [],
+        "title": "模型维度",
+        "type": "row"
+      },
+      {
+        "datasource": {
+          "type": "postgres",
+          "uid": "__DATASOURCE_UID__"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 79
+        },
+        "id": 23,
+        "options": {
+          "legend": {
+            "displayMode": "list",
+            "placement": "bottom",
+            "showLegend": true
+          },
+          "tooltip": {
+            "mode": "multi",
+            "sort": "desc"
+          }
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "postgres",
+              "uid": "__DATASOURCE_UID__"
+            },
+            "format": "time_series",
+            "rawQuery": true,
+            "rawSql": "SELECT $__timeGroupAlias(bucket_ts, '1m'), model_name AS metric, SUM(count) AS value FROM logs_1m WHERE $__timeFilter(bucket_ts) AND type = 2 AND (LOWER('${v_group:raw}') = 'all' OR group_name = '${v_group:raw}') AND (LOWER('${v_model:raw}') = 'all' OR model_name = '${v_model:raw}') AND (LOWER('${v_channel:raw}') = 'all' OR channel_name = '${v_channel:raw}') AND (LOWER('${v_user:raw}') = 'all' OR username = '${v_user:raw}') AND (LOWER('${v_token:raw}') = 'all' OR token_name = '${v_token:raw}') AND (LOWER('${v_stream:raw}') = 'all' OR is_stream = ('${v_stream:raw}' = 'true')) GROUP BY 1, 2 ORDER BY 1, 2;",
+            "refId": "A"
+          }
+        ],
+        "title": "模型请求数",
+        "type": "timeseries"
+      },
+      {
+        "datasource": {
+          "type": "postgres",
+          "uid": "__DATASOURCE_UID__"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 79
+        },
+        "id": 26,
+        "options": {
+          "legend": {
+            "displayMode": "list",
+            "placement": "bottom",
+            "showLegend": true
+          },
+          "tooltip": {
+            "mode": "multi",
+            "sort": "desc"
+          }
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "postgres",
+              "uid": "__DATASOURCE_UID__"
+            },
+            "format": "time_series",
+            "rawQuery": true,
+            "rawSql": "SELECT $__timeGroupAlias(bucket_ts, '1m'), model_name AS metric, SUM(sum_quota) AS value FROM logs_1m WHERE $__timeFilter(bucket_ts) AND type = 2 AND (LOWER('${v_group:raw}') = 'all' OR group_name = '${v_group:raw}') AND (LOWER('${v_model:raw}') = 'all' OR model_name = '${v_model:raw}') AND (LOWER('${v_channel:raw}') = 'all' OR channel_name = '${v_channel:raw}') AND (LOWER('${v_user:raw}') = 'all' OR username = '${v_user:raw}') AND (LOWER('${v_token:raw}') = 'all' OR token_name = '${v_token:raw}') AND (LOWER('${v_stream:raw}') = 'all' OR is_stream = ('${v_stream:raw}' = 'true')) GROUP BY 1, 2 ORDER BY 1, 2;",
+            "refId": "A"
+          }
+        ],
+        "title": "模型额度消耗",
+        "type": "timeseries"
+      },
+      {
+        "datasource": {
+          "type": "postgres",
+          "uid": "__DATASOURCE_UID__"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 8,
+          "x": 0,
+          "y": 87
+        },
+        "id": 25,
+        "options": {
+          "legend": {
+            "displayMode": "list",
+            "placement": "bottom",
+            "showLegend": true
+          },
+          "tooltip": {
+            "mode": "multi",
+            "sort": "desc"
+          }
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "postgres",
+              "uid": "__DATASOURCE_UID__"
+            },
+            "format": "time_series",
+            "rawQuery": true,
+            "rawSql": "SELECT $__timeGroupAlias(bucket_ts, '1m'), model_name AS metric, SUM(sum_prompt_tokens + sum_completion_tokens) AS value FROM logs_1m WHERE $__timeFilter(bucket_ts) AND type = 2 AND (LOWER('${v_group:raw}') = 'all' OR group_name = '${v_group:raw}') AND (LOWER('${v_model:raw}') = 'all' OR model_name = '${v_model:raw}') AND (LOWER('${v_channel:raw}') = 'all' OR channel_name = '${v_channel:raw}') AND (LOWER('${v_user:raw}') = 'all' OR username = '${v_user:raw}') AND (LOWER('${v_token:raw}') = 'all' OR token_name = '${v_token:raw}') AND (LOWER('${v_stream:raw}') = 'all' OR is_stream = ('${v_stream:raw}' = 'true')) GROUP BY 1, 2 ORDER BY 1, 2;",
+            "refId": "A"
+          }
+        ],
+        "title": "模型 Token 消耗",
+        "type": "timeseries"
+      },
+      {
+        "datasource": {
+          "type": "postgres",
+          "uid": "__DATASOURCE_UID__"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 8,
+          "x": 8,
+          "y": 87
+        },
+        "id": 24,
+        "options": {
+          "legend": {
+            "displayMode": "list",
+            "placement": "bottom",
+            "showLegend": true
+          },
+          "tooltip": {
+            "mode": "multi",
+            "sort": "desc"
+          }
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "postgres",
+              "uid": "__DATASOURCE_UID__"
+            },
+            "format": "time_series",
+            "rawQuery": true,
+            "rawSql": "SELECT $__timeGroupAlias(bucket_ts, '1m'), model_name AS metric, SUM(sum_prompt_tokens) AS value FROM logs_1m WHERE $__timeFilter(bucket_ts) AND type = 2 AND (LOWER('${v_group:raw}') = 'all' OR group_name = '${v_group:raw}') AND (LOWER('${v_model:raw}') = 'all' OR model_name = '${v_model:raw}') AND (LOWER('${v_channel:raw}') = 'all' OR channel_name = '${v_channel:raw}') AND (LOWER('${v_user:raw}') = 'all' OR username = '${v_user:raw}') AND (LOWER('${v_token:raw}') = 'all' OR token_name = '${v_token:raw}') AND (LOWER('${v_stream:raw}') = 'all' OR is_stream = ('${v_stream:raw}' = 'true')) GROUP BY 1, 2 ORDER BY 1, 2;",
+            "refId": "A"
+          }
+        ],
+        "title": "模型输入 Token 消耗",
+        "type": "timeseries"
+      },
+      {
+        "datasource": {
+          "type": "postgres",
+          "uid": "__DATASOURCE_UID__"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 8,
+          "x": 16,
+          "y": 87
+        },
+        "id": 36,
+        "options": {
+          "legend": {
+            "displayMode": "list",
+            "placement": "bottom",
+            "showLegend": true
+          },
+          "tooltip": {
+            "mode": "multi",
+            "sort": "desc"
+          }
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "postgres",
+              "uid": "__DATASOURCE_UID__"
+            },
+            "format": "time_series",
+            "rawQuery": true,
+            "rawSql": "SELECT $__timeGroupAlias(bucket_ts, '1m'), model_name AS metric, SUM(sum_completion_tokens) AS value FROM logs_1m WHERE $__timeFilter(bucket_ts) AND type = 2 AND (LOWER('${v_group:raw}') = 'all' OR group_name = '${v_group:raw}') AND (LOWER('${v_model:raw}') = 'all' OR model_name = '${v_model:raw}') AND (LOWER('${v_channel:raw}') = 'all' OR channel_name = '${v_channel:raw}') AND (LOWER('${v_user:raw}') = 'all' OR username = '${v_user:raw}') AND (LOWER('${v_token:raw}') = 'all' OR token_name = '${v_token:raw}') AND (LOWER('${v_stream:raw}') = 'all' OR is_stream = ('${v_stream:raw}' = 'true')) GROUP BY 1, 2 ORDER BY 1, 2;",
+            "refId": "A"
+          }
+        ],
+        "title": "模型输出 Token 消耗",
+        "type": "timeseries"
+      },
+      {
+        "datasource": {
+          "type": "postgres",
+          "uid": "__DATASOURCE_UID__"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "align": "auto"
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 9,
+          "w": 24,
+          "x": 0,
+          "y": 95
+        },
+        "id": 27,
+        "options": {
+          "cellHeight": "sm",
+          "footer": {
+            "countRows": false,
+            "fields": "",
+            "reducer": [
+              "sum"
+            ],
+            "show": false
+          },
+          "showHeader": true
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "postgres",
+              "uid": "__DATASOURCE_UID__"
+            },
+            "format": "table",
+            "rawQuery": true,
+            "rawSql": "SELECT model_name, SUM(count) AS requests, SUM(sum_prompt_tokens) AS prompt_tokens, SUM(sum_completion_tokens) AS completion_tokens, SUM(sum_prompt_tokens + sum_completion_tokens) AS total_tokens, SUM(sum_quota) AS quota_used, SUM(sum_use_time)::double precision / NULLIF(SUM(count), 0) AS avg_use_time_ms, MAX(max_use_time) AS max_use_time_ms FROM logs_1m WHERE $__timeFilter(bucket_ts) AND type = 2 AND (LOWER('${v_group:raw}') = 'all' OR group_name = '${v_group:raw}') AND (LOWER('${v_model:raw}') = 'all' OR model_name = '${v_model:raw}') AND (LOWER('${v_channel:raw}') = 'all' OR channel_name = '${v_channel:raw}') AND (LOWER('${v_user:raw}') = 'all' OR username = '${v_user:raw}') AND (LOWER('${v_token:raw}') = 'all' OR token_name = '${v_token:raw}') AND (LOWER('${v_stream:raw}') = 'all' OR is_stream = ('${v_stream:raw}' = 'true')) GROUP BY model_name ORDER BY requests DESC LIMIT 100;",
+            "refId": "A"
+          }
+        ],
+        "title": "模型总览明细",
+        "type": "table"
+      },
+      {
+        "collapsed": false,
+        "gridPos": {
+          "h": 1,
+          "w": 24,
+          "x": 0,
+          "y": 104
+        },
+        "id": 28,
+        "panels": [],
+        "title": "分组维度",
+        "type": "row"
+      },
+      {
+        "datasource": {
+          "type": "postgres",
+          "uid": "__DATASOURCE_UID__"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 105
+        },
+        "id": 29,
+        "options": {
+          "legend": {
+            "displayMode": "list",
+            "placement": "bottom",
+            "showLegend": true
+          },
+          "tooltip": {
+            "mode": "multi",
+            "sort": "desc"
+          }
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "postgres",
+              "uid": "__DATASOURCE_UID__"
+            },
+            "format": "time_series",
+            "rawQuery": true,
+            "rawSql": "SELECT $__timeGroupAlias(bucket_ts, '1m'), group_name AS metric, SUM(count) AS value FROM logs_1m WHERE $__timeFilter(bucket_ts) AND type = 2 AND (LOWER('${v_group:raw}') = 'all' OR group_name = '${v_group:raw}') AND (LOWER('${v_model:raw}') = 'all' OR model_name = '${v_model:raw}') AND (LOWER('${v_channel:raw}') = 'all' OR channel_name = '${v_channel:raw}') AND (LOWER('${v_user:raw}') = 'all' OR username = '${v_user:raw}') AND (LOWER('${v_token:raw}') = 'all' OR token_name = '${v_token:raw}') AND (LOWER('${v_stream:raw}') = 'all' OR is_stream = ('${v_stream:raw}' = 'true')) GROUP BY 1, 2 ORDER BY 1, 2;",
+            "refId": "A"
+          }
+        ],
+        "title": "分组请求数",
+        "type": "timeseries"
+      },
+      {
+        "datasource": {
+          "type": "postgres",
+          "uid": "__DATASOURCE_UID__"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 105
+        },
+        "id": 32,
+        "options": {
+          "legend": {
+            "displayMode": "list",
+            "placement": "bottom",
+            "showLegend": true
+          },
+          "tooltip": {
+            "mode": "multi",
+            "sort": "desc"
+          }
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "postgres",
+              "uid": "__DATASOURCE_UID__"
+            },
+            "format": "time_series",
+            "rawQuery": true,
+            "rawSql": "SELECT $__timeGroupAlias(bucket_ts, '1m'), group_name AS metric, SUM(sum_quota) AS value FROM logs_1m WHERE $__timeFilter(bucket_ts) AND type = 2 AND (LOWER('${v_group:raw}') = 'all' OR group_name = '${v_group:raw}') AND (LOWER('${v_model:raw}') = 'all' OR model_name = '${v_model:raw}') AND (LOWER('${v_channel:raw}') = 'all' OR channel_name = '${v_channel:raw}') AND (LOWER('${v_user:raw}') = 'all' OR username = '${v_user:raw}') AND (LOWER('${v_token:raw}') = 'all' OR token_name = '${v_token:raw}') AND (LOWER('${v_stream:raw}') = 'all' OR is_stream = ('${v_stream:raw}' = 'true')) GROUP BY 1, 2 ORDER BY 1, 2;",
+            "refId": "A"
+          }
+        ],
+        "title": "分组额度消耗",
+        "type": "timeseries"
+      },
+      {
+        "datasource": {
+          "type": "postgres",
+          "uid": "__DATASOURCE_UID__"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 8,
+          "x": 0,
+          "y": 113
+        },
+        "id": 31,
+        "options": {
+          "legend": {
+            "displayMode": "list",
+            "placement": "bottom",
+            "showLegend": true
+          },
+          "tooltip": {
+            "mode": "multi",
+            "sort": "desc"
+          }
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "postgres",
+              "uid": "__DATASOURCE_UID__"
+            },
+            "format": "time_series",
+            "rawQuery": true,
+            "rawSql": "SELECT $__timeGroupAlias(bucket_ts, '1m'), group_name AS metric, SUM(sum_prompt_tokens + sum_completion_tokens) AS value FROM logs_1m WHERE $__timeFilter(bucket_ts) AND type = 2 AND (LOWER('${v_group:raw}') = 'all' OR group_name = '${v_group:raw}') AND (LOWER('${v_model:raw}') = 'all' OR model_name = '${v_model:raw}') AND (LOWER('${v_channel:raw}') = 'all' OR channel_name = '${v_channel:raw}') AND (LOWER('${v_user:raw}') = 'all' OR username = '${v_user:raw}') AND (LOWER('${v_token:raw}') = 'all' OR token_name = '${v_token:raw}') AND (LOWER('${v_stream:raw}') = 'all' OR is_stream = ('${v_stream:raw}' = 'true')) GROUP BY 1, 2 ORDER BY 1, 2;",
+            "refId": "A"
+          }
+        ],
+        "title": "分组 Token 消耗",
+        "type": "timeseries"
+      },
+      {
+        "datasource": {
+          "type": "postgres",
+          "uid": "__DATASOURCE_UID__"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 8,
+          "x": 8,
+          "y": 113
+        },
+        "id": 30,
+        "options": {
+          "legend": {
+            "displayMode": "list",
+            "placement": "bottom",
+            "showLegend": true
+          },
+          "tooltip": {
+            "mode": "multi",
+            "sort": "desc"
+          }
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "postgres",
+              "uid": "__DATASOURCE_UID__"
+            },
+            "format": "time_series",
+            "rawQuery": true,
+            "rawSql": "SELECT $__timeGroupAlias(bucket_ts, '1m'), group_name AS metric, SUM(sum_prompt_tokens) AS value FROM logs_1m WHERE $__timeFilter(bucket_ts) AND type = 2 AND (LOWER('${v_group:raw}') = 'all' OR group_name = '${v_group:raw}') AND (LOWER('${v_model:raw}') = 'all' OR model_name = '${v_model:raw}') AND (LOWER('${v_channel:raw}') = 'all' OR channel_name = '${v_channel:raw}') AND (LOWER('${v_user:raw}') = 'all' OR username = '${v_user:raw}') AND (LOWER('${v_token:raw}') = 'all' OR token_name = '${v_token:raw}') AND (LOWER('${v_stream:raw}') = 'all' OR is_stream = ('${v_stream:raw}' = 'true')) GROUP BY 1, 2 ORDER BY 1, 2;",
+            "refId": "A"
+          }
+        ],
+        "title": "分组输入 Token 消耗",
+        "type": "timeseries"
+      },
+      {
+        "datasource": {
+          "type": "postgres",
+          "uid": "__DATASOURCE_UID__"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 8,
+          "x": 16,
+          "y": 113
+        },
+        "id": 37,
+        "options": {
+          "legend": {
+            "displayMode": "list",
+            "placement": "bottom",
+            "showLegend": true
+          },
+          "tooltip": {
+            "mode": "multi",
+            "sort": "desc"
+          }
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "postgres",
+              "uid": "__DATASOURCE_UID__"
+            },
+            "format": "time_series",
+            "rawQuery": true,
+            "rawSql": "SELECT $__timeGroupAlias(bucket_ts, '1m'), group_name AS metric, SUM(sum_completion_tokens) AS value FROM logs_1m WHERE $__timeFilter(bucket_ts) AND type = 2 AND (LOWER('${v_group:raw}') = 'all' OR group_name = '${v_group:raw}') AND (LOWER('${v_model:raw}') = 'all' OR model_name = '${v_model:raw}') AND (LOWER('${v_channel:raw}') = 'all' OR channel_name = '${v_channel:raw}') AND (LOWER('${v_user:raw}') = 'all' OR username = '${v_user:raw}') AND (LOWER('${v_token:raw}') = 'all' OR token_name = '${v_token:raw}') AND (LOWER('${v_stream:raw}') = 'all' OR is_stream = ('${v_stream:raw}' = 'true')) GROUP BY 1, 2 ORDER BY 1, 2;",
+            "refId": "A"
+          }
+        ],
+        "title": "分组输出 Token 消耗",
+        "type": "timeseries"
+      }
+    ],
+    "refresh": "1m",
+    "schemaVersion": 39,
+    "style": "dark",
+    "tags": [
+      "logsagg",
+      "operations",
+      "dimensions"
+    ],
+    "templating": {
+      "list": [
+        {
+          "allValue": "All",
+          "current": {
+            "selected": true,
+            "text": "consume",
+            "value": "2"
+          },
+          "datasource": {
+            "type": "postgres",
+            "uid": "__DATASOURCE_UID__"
+          },
+          "definition": "SELECT * FROM (VALUES (2, 'consume'), (5, 'error'), (6, 'refund'), (1, 'topup')) AS t(value, text);",
+          "hide": 0,
+          "includeAll": false,
+          "label": "类型",
+          "multi": false,
+          "name": "v_type",
+          "options": [],
+          "query": "SELECT * FROM (VALUES (2, 'consume'), (5, 'error'), (6, 'refund'), (1, 'topup')) AS t(value, text);",
+          "refresh": 1,
+          "skipUrlSync": false,
+          "type": "query"
+        },
+        {
+          "allValue": "All",
+          "current": {
+            "selected": true,
+            "text": "All",
+            "value": "All"
+          },
+          "datasource": {
+            "type": "postgres",
+            "uid": "__DATASOURCE_UID__"
+          },
+          "definition": "SELECT DISTINCT group_name FROM logs_1m WHERE group_name <> '' ORDER BY 1;",
+          "hide": 0,
+          "includeAll": true,
+          "label": "分组",
+          "multi": false,
+          "name": "v_group",
+          "options": [],
+          "query": "SELECT DISTINCT group_name FROM logs_1m WHERE group_name <> '' ORDER BY 1;",
+          "refresh": 1,
+          "skipUrlSync": false,
+          "type": "query"
+        },
+        {
+          "allValue": "All",
+          "current": {
+            "selected": true,
+            "text": "All",
+            "value": "All"
+          },
+          "datasource": {
+            "type": "postgres",
+            "uid": "__DATASOURCE_UID__"
+          },
+          "definition": "SELECT DISTINCT model_name FROM logs_1m WHERE model_name <> '' ORDER BY 1;",
+          "hide": 0,
+          "includeAll": true,
+          "label": "模型",
+          "multi": false,
+          "name": "v_model",
+          "options": [],
+          "query": "SELECT DISTINCT model_name FROM logs_1m WHERE model_name <> '' ORDER BY 1;",
+          "refresh": 1,
+          "skipUrlSync": false,
+          "type": "query"
+        },
+        {
+          "allValue": "All",
+          "current": {
+            "selected": true,
+            "text": "All",
+            "value": "All"
+          },
+          "datasource": {
+            "type": "postgres",
+            "uid": "__DATASOURCE_UID__"
+          },
+          "definition": "SELECT DISTINCT channel_name FROM logs_1m WHERE channel_name <> '' ORDER BY 1;",
+          "hide": 0,
+          "includeAll": true,
+          "label": "渠道",
+          "multi": false,
+          "name": "v_channel",
+          "options": [],
+          "query": "SELECT DISTINCT channel_name FROM logs_1m WHERE channel_name <> '' ORDER BY 1;",
+          "refresh": 1,
+          "skipUrlSync": false,
+          "type": "query"
+        },
+        {
+          "allValue": "All",
+          "current": {
+            "selected": true,
+            "text": "All",
+            "value": "All"
+          },
+          "datasource": {
+            "type": "postgres",
+            "uid": "__DATASOURCE_UID__"
+          },
+          "definition": "SELECT DISTINCT username FROM logs_1m WHERE username <> '' ORDER BY 1;",
+          "hide": 0,
+          "includeAll": true,
+          "label": "用户",
+          "multi": false,
+          "name": "v_user",
+          "options": [],
+          "query": "SELECT DISTINCT username FROM logs_1m WHERE username <> '' ORDER BY 1;",
+          "refresh": 1,
+          "skipUrlSync": false,
+          "type": "query"
+        },
+        {
+          "allValue": "All",
+          "current": {
+            "selected": true,
+            "text": "All",
+            "value": "All"
+          },
+          "datasource": {
+            "type": "postgres",
+            "uid": "__DATASOURCE_UID__"
+          },
+          "definition": "SELECT DISTINCT token_name FROM logs_1m WHERE token_name <> '' ORDER BY 1;",
+          "hide": 0,
+          "includeAll": true,
+          "label": "令牌",
+          "multi": false,
+          "name": "v_token",
+          "options": [],
+          "query": "SELECT DISTINCT token_name FROM logs_1m WHERE token_name <> '' ORDER BY 1;",
+          "refresh": 1,
+          "skipUrlSync": false,
+          "type": "query"
+        },
+        {
+          "allValue": "All",
+          "current": {
+            "selected": true,
+            "text": "All",
+            "value": "All"
+          },
+          "datasource": {
+            "type": "postgres",
+            "uid": "__DATASOURCE_UID__"
+          },
+          "definition": "SELECT * FROM (VALUES ('true', 'stream'), ('false', 'non-stream')) AS t(value, text);",
+          "hide": 0,
+          "includeAll": true,
+          "label": "流式",
+          "multi": false,
+          "name": "v_stream",
+          "options": [],
+          "query": "SELECT * FROM (VALUES ('true', 'stream'), ('false', 'non-stream')) AS t(value, text);",
+          "refresh": 1,
+          "skipUrlSync": false,
+          "type": "query"
+        }
+      ]
+    },
+    "time": {
+      "from": "now-6h",
+      "to": "now"
+    },
+    "timezone": "",
+    "title": "mmodel",
+    "uid": "logsagg-dimensions",
+    "version": 1,
+    "weekStart": ""
+  },
+  "message": "sync logsagg dimensions dashboard",
+  "overwrite": true
+}
