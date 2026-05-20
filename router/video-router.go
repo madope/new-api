@@ -1,8 +1,11 @@
 package router
 
 import (
+	"github.com/QuantumNous/new-api/common"
+	"github.com/QuantumNous/new-api/constant"
 	"github.com/QuantumNous/new-api/controller"
 	"github.com/QuantumNous/new-api/middleware"
+	relayconstant "github.com/QuantumNous/new-api/relay/constant"
 
 	"github.com/gin-gonic/gin"
 )
@@ -29,6 +32,19 @@ func SetVideoRouter(router *gin.Engine) {
 	{
 		videoV1Router.POST("/videos", controller.RelayTask)
 		videoV1Router.GET("/videos/:task_id", controller.RelayTaskFetch)
+	}
+
+	volcesRouter := router.Group("/volces")
+	volcesRouter.Use(middleware.RouteTag("relay"))
+	volcesRouter.Use(middleware.TokenAuth(), middleware.Distribute())
+	{
+		volcesRouter.POST("/api/v3/contents/generations/tasks", middleware.VolcesSeedanceRequestConvert(), controller.RelayTask)
+		volcesRouter.GET("/api/v3/contents/generations/tasks/:task_id", func(c *gin.Context) {
+			common.SetContextKey(c, constant.ContextKeyVolcesCompat, true)
+			c.Set("relay_mode", relayconstant.RelayModeVideoFetchByID)
+			c.Set("task_id", c.Param("task_id"))
+			controller.RelayTaskFetch(c)
+		})
 	}
 
 	klingV1Router := router.Group("/kling/v1")

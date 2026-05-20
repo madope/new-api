@@ -392,6 +392,8 @@ func updateVideoSingleTask(ctx context.Context, adaptor TaskPollingAdaptor, ch *
 		return fmt.Errorf("parseTaskResult failed for task %s: %w", taskId, err)
 	}
 
+	task.PrivateData.FetchResponse = responseBody
+	task.PrivateData.FetchResponseUpdatedAt = time.Now().Unix()
 	task.Data = redactVideoResponseBody(responseBody)
 
 	logger.LogDebug(ctx, fmt.Sprintf("updateVideoSingleTask taskResult: %+v", taskResult))

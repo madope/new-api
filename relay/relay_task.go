@@ -8,12 +8,14 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/QuantumNous/new-api/common"
 	"github.com/QuantumNous/new-api/constant"
 	"github.com/QuantumNous/new-api/dto"
 	"github.com/QuantumNous/new-api/model"
 	"github.com/QuantumNous/new-api/relay/channel"
+	taskdoubao "github.com/QuantumNous/new-api/relay/channel/task/doubao"
 	"github.com/QuantumNous/new-api/relay/channel/task/taskcommon"
 	relaycommon "github.com/QuantumNous/new-api/relay/common"
 	relayconstant "github.com/QuantumNous/new-api/relay/constant"
@@ -376,6 +378,11 @@ func videoFetchByIDRespBodyBuilder(c *gin.Context) (respBody []byte, taskResp *d
 		return
 	}
 
+	if common.GetContextKeyBool(c, constant.ContextKeyVolcesCompat) {
+		respBody, taskResp = volcesFetchByIDRespBodyBuilder(originTask)
+		return
+	}
+
 	isOpenAIVideoAPI := strings.HasPrefix(c.Request.RequestURI, "/v1/videos/")
 
 	// Gemini/Vertex 支持实时查询：用户 fetch 时直接从上游拉取最新状态
@@ -411,6 +418,33 @@ func videoFetchByIDRespBodyBuilder(c *gin.Context) (respBody []byte, taskResp *d
 	})
 	if err != nil {
 		taskResp = service.TaskErrorWrapper(err, "marshal_response_failed", http.StatusInternalServerError)
+	}
+	return
+}
+
+func volcesFetchByIDRespBodyBuilder(originTask *model.Task) (respBody []byte, taskResp *dto.TaskError) {
+	channelModel, err := model.GetChannelById(originTask.ChannelId, true)
+	if err != nil {
+		taskResp = service.TaskErrorWrapper(err, "get_channel_failed", http.StatusInternalServerError)
+		return
+	}
+	if channelModel.Type != constant.ChannelTypeDoubaoVideo && channelModel.Type != constant.ChannelTypeVolcEngine {
+		taskResp = service.TaskErrorWrapperLocal(fmt.Errorf("channel type %d does not support volces compatibility", channelModel.Type), "invalid_channel_type", http.StatusBadRequest)
+		return
+	}
+
+	rawBody := originTask.PrivateData.FetchResponse
+	if len(rawBody) == 0 {
+		rawBody, err = refreshTaskFetchSnapshot(originTask, channelModel)
+		if err != nil {
+			taskResp = service.TaskErrorWrapper(err, "fetch_task_failed", http.StatusInternalServerError)
+			return
+		}
+	}
+
+	respBody, err = taskdoubao.BuildVolcesFetchResponse(originTask.TaskID, rawBody)
+	if err != nil {
+		taskResp = service.TaskErrorWrapper(err, "build_volces_response_failed", http.StatusInternalServerError)
 	}
 	return
 }
@@ -497,6 +531,78 @@ func tryRealtimeFetch(task *model.Task, isOpenAIVideoAPI bool) []byte {
 		Data: out,
 	})
 	return respBody
+}
+
+func refreshTaskFetchSnapshot(task *model.Task, channelModel *model.Channel) ([]byte, error) {
+	if task == nil || channelModel == nil {
+		return nil, fmt.Errorf("task or channel is nil")
+	}
+
+	baseURL := constant.ChannelBaseURLs[channelModel.Type]
+	if channelModel.GetBaseURL() != "" {
+		baseURL = channelModel.GetBaseURL()
+	}
+	proxy := channelModel.GetSetting().Proxy
+	adaptor := GetTaskAdaptor(constant.TaskPlatform(strconv.Itoa(channelModel.Type)))
+	if adaptor == nil {
+		return nil, fmt.Errorf("task adaptor not found for channel type %d", channelModel.Type)
+	}
+
+	resp, err := adaptor.FetchTask(baseURL, channelModel.Key, map[string]any{
+		"task_id": task.GetUpstreamTaskID(),
+		"action":  task.Action,
+	}, proxy)
+	if err != nil {
+		return nil, err
+	}
+	if resp == nil {
+		return nil, fmt.Errorf("empty upstream response")
+	}
+	defer resp.Body.Close()
+
+	rawBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	now := time.Now().Unix()
+	snap := task.Snapshot()
+	task.PrivateData.FetchResponse = rawBody
+	task.PrivateData.FetchResponseUpdatedAt = now
+	task.Data = rawBody
+
+	if taskResult, parseErr := adaptor.ParseTaskResult(rawBody); parseErr == nil && taskResult != nil {
+		task.Status = model.TaskStatus(taskResult.Status)
+		if taskResult.Progress != "" {
+			task.Progress = taskResult.Progress
+		}
+		switch task.Status {
+		case model.TaskStatusInProgress:
+			if task.StartTime == 0 {
+				task.StartTime = now
+			}
+		case model.TaskStatusSuccess:
+			task.Progress = taskcommon.ProgressComplete
+			if task.FinishTime == 0 {
+				task.FinishTime = now
+			}
+			if taskResult.Url != "" {
+				task.PrivateData.ResultURL = taskResult.Url
+			}
+		case model.TaskStatusFailure:
+			task.Progress = taskcommon.ProgressComplete
+			if task.FinishTime == 0 {
+				task.FinishTime = now
+			}
+			task.FailReason = taskResult.Reason
+		}
+	}
+
+	if !snap.Equal(task.Snapshot()) {
+		_, _ = task.UpdateWithStatus(snap.Status)
+	}
+
+	return rawBody, nil
 }
 
 // detectVideoFormat 从 Gemini/Vertex 原始响应中探测视频格式

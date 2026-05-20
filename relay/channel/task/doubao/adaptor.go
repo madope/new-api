@@ -224,6 +224,16 @@ func (a *TaskAdaptor) DoResponse(c *gin.Context, resp *http.Response, info *rela
 		return
 	}
 
+	if common.GetContextKeyBool(c, constant.ContextKeyVolcesCompat) {
+		compatResp, err := BuildVolcesSubmitResponse(info.PublicTaskID)
+		if err != nil {
+			taskErr = service.TaskErrorWrapper(err, "marshal_response_body_failed", http.StatusInternalServerError)
+			return
+		}
+		c.Data(http.StatusOK, "application/json", compatResp)
+		return dResp.ID, responseBody, nil
+	}
+
 	ov := dto.NewOpenAIVideo()
 	ov.ID = info.PublicTaskID
 	ov.TaskID = info.PublicTaskID
