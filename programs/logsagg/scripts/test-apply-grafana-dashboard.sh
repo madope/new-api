@@ -89,6 +89,21 @@ const titles = new Set(payload.dashboard.panels.map((panel) => panel.title));
 
 assert(payload.dashboard.panels.filter((panel) => panel.type === 'barchart').length === 0, 'barcharts should be removed');
 
+const quotaPanels = payload.dashboard.panels.filter((panel) => typeof panel?.title === 'string' && panel.title.includes('额度消耗'));
+assert(quotaPanels.length === 5, 'unexpected quota panel count');
+quotaPanels.forEach((panel) => {
+  assert(panel.fieldConfig?.defaults?.unit === 'currencyUSD', `quota panel unit mismatch: ${panel.title}`);
+  assert(panel.targets?.[0]?.rawSql?.includes('/ 500000.0 AS value'), `quota SQL mismatch: ${panel.title}`);
+});
+
+const quotaTables = payload.dashboard.panels.filter((panel) => Array.isArray(panel?.targets) && panel.targets[0]?.rawSql?.includes('/ 500000.0 AS quota_used'));
+assert(quotaTables.length >= 7, 'unexpected quota table count');
+quotaTables.forEach((panel) => {
+  const override = panel.fieldConfig?.overrides?.find((item) => item?.matcher?.id === 'byName' && item?.matcher?.options === 'quota_used');
+  assert(override, `missing quota_used override: ${panel.title}`);
+  assert(override.properties?.some((item) => item.id === 'unit' && item.value === 'currencyUSD'), `quota_used unit mismatch: ${panel.title}`);
+});
+
 const variableNames = new Set(payload.dashboard.templating.list.map((item) => item.name));
 assert(variableNames.has('v_token'), 'missing token variable');
 EOF

@@ -78,7 +78,8 @@
           "defaults": {
             "color": {
               "mode": "palette-classic"
-            }
+            },
+            "unit": "currencyUSD"
           },
           "overrides": []
         },
@@ -108,7 +109,7 @@
             },
             "format": "time_series",
             "rawQuery": true,
-            "rawSql": "SELECT $__timeGroupAlias(bucket_ts, '1m'), username AS metric, SUM(sum_quota) AS value FROM logs_1m WHERE $__timeFilter(bucket_ts) AND type = 2 AND (LOWER('${v_group:raw}') = 'all' OR group_name = '${v_group:raw}') AND (LOWER('${v_model:raw}') = 'all' OR model_name = '${v_model:raw}') AND (LOWER('${v_channel:raw}') = 'all' OR channel_name = '${v_channel:raw}') AND (LOWER('${v_user:raw}') = 'all' OR username = '${v_user:raw}') AND (LOWER('${v_token:raw}') = 'all' OR token_name = '${v_token:raw}') AND (LOWER('${v_stream:raw}') = 'all' OR is_stream = ('${v_stream:raw}' = 'true')) GROUP BY 1, 2 ORDER BY 1, 2;",
+            "rawSql": "SELECT $__timeGroupAlias(bucket_ts, '1m'), username AS metric, SUM(sum_quota) / 500000.0 AS value FROM logs_1m WHERE $__timeFilter(bucket_ts) AND type = 2 AND (LOWER('${v_group:raw}') = 'all' OR group_name = '${v_group:raw}') AND (LOWER('${v_model:raw}') = 'all' OR model_name = '${v_model:raw}') AND (LOWER('${v_channel:raw}') = 'all' OR channel_name = '${v_channel:raw}') AND (LOWER('${v_user:raw}') = 'all' OR username = '${v_user:raw}') AND (LOWER('${v_token:raw}') = 'all' OR token_name = '${v_token:raw}') AND (LOWER('${v_stream:raw}') = 'all' OR is_stream = ('${v_stream:raw}' = 'true')) GROUP BY 1, 2 ORDER BY 1, 2;",
             "refId": "A"
           }
         ],
@@ -264,7 +265,20 @@
               "align": "auto"
             }
           },
-          "overrides": []
+          "overrides": [
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "quota_used"
+              },
+              "properties": [
+                {
+                  "id": "unit",
+                  "value": "currencyUSD"
+                }
+              ]
+            }
+          ]
         },
         "gridPos": {
           "h": 9,
@@ -293,7 +307,7 @@
             },
             "format": "table",
             "rawQuery": true,
-            "rawSql": "SELECT username, SUM(count) AS requests, SUM(sum_prompt_tokens) AS prompt_tokens, SUM(sum_completion_tokens) AS completion_tokens, SUM(sum_prompt_tokens + sum_completion_tokens) AS total_tokens, SUM(sum_quota) AS quota_used, SUM(sum_use_time)::double precision / NULLIF(SUM(count), 0) AS avg_use_time_ms, MAX(max_use_time) AS max_use_time_ms FROM logs_1m WHERE $__timeFilter(bucket_ts) AND type = 2 AND (LOWER('${v_group:raw}') = 'all' OR group_name = '${v_group:raw}') AND (LOWER('${v_model:raw}') = 'all' OR model_name = '${v_model:raw}') AND (LOWER('${v_channel:raw}') = 'all' OR channel_name = '${v_channel:raw}') AND (LOWER('${v_user:raw}') = 'all' OR username = '${v_user:raw}') AND (LOWER('${v_token:raw}') = 'all' OR token_name = '${v_token:raw}') AND (LOWER('${v_stream:raw}') = 'all' OR is_stream = ('${v_stream:raw}' = 'true')) GROUP BY username ORDER BY requests DESC LIMIT 100;",
+            "rawSql": "SELECT username, SUM(count) AS requests, SUM(sum_prompt_tokens) AS prompt_tokens, SUM(sum_completion_tokens) AS completion_tokens, SUM(sum_prompt_tokens + sum_completion_tokens) AS total_tokens, SUM(sum_quota) / 500000.0 AS quota_used, SUM(sum_use_time)::double precision / NULLIF(SUM(count), 0) AS avg_use_time_ms, MAX(max_use_time) AS max_use_time_ms FROM logs_1m WHERE $__timeFilter(bucket_ts) AND type = 2 AND (LOWER('${v_group:raw}') = 'all' OR group_name = '${v_group:raw}') AND (LOWER('${v_model:raw}') = 'all' OR model_name = '${v_model:raw}') AND (LOWER('${v_channel:raw}') = 'all' OR channel_name = '${v_channel:raw}') AND (LOWER('${v_user:raw}') = 'all' OR username = '${v_user:raw}') AND (LOWER('${v_token:raw}') = 'all' OR token_name = '${v_token:raw}') AND (LOWER('${v_stream:raw}') = 'all' OR is_stream = ('${v_stream:raw}' = 'true')) GROUP BY username ORDER BY requests DESC LIMIT 100;",
             "refId": "A"
           }
         ],
@@ -311,7 +325,20 @@
               "align": "auto"
             }
           },
-          "overrides": []
+          "overrides": [
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "quota_used"
+              },
+              "properties": [
+                {
+                  "id": "unit",
+                  "value": "currencyUSD"
+                }
+              ]
+            }
+          ]
         },
         "gridPos": {
           "h": 9,
@@ -340,7 +367,7 @@
             },
             "format": "table",
             "rawQuery": true,
-            "rawSql": "SELECT username, token_id, token_name, SUM(count) AS requests, SUM(sum_prompt_tokens) AS prompt_tokens, SUM(sum_completion_tokens) AS completion_tokens, SUM(sum_prompt_tokens + sum_completion_tokens) AS total_tokens, SUM(sum_quota) AS quota_used, SUM(sum_use_time)::double precision / NULLIF(SUM(count), 0) AS avg_use_time_ms, MAX(max_use_time) AS max_use_time_ms FROM logs_1m WHERE $__timeFilter(bucket_ts) AND type = 2 AND (LOWER('${v_group:raw}') = 'all' OR group_name = '${v_group:raw}') AND (LOWER('${v_model:raw}') = 'all' OR model_name = '${v_model:raw}') AND (LOWER('${v_channel:raw}') = 'all' OR channel_name = '${v_channel:raw}') AND (LOWER('${v_user:raw}') = 'all' OR username = '${v_user:raw}') AND (LOWER('${v_token:raw}') = 'all' OR token_name = '${v_token:raw}') AND (LOWER('${v_stream:raw}') = 'all' OR is_stream = ('${v_stream:raw}' = 'true')) GROUP BY username, token_id, token_name ORDER BY requests DESC LIMIT 100;",
+            "rawSql": "SELECT username, token_id, token_name, SUM(count) AS requests, SUM(sum_prompt_tokens) AS prompt_tokens, SUM(sum_completion_tokens) AS completion_tokens, SUM(sum_prompt_tokens + sum_completion_tokens) AS total_tokens, SUM(sum_quota) / 500000.0 AS quota_used, SUM(sum_use_time)::double precision / NULLIF(SUM(count), 0) AS avg_use_time_ms, MAX(max_use_time) AS max_use_time_ms FROM logs_1m WHERE $__timeFilter(bucket_ts) AND type = 2 AND (LOWER('${v_group:raw}') = 'all' OR group_name = '${v_group:raw}') AND (LOWER('${v_model:raw}') = 'all' OR model_name = '${v_model:raw}') AND (LOWER('${v_channel:raw}') = 'all' OR channel_name = '${v_channel:raw}') AND (LOWER('${v_user:raw}') = 'all' OR username = '${v_user:raw}') AND (LOWER('${v_token:raw}') = 'all' OR token_name = '${v_token:raw}') AND (LOWER('${v_stream:raw}') = 'all' OR is_stream = ('${v_stream:raw}' = 'true')) GROUP BY username, token_id, token_name ORDER BY requests DESC LIMIT 100;",
             "refId": "A"
           }
         ],
@@ -415,7 +442,8 @@
           "defaults": {
             "color": {
               "mode": "palette-classic"
-            }
+            },
+            "unit": "currencyUSD"
           },
           "overrides": []
         },
@@ -445,7 +473,7 @@
             },
             "format": "time_series",
             "rawQuery": true,
-            "rawSql": "SELECT $__timeGroupAlias(bucket_ts, '1m'), CAST(channel_id AS TEXT) || ':' || COALESCE(NULLIF(channel_name, ''), 'unknown') AS metric, SUM(sum_quota) AS value FROM logs_1m WHERE $__timeFilter(bucket_ts) AND type = 2 AND (LOWER('${v_group:raw}') = 'all' OR group_name = '${v_group:raw}') AND (LOWER('${v_model:raw}') = 'all' OR model_name = '${v_model:raw}') AND (LOWER('${v_channel:raw}') = 'all' OR channel_name = '${v_channel:raw}') AND (LOWER('${v_user:raw}') = 'all' OR username = '${v_user:raw}') AND (LOWER('${v_token:raw}') = 'all' OR token_name = '${v_token:raw}') AND (LOWER('${v_stream:raw}') = 'all' OR is_stream = ('${v_stream:raw}' = 'true')) GROUP BY 1, 2 ORDER BY 1, 2;",
+            "rawSql": "SELECT $__timeGroupAlias(bucket_ts, '1m'), CAST(channel_id AS TEXT) || ':' || COALESCE(NULLIF(channel_name, ''), 'unknown') AS metric, SUM(sum_quota) / 500000.0 AS value FROM logs_1m WHERE $__timeFilter(bucket_ts) AND type = 2 AND (LOWER('${v_group:raw}') = 'all' OR group_name = '${v_group:raw}') AND (LOWER('${v_model:raw}') = 'all' OR model_name = '${v_model:raw}') AND (LOWER('${v_channel:raw}') = 'all' OR channel_name = '${v_channel:raw}') AND (LOWER('${v_user:raw}') = 'all' OR username = '${v_user:raw}') AND (LOWER('${v_token:raw}') = 'all' OR token_name = '${v_token:raw}') AND (LOWER('${v_stream:raw}') = 'all' OR is_stream = ('${v_stream:raw}' = 'true')) GROUP BY 1, 2 ORDER BY 1, 2;",
             "refId": "A"
           }
         ],
@@ -601,7 +629,20 @@
               "align": "auto"
             }
           },
-          "overrides": []
+          "overrides": [
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "quota_used"
+              },
+              "properties": [
+                {
+                  "id": "unit",
+                  "value": "currencyUSD"
+                }
+              ]
+            }
+          ]
         },
         "gridPos": {
           "h": 9,
@@ -630,7 +671,7 @@
             },
             "format": "table",
             "rawQuery": true,
-            "rawSql": "SELECT channel_id, channel_name, SUM(count) AS requests, SUM(sum_prompt_tokens) AS prompt_tokens, SUM(sum_completion_tokens) AS completion_tokens, SUM(sum_prompt_tokens + sum_completion_tokens) AS total_tokens, SUM(sum_quota) AS quota_used, SUM(sum_use_time)::double precision / NULLIF(SUM(count), 0) AS avg_use_time_ms, MAX(max_use_time) AS max_use_time_ms FROM logs_1m WHERE $__timeFilter(bucket_ts) AND type = 2 AND (LOWER('${v_group:raw}') = 'all' OR group_name = '${v_group:raw}') AND (LOWER('${v_model:raw}') = 'all' OR model_name = '${v_model:raw}') AND (LOWER('${v_channel:raw}') = 'all' OR channel_name = '${v_channel:raw}') AND (LOWER('${v_user:raw}') = 'all' OR username = '${v_user:raw}') AND (LOWER('${v_token:raw}') = 'all' OR token_name = '${v_token:raw}') AND (LOWER('${v_stream:raw}') = 'all' OR is_stream = ('${v_stream:raw}' = 'true')) GROUP BY channel_id, channel_name ORDER BY requests DESC LIMIT 100;",
+            "rawSql": "SELECT channel_id, channel_name, SUM(count) AS requests, SUM(sum_prompt_tokens) AS prompt_tokens, SUM(sum_completion_tokens) AS completion_tokens, SUM(sum_prompt_tokens + sum_completion_tokens) AS total_tokens, SUM(sum_quota) / 500000.0 AS quota_used, SUM(sum_use_time)::double precision / NULLIF(SUM(count), 0) AS avg_use_time_ms, MAX(max_use_time) AS max_use_time_ms FROM logs_1m WHERE $__timeFilter(bucket_ts) AND type = 2 AND (LOWER('${v_group:raw}') = 'all' OR group_name = '${v_group:raw}') AND (LOWER('${v_model:raw}') = 'all' OR model_name = '${v_model:raw}') AND (LOWER('${v_channel:raw}') = 'all' OR channel_name = '${v_channel:raw}') AND (LOWER('${v_user:raw}') = 'all' OR username = '${v_user:raw}') AND (LOWER('${v_token:raw}') = 'all' OR token_name = '${v_token:raw}') AND (LOWER('${v_stream:raw}') = 'all' OR is_stream = ('${v_stream:raw}' = 'true')) GROUP BY channel_id, channel_name ORDER BY requests DESC LIMIT 100;",
             "refId": "A"
           }
         ],
@@ -648,7 +689,20 @@
               "align": "auto"
             }
           },
-          "overrides": []
+          "overrides": [
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "quota_used"
+              },
+              "properties": [
+                {
+                  "id": "unit",
+                  "value": "currencyUSD"
+                }
+              ]
+            }
+          ]
         },
         "gridPos": {
           "h": 9,
@@ -677,7 +731,7 @@
             },
             "format": "table",
             "rawQuery": true,
-            "rawSql": "SELECT channel_id, channel_name, model_name, SUM(count) AS requests, SUM(sum_prompt_tokens) AS prompt_tokens, SUM(sum_completion_tokens) AS completion_tokens, SUM(sum_prompt_tokens + sum_completion_tokens) AS total_tokens, SUM(sum_quota) AS quota_used, SUM(sum_use_time)::double precision / NULLIF(SUM(count), 0) AS avg_use_time_ms, MAX(max_use_time) AS max_use_time_ms FROM logs_1m WHERE $__timeFilter(bucket_ts) AND type = 2 AND (LOWER('${v_group:raw}') = 'all' OR group_name = '${v_group:raw}') AND (LOWER('${v_model:raw}') = 'all' OR model_name = '${v_model:raw}') AND (LOWER('${v_channel:raw}') = 'all' OR channel_name = '${v_channel:raw}') AND (LOWER('${v_user:raw}') = 'all' OR username = '${v_user:raw}') AND (LOWER('${v_token:raw}') = 'all' OR token_name = '${v_token:raw}') AND (LOWER('${v_stream:raw}') = 'all' OR is_stream = ('${v_stream:raw}' = 'true')) GROUP BY channel_id, channel_name, model_name ORDER BY requests DESC LIMIT 100;",
+            "rawSql": "SELECT channel_id, channel_name, model_name, SUM(count) AS requests, SUM(sum_prompt_tokens) AS prompt_tokens, SUM(sum_completion_tokens) AS completion_tokens, SUM(sum_prompt_tokens + sum_completion_tokens) AS total_tokens, SUM(sum_quota) / 500000.0 AS quota_used, SUM(sum_use_time)::double precision / NULLIF(SUM(count), 0) AS avg_use_time_ms, MAX(max_use_time) AS max_use_time_ms FROM logs_1m WHERE $__timeFilter(bucket_ts) AND type = 2 AND (LOWER('${v_group:raw}') = 'all' OR group_name = '${v_group:raw}') AND (LOWER('${v_model:raw}') = 'all' OR model_name = '${v_model:raw}') AND (LOWER('${v_channel:raw}') = 'all' OR channel_name = '${v_channel:raw}') AND (LOWER('${v_user:raw}') = 'all' OR username = '${v_user:raw}') AND (LOWER('${v_token:raw}') = 'all' OR token_name = '${v_token:raw}') AND (LOWER('${v_stream:raw}') = 'all' OR is_stream = ('${v_stream:raw}' = 'true')) GROUP BY channel_id, channel_name, model_name ORDER BY requests DESC LIMIT 100;",
             "refId": "A"
           }
         ],
@@ -752,7 +806,8 @@
           "defaults": {
             "color": {
               "mode": "palette-classic"
-            }
+            },
+            "unit": "currencyUSD"
           },
           "overrides": []
         },
@@ -782,7 +837,7 @@
             },
             "format": "time_series",
             "rawQuery": true,
-            "rawSql": "SELECT $__timeGroupAlias(bucket_ts, '1m'), CAST(token_id AS TEXT) || ':' || COALESCE(NULLIF(token_name, ''), 'unknown') AS metric, SUM(sum_quota) AS value FROM logs_1m WHERE $__timeFilter(bucket_ts) AND type = 2 AND (LOWER('${v_group:raw}') = 'all' OR group_name = '${v_group:raw}') AND (LOWER('${v_model:raw}') = 'all' OR model_name = '${v_model:raw}') AND (LOWER('${v_channel:raw}') = 'all' OR channel_name = '${v_channel:raw}') AND (LOWER('${v_user:raw}') = 'all' OR username = '${v_user:raw}') AND (LOWER('${v_token:raw}') = 'all' OR token_name = '${v_token:raw}') AND (LOWER('${v_stream:raw}') = 'all' OR is_stream = ('${v_stream:raw}' = 'true')) GROUP BY 1, 2 ORDER BY 1, 2;",
+            "rawSql": "SELECT $__timeGroupAlias(bucket_ts, '1m'), CAST(token_id AS TEXT) || ':' || COALESCE(NULLIF(token_name, ''), 'unknown') AS metric, SUM(sum_quota) / 500000.0 AS value FROM logs_1m WHERE $__timeFilter(bucket_ts) AND type = 2 AND (LOWER('${v_group:raw}') = 'all' OR group_name = '${v_group:raw}') AND (LOWER('${v_model:raw}') = 'all' OR model_name = '${v_model:raw}') AND (LOWER('${v_channel:raw}') = 'all' OR channel_name = '${v_channel:raw}') AND (LOWER('${v_user:raw}') = 'all' OR username = '${v_user:raw}') AND (LOWER('${v_token:raw}') = 'all' OR token_name = '${v_token:raw}') AND (LOWER('${v_stream:raw}') = 'all' OR is_stream = ('${v_stream:raw}' = 'true')) GROUP BY 1, 2 ORDER BY 1, 2;",
             "refId": "A"
           }
         ],
@@ -938,7 +993,20 @@
               "align": "auto"
             }
           },
-          "overrides": []
+          "overrides": [
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "quota_used"
+              },
+              "properties": [
+                {
+                  "id": "unit",
+                  "value": "currencyUSD"
+                }
+              ]
+            }
+          ]
         },
         "gridPos": {
           "h": 9,
@@ -967,7 +1035,7 @@
             },
             "format": "table",
             "rawQuery": true,
-            "rawSql": "SELECT token_id, token_name, SUM(count) AS requests, SUM(sum_prompt_tokens) AS prompt_tokens, SUM(sum_completion_tokens) AS completion_tokens, SUM(sum_prompt_tokens + sum_completion_tokens) AS total_tokens, SUM(sum_quota) AS quota_used, SUM(sum_use_time)::double precision / NULLIF(SUM(count), 0) AS avg_use_time_ms, MAX(max_use_time) AS max_use_time_ms FROM logs_1m WHERE $__timeFilter(bucket_ts) AND type = 2 AND (LOWER('${v_group:raw}') = 'all' OR group_name = '${v_group:raw}') AND (LOWER('${v_model:raw}') = 'all' OR model_name = '${v_model:raw}') AND (LOWER('${v_channel:raw}') = 'all' OR channel_name = '${v_channel:raw}') AND (LOWER('${v_user:raw}') = 'all' OR username = '${v_user:raw}') AND (LOWER('${v_token:raw}') = 'all' OR token_name = '${v_token:raw}') AND (LOWER('${v_stream:raw}') = 'all' OR is_stream = ('${v_stream:raw}' = 'true')) GROUP BY token_id, token_name ORDER BY requests DESC LIMIT 100;",
+            "rawSql": "SELECT token_id, token_name, SUM(count) AS requests, SUM(sum_prompt_tokens) AS prompt_tokens, SUM(sum_completion_tokens) AS completion_tokens, SUM(sum_prompt_tokens + sum_completion_tokens) AS total_tokens, SUM(sum_quota) / 500000.0 AS quota_used, SUM(sum_use_time)::double precision / NULLIF(SUM(count), 0) AS avg_use_time_ms, MAX(max_use_time) AS max_use_time_ms FROM logs_1m WHERE $__timeFilter(bucket_ts) AND type = 2 AND (LOWER('${v_group:raw}') = 'all' OR group_name = '${v_group:raw}') AND (LOWER('${v_model:raw}') = 'all' OR model_name = '${v_model:raw}') AND (LOWER('${v_channel:raw}') = 'all' OR channel_name = '${v_channel:raw}') AND (LOWER('${v_user:raw}') = 'all' OR username = '${v_user:raw}') AND (LOWER('${v_token:raw}') = 'all' OR token_name = '${v_token:raw}') AND (LOWER('${v_stream:raw}') = 'all' OR is_stream = ('${v_stream:raw}' = 'true')) GROUP BY token_id, token_name ORDER BY requests DESC LIMIT 100;",
             "refId": "A"
           }
         ],
@@ -985,7 +1053,20 @@
               "align": "auto"
             }
           },
-          "overrides": []
+          "overrides": [
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "quota_used"
+              },
+              "properties": [
+                {
+                  "id": "unit",
+                  "value": "currencyUSD"
+                }
+              ]
+            }
+          ]
         },
         "gridPos": {
           "h": 9,
@@ -1014,7 +1095,7 @@
             },
             "format": "table",
             "rawQuery": true,
-            "rawSql": "SELECT token_id, token_name, model_name, SUM(count) AS requests, SUM(sum_prompt_tokens) AS prompt_tokens, SUM(sum_completion_tokens) AS completion_tokens, SUM(sum_prompt_tokens + sum_completion_tokens) AS total_tokens, SUM(sum_quota) AS quota_used, SUM(sum_use_time)::double precision / NULLIF(SUM(count), 0) AS avg_use_time_ms, MAX(max_use_time) AS max_use_time_ms FROM logs_1m WHERE $__timeFilter(bucket_ts) AND type = 2 AND (LOWER('${v_group:raw}') = 'all' OR group_name = '${v_group:raw}') AND (LOWER('${v_model:raw}') = 'all' OR model_name = '${v_model:raw}') AND (LOWER('${v_channel:raw}') = 'all' OR channel_name = '${v_channel:raw}') AND (LOWER('${v_user:raw}') = 'all' OR username = '${v_user:raw}') AND (LOWER('${v_token:raw}') = 'all' OR token_name = '${v_token:raw}') AND (LOWER('${v_stream:raw}') = 'all' OR is_stream = ('${v_stream:raw}' = 'true')) GROUP BY token_id, token_name, model_name ORDER BY requests DESC LIMIT 100;",
+            "rawSql": "SELECT token_id, token_name, model_name, SUM(count) AS requests, SUM(sum_prompt_tokens) AS prompt_tokens, SUM(sum_completion_tokens) AS completion_tokens, SUM(sum_prompt_tokens + sum_completion_tokens) AS total_tokens, SUM(sum_quota) / 500000.0 AS quota_used, SUM(sum_use_time)::double precision / NULLIF(SUM(count), 0) AS avg_use_time_ms, MAX(max_use_time) AS max_use_time_ms FROM logs_1m WHERE $__timeFilter(bucket_ts) AND type = 2 AND (LOWER('${v_group:raw}') = 'all' OR group_name = '${v_group:raw}') AND (LOWER('${v_model:raw}') = 'all' OR model_name = '${v_model:raw}') AND (LOWER('${v_channel:raw}') = 'all' OR channel_name = '${v_channel:raw}') AND (LOWER('${v_user:raw}') = 'all' OR username = '${v_user:raw}') AND (LOWER('${v_token:raw}') = 'all' OR token_name = '${v_token:raw}') AND (LOWER('${v_stream:raw}') = 'all' OR is_stream = ('${v_stream:raw}' = 'true')) GROUP BY token_id, token_name, model_name ORDER BY requests DESC LIMIT 100;",
             "refId": "A"
           }
         ],
@@ -1089,7 +1170,8 @@
           "defaults": {
             "color": {
               "mode": "palette-classic"
-            }
+            },
+            "unit": "currencyUSD"
           },
           "overrides": []
         },
@@ -1119,7 +1201,7 @@
             },
             "format": "time_series",
             "rawQuery": true,
-            "rawSql": "SELECT $__timeGroupAlias(bucket_ts, '1m'), model_name AS metric, SUM(sum_quota) AS value FROM logs_1m WHERE $__timeFilter(bucket_ts) AND type = 2 AND (LOWER('${v_group:raw}') = 'all' OR group_name = '${v_group:raw}') AND (LOWER('${v_model:raw}') = 'all' OR model_name = '${v_model:raw}') AND (LOWER('${v_channel:raw}') = 'all' OR channel_name = '${v_channel:raw}') AND (LOWER('${v_user:raw}') = 'all' OR username = '${v_user:raw}') AND (LOWER('${v_token:raw}') = 'all' OR token_name = '${v_token:raw}') AND (LOWER('${v_stream:raw}') = 'all' OR is_stream = ('${v_stream:raw}' = 'true')) GROUP BY 1, 2 ORDER BY 1, 2;",
+            "rawSql": "SELECT $__timeGroupAlias(bucket_ts, '1m'), model_name AS metric, SUM(sum_quota) / 500000.0 AS value FROM logs_1m WHERE $__timeFilter(bucket_ts) AND type = 2 AND (LOWER('${v_group:raw}') = 'all' OR group_name = '${v_group:raw}') AND (LOWER('${v_model:raw}') = 'all' OR model_name = '${v_model:raw}') AND (LOWER('${v_channel:raw}') = 'all' OR channel_name = '${v_channel:raw}') AND (LOWER('${v_user:raw}') = 'all' OR username = '${v_user:raw}') AND (LOWER('${v_token:raw}') = 'all' OR token_name = '${v_token:raw}') AND (LOWER('${v_stream:raw}') = 'all' OR is_stream = ('${v_stream:raw}' = 'true')) GROUP BY 1, 2 ORDER BY 1, 2;",
             "refId": "A"
           }
         ],
@@ -1275,7 +1357,20 @@
               "align": "auto"
             }
           },
-          "overrides": []
+          "overrides": [
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "quota_used"
+              },
+              "properties": [
+                {
+                  "id": "unit",
+                  "value": "currencyUSD"
+                }
+              ]
+            }
+          ]
         },
         "gridPos": {
           "h": 9,
@@ -1304,7 +1399,7 @@
             },
             "format": "table",
             "rawQuery": true,
-            "rawSql": "SELECT model_name, SUM(count) AS requests, SUM(sum_prompt_tokens) AS prompt_tokens, SUM(sum_completion_tokens) AS completion_tokens, SUM(sum_prompt_tokens + sum_completion_tokens) AS total_tokens, SUM(sum_quota) AS quota_used, SUM(sum_use_time)::double precision / NULLIF(SUM(count), 0) AS avg_use_time_ms, MAX(max_use_time) AS max_use_time_ms FROM logs_1m WHERE $__timeFilter(bucket_ts) AND type = 2 AND (LOWER('${v_group:raw}') = 'all' OR group_name = '${v_group:raw}') AND (LOWER('${v_model:raw}') = 'all' OR model_name = '${v_model:raw}') AND (LOWER('${v_channel:raw}') = 'all' OR channel_name = '${v_channel:raw}') AND (LOWER('${v_user:raw}') = 'all' OR username = '${v_user:raw}') AND (LOWER('${v_token:raw}') = 'all' OR token_name = '${v_token:raw}') AND (LOWER('${v_stream:raw}') = 'all' OR is_stream = ('${v_stream:raw}' = 'true')) GROUP BY model_name ORDER BY requests DESC LIMIT 100;",
+            "rawSql": "SELECT model_name, SUM(count) AS requests, SUM(sum_prompt_tokens) AS prompt_tokens, SUM(sum_completion_tokens) AS completion_tokens, SUM(sum_prompt_tokens + sum_completion_tokens) AS total_tokens, SUM(sum_quota) / 500000.0 AS quota_used, SUM(sum_use_time)::double precision / NULLIF(SUM(count), 0) AS avg_use_time_ms, MAX(max_use_time) AS max_use_time_ms FROM logs_1m WHERE $__timeFilter(bucket_ts) AND type = 2 AND (LOWER('${v_group:raw}') = 'all' OR group_name = '${v_group:raw}') AND (LOWER('${v_model:raw}') = 'all' OR model_name = '${v_model:raw}') AND (LOWER('${v_channel:raw}') = 'all' OR channel_name = '${v_channel:raw}') AND (LOWER('${v_user:raw}') = 'all' OR username = '${v_user:raw}') AND (LOWER('${v_token:raw}') = 'all' OR token_name = '${v_token:raw}') AND (LOWER('${v_stream:raw}') = 'all' OR is_stream = ('${v_stream:raw}' = 'true')) GROUP BY model_name ORDER BY requests DESC LIMIT 100;",
             "refId": "A"
           }
         ],
@@ -1379,7 +1474,8 @@
           "defaults": {
             "color": {
               "mode": "palette-classic"
-            }
+            },
+            "unit": "currencyUSD"
           },
           "overrides": []
         },
@@ -1409,7 +1505,7 @@
             },
             "format": "time_series",
             "rawQuery": true,
-            "rawSql": "SELECT $__timeGroupAlias(bucket_ts, '1m'), group_name AS metric, SUM(sum_quota) AS value FROM logs_1m WHERE $__timeFilter(bucket_ts) AND type = 2 AND (LOWER('${v_group:raw}') = 'all' OR group_name = '${v_group:raw}') AND (LOWER('${v_model:raw}') = 'all' OR model_name = '${v_model:raw}') AND (LOWER('${v_channel:raw}') = 'all' OR channel_name = '${v_channel:raw}') AND (LOWER('${v_user:raw}') = 'all' OR username = '${v_user:raw}') AND (LOWER('${v_token:raw}') = 'all' OR token_name = '${v_token:raw}') AND (LOWER('${v_stream:raw}') = 'all' OR is_stream = ('${v_stream:raw}' = 'true')) GROUP BY 1, 2 ORDER BY 1, 2;",
+            "rawSql": "SELECT $__timeGroupAlias(bucket_ts, '1m'), group_name AS metric, SUM(sum_quota) / 500000.0 AS value FROM logs_1m WHERE $__timeFilter(bucket_ts) AND type = 2 AND (LOWER('${v_group:raw}') = 'all' OR group_name = '${v_group:raw}') AND (LOWER('${v_model:raw}') = 'all' OR model_name = '${v_model:raw}') AND (LOWER('${v_channel:raw}') = 'all' OR channel_name = '${v_channel:raw}') AND (LOWER('${v_user:raw}') = 'all' OR username = '${v_user:raw}') AND (LOWER('${v_token:raw}') = 'all' OR token_name = '${v_token:raw}') AND (LOWER('${v_stream:raw}') = 'all' OR is_stream = ('${v_stream:raw}' = 'true')) GROUP BY 1, 2 ORDER BY 1, 2;",
             "refId": "A"
           }
         ],
