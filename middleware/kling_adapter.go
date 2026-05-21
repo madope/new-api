@@ -44,8 +44,6 @@ func KlingRequestConvert() func(c *gin.Context) {
 		if image, ok := originalReq["image"]; !ok || image == "" {
 			c.Set("action", constant.TaskActionTextGenerate)
 		}
-
-		// We have to reset the request body for the next handlers
 		c.Set(common.KeyRequestBody, jsonData)
 		c.Next()
 	}

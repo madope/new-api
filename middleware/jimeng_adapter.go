@@ -41,7 +41,6 @@ func JimengRequestConvert() func(c *gin.Context) {
 			return
 		}
 
-		// Update request body
 		c.Request.Body = io.NopCloser(bytes.NewBuffer(jsonData))
 		c.Set(common.KeyRequestBody, jsonData)
 
