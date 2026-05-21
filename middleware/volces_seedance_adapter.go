@@ -1,9 +1,7 @@
 package middleware
 
 import (
-	"bytes"
 	"fmt"
-	"io"
 	"strings"
 
 	"github.com/QuantumNous/new-api/common"
@@ -34,9 +32,11 @@ func VolcesSeedanceRequestConvert() func(c *gin.Context) {
 			return
 		}
 
-		c.Request.Body = io.NopCloser(bytes.NewBuffer(jsonData))
+		if err := common.ReplaceRequestBody(c, jsonData); err != nil {
+			abortWithOpenAiMessage(c, 500, "Failed to replace request body")
+			return
+		}
 		c.Request.URL.Path = "/v1/video/generations"
-		c.Set(common.KeyRequestBody, jsonData)
 		c.Next()
 	}
 }

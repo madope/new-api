@@ -95,6 +95,29 @@ func GetBodyStorage(c *gin.Context) (BodyStorage, error) {
 	return bs, nil
 }
 
+// ReplaceRequestBody replaces the current request body and refreshes cached body storage.
+// Middlewares that rewrite request payloads must use this helper so later reusable reads
+// observe the rewritten body rather than stale cached bytes from the original request.
+func ReplaceRequestBody(c *gin.Context, body []byte) error {
+	if c == nil || c.Request == nil {
+		return errors.New("request context is nil")
+	}
+	storage, err := CreateBodyStorage(body)
+	if err != nil {
+		return err
+	}
+	if oldStorage, exists := c.Get(KeyBodyStorage); exists && oldStorage != nil {
+		if bs, ok := oldStorage.(BodyStorage); ok {
+			bs.Close()
+		}
+	}
+	c.Set(KeyBodyStorage, storage)
+	c.Set(KeyRequestBody, body)
+	c.Request.ContentLength = int64(len(body))
+	c.Request.Body = io.NopCloser(storage)
+	return nil
+}
+
 // CleanupBodyStorage 清理请求体存储（应在请求结束时调用）
 func CleanupBodyStorage(c *gin.Context) {
 	if storage, exists := c.Get(KeyBodyStorage); exists && storage != nil {
