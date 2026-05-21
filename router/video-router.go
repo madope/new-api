@@ -34,12 +34,18 @@ func SetVideoRouter(router *gin.Engine) {
 		videoV1Router.GET("/videos/:task_id", controller.RelayTaskFetch)
 	}
 
-	volcesRouter := router.Group("/volces")
-	volcesRouter.Use(middleware.RouteTag("relay"))
-	volcesRouter.Use(middleware.TokenAuth(), middleware.Distribute())
+	volcesSubmitRouter := router.Group("/volces")
+	volcesSubmitRouter.Use(middleware.RouteTag("relay"))
+	volcesSubmitRouter.Use(middleware.TokenAuth(), middleware.Distribute())
 	{
-		volcesRouter.POST("/api/v3/contents/generations/tasks", middleware.VolcesSeedanceRequestConvert(), controller.RelayTask)
-		volcesRouter.GET("/api/v3/contents/generations/tasks/:task_id", func(c *gin.Context) {
+		volcesSubmitRouter.POST("/api/v3/contents/generations/tasks", middleware.VolcesSeedanceRequestConvert(), controller.RelayTask)
+	}
+
+	volcesFetchRouter := router.Group("/volces")
+	volcesFetchRouter.Use(middleware.RouteTag("relay"))
+	volcesFetchRouter.Use(middleware.TokenAuth())
+	{
+		volcesFetchRouter.GET("/api/v3/contents/generations/tasks/:task_id", func(c *gin.Context) {
 			common.SetContextKey(c, constant.ContextKeyVolcesCompat, true)
 			c.Set("relay_mode", relayconstant.RelayModeVideoFetchByID)
 			c.Set("task_id", c.Param("task_id"))
