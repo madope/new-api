@@ -1665,29 +1665,6 @@
           "allValue": "All",
           "current": {
             "selected": true,
-            "text": "consume",
-            "value": "2"
-          },
-          "datasource": {
-            "type": "postgres",
-            "uid": "__DATASOURCE_UID__"
-          },
-          "definition": "SELECT * FROM (VALUES (2, 'consume'), (5, 'error'), (6, 'refund'), (1, 'topup')) AS t(value, text);",
-          "hide": 0,
-          "includeAll": false,
-          "label": "类型",
-          "multi": false,
-          "name": "v_type",
-          "options": [],
-          "query": "SELECT * FROM (VALUES (2, 'consume'), (5, 'error'), (6, 'refund'), (1, 'topup')) AS t(value, text);",
-          "refresh": 1,
-          "skipUrlSync": false,
-          "type": "query"
-        },
-        {
-          "allValue": "All",
-          "current": {
-            "selected": true,
             "text": "All",
             "value": "All"
           },

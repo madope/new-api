@@ -41,7 +41,7 @@ assert(payload.overwrite === true, 'overwrite mismatch');
 assert(payload.dashboard.uid === 'logsagg-dimensions', 'dashboard uid mismatch');
 assert(payload.dashboard.title === 'mmodel', 'dashboard title mismatch');
 assert(Array.isArray(payload.dashboard.panels) && payload.dashboard.panels.length >= 27, 'panels missing');
-assert(Array.isArray(payload.dashboard.templating.list) && payload.dashboard.templating.list.length >= 6, 'variables missing');
+assert(Array.isArray(payload.dashboard.templating.list) && payload.dashboard.templating.list.length >= 5, 'variables missing');
 const firstDataPanel = payload.dashboard.panels.find((panel) => panel.type !== 'row');
 assert(firstDataPanel && firstDataPanel.datasource.uid === 'postgres-main', 'panel datasource mismatch');
 assert(firstDataPanel.targets[0].datasource.uid === 'postgres-main', 'target datasource mismatch');
@@ -106,6 +106,7 @@ quotaTables.forEach((panel) => {
 
 const variableNames = new Set(payload.dashboard.templating.list.map((item) => item.name));
 assert(variableNames.has('v_token'), 'missing token variable');
+assert(!variableNames.has('v_type'), 'v_type variable should be removed');
 EOF
 
 echo "ok"
