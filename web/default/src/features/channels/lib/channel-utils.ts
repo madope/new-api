@@ -73,6 +73,7 @@ export function getChannelTypeIcon(type: number): string {
     17: 'Qwen', // Ali
     18: 'Spark', // Xunfei
     23: 'Hunyuan', // Tencent
+    58: 'Hunyuan', // TencentVODVideo
     19: 'Ai360', // 360
     25: 'Moonshot', // Moonshot
     31: 'Yi', // LingYiWanWu
@@ -101,6 +102,7 @@ export function getChannelTypeIcon(type: number): string {
     55: 'OpenAI', // Sora
     54: 'Doubao', // DoubaoVideo
     56: 'Replicate', // Replicate
+    58: 'Hunyuan', // TencentVODVideo
 
     // Tools & Platforms
     37: 'Dify', // Dify
