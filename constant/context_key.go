@@ -67,4 +67,5 @@ const (
 	ContextKeyLanguage     ContextKey = "language"
 	ContextKeyIsStream     ContextKey = "is_stream"
 	ContextKeyVolcesCompat ContextKey = "volces_compat"
+	ContextKeyMViduCompat  ContextKey = "m_vidu_compat"
 )

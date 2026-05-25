@@ -15,6 +15,7 @@ import (
 	"github.com/QuantumNous/new-api/dto"
 	"github.com/QuantumNous/new-api/model"
 	"github.com/QuantumNous/new-api/relay/channel"
+	mvidu "github.com/QuantumNous/new-api/relay/channel/task/m_vidu"
 	taskcommon "github.com/QuantumNous/new-api/relay/channel/task/taskcommon"
 	relaycommon "github.com/QuantumNous/new-api/relay/common"
 	"github.com/QuantumNous/new-api/service"
@@ -91,7 +92,10 @@ func (a *TaskAdaptor) ValidateRequestAndSetAction(c *gin.Context, info *relaycom
 	if err != nil {
 		return service.TaskErrorWrapper(err, "get_task_request_failed", http.StatusBadRequest)
 	}
-	action := constant.TaskActionTextGenerate
+	action := c.GetString("action")
+	if action == "" {
+		action = constant.TaskActionTextGenerate
+	}
 	if meatAction, ok := req.Metadata["action"]; ok {
 		action, _ = meatAction.(string)
 	} else if req.HasImage() {
@@ -178,6 +182,15 @@ func (a *TaskAdaptor) DoResponse(c *gin.Context, resp *http.Response, info *rela
 	if vResp.State == "failed" {
 		taskErr = service.TaskErrorWrapperLocal(fmt.Errorf("task failed"), "task_failed", http.StatusBadRequest)
 		return
+	}
+	if common.GetContextKeyBool(c, constant.ContextKeyMViduCompat) {
+		compatResp, err := mvidu.BuildSubmitResponse(info.PublicTaskID)
+		if err != nil {
+			taskErr = service.TaskErrorWrapper(err, "marshal_response_body_failed", http.StatusInternalServerError)
+			return
+		}
+		c.Data(http.StatusOK, "application/json", compatResp)
+		return vResp.TaskId, responseBody, nil
 	}
 
 	ov := dto.NewOpenAIVideo()

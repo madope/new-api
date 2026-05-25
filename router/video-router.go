@@ -53,6 +53,28 @@ func SetVideoRouter(router *gin.Engine) {
 		})
 	}
 
+	mViduSubmitRouter := router.Group("/m-vidu/ent/v2")
+	mViduSubmitRouter.Use(middleware.RouteTag("relay"))
+	mViduSubmitRouter.Use(middleware.MViduRequestConvert(), middleware.TokenAuth(), middleware.Distribute())
+	{
+		mViduSubmitRouter.POST("/text2video", controller.RelayTask)
+		mViduSubmitRouter.POST("/img2video", controller.RelayTask)
+		mViduSubmitRouter.POST("/start-end2video", controller.RelayTask)
+		mViduSubmitRouter.POST("/reference2video", controller.RelayTask)
+	}
+
+	mViduFetchRouter := router.Group("/m-vidu/ent/v2")
+	mViduFetchRouter.Use(middleware.RouteTag("relay"))
+	mViduFetchRouter.Use(middleware.TokenAuth())
+	{
+		mViduFetchRouter.GET("/tasks/:task_id/creations", func(c *gin.Context) {
+			common.SetContextKey(c, constant.ContextKeyMViduCompat, true)
+			c.Set("relay_mode", relayconstant.RelayModeVideoFetchByID)
+			c.Set("task_id", c.Param("task_id"))
+			controller.RelayTaskFetch(c)
+		})
+	}
+
 	klingV1Router := router.Group("/kling/v1")
 	klingV1Router.Use(middleware.RouteTag("relay"))
 	klingV1Router.Use(middleware.KlingRequestConvert(), middleware.TokenAuth(), middleware.Distribute())

@@ -18,6 +18,7 @@ import (
 	"github.com/QuantumNous/new-api/dto"
 	"github.com/QuantumNous/new-api/model"
 	"github.com/QuantumNous/new-api/relay/channel"
+	mvidu "github.com/QuantumNous/new-api/relay/channel/task/m_vidu"
 	taskcommon "github.com/QuantumNous/new-api/relay/channel/task/taskcommon"
 	relaycommon "github.com/QuantumNous/new-api/relay/common"
 	"github.com/QuantumNous/new-api/service"
@@ -218,7 +219,11 @@ func (a *TaskAdaptor) ValidateRequestAndSetAction(c *gin.Context, info *relaycom
 	if err := validateTencentVODRequest(&req, meta); err != nil {
 		return service.TaskErrorWrapperLocal(err, "invalid_request", http.StatusBadRequest)
 	}
-	info.Action = detectAction(&req, meta)
+	if action := c.GetString("action"); action != "" {
+		info.Action = action
+	} else {
+		info.Action = detectAction(&req, meta)
+	}
 	c.Set("task_request", req)
 	return nil
 }
@@ -339,6 +344,14 @@ func (a *TaskAdaptor) DoResponse(c *gin.Context, resp *http.Response, info *rela
 	}
 	if submitResp.Response.TaskID == "" {
 		return "", nil, service.TaskErrorWrapper(fmt.Errorf("task_id is empty"), "invalid_response", http.StatusInternalServerError)
+	}
+	if common.GetContextKeyBool(c, constant.ContextKeyMViduCompat) {
+		compatResp, err := mvidu.BuildSubmitResponse(info.PublicTaskID)
+		if err != nil {
+			return "", nil, service.TaskErrorWrapper(err, "marshal_response_body_failed", http.StatusInternalServerError)
+		}
+		c.Data(http.StatusOK, "application/json", compatResp)
+		return submitResp.Response.TaskID, responseBody, nil
 	}
 	ov := dto.NewOpenAIVideo()
 	ov.ID = info.PublicTaskID

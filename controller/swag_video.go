@@ -134,3 +134,53 @@ func KlingImage2videoTaskId(c *gin.Context) {}
 // @Param task_id path string true "Task ID"
 // @Router /kling/v1/videos/text2video/{task_id} [get]
 func KlingText2videoTaskId(c *gin.Context) {}
+
+// MViduText2Video godoc
+// @Summary m-vidu 文生视频
+// @Description Submit a Vidu-compatible text-to-video generation request
+// @Tags Origin
+// @Accept json
+// @Produce json
+// @Param Authorization header string true "用户认证令牌 (Bearer sk-xxxx)"
+// @Router /m-vidu/ent/v2/text2video [post]
+func MViduText2Video(c *gin.Context) {}
+
+// MViduImg2Video godoc
+// @Summary m-vidu 图生视频
+// @Description Submit a Vidu-compatible image-to-video generation request
+// @Tags Origin
+// @Accept json
+// @Produce json
+// @Param Authorization header string true "用户认证令牌 (Bearer sk-xxxx)"
+// @Router /m-vidu/ent/v2/img2video [post]
+func MViduImg2Video(c *gin.Context) {}
+
+// MViduStartEnd2Video godoc
+// @Summary m-vidu 首尾帧生视频
+// @Description Submit a Vidu-compatible start-end frame video generation request
+// @Tags Origin
+// @Accept json
+// @Produce json
+// @Param Authorization header string true "用户认证令牌 (Bearer sk-xxxx)"
+// @Router /m-vidu/ent/v2/start-end2video [post]
+func MViduStartEnd2Video(c *gin.Context) {}
+
+// MViduReference2Video godoc
+// @Summary m-vidu 参考生视频
+// @Description Submit a Vidu-compatible reference-to-video generation request
+// @Tags Origin
+// @Accept json
+// @Produce json
+// @Param Authorization header string true "用户认证令牌 (Bearer sk-xxxx)"
+// @Router /m-vidu/ent/v2/reference2video [post]
+func MViduReference2Video(c *gin.Context) {}
+
+// MViduTaskCreations godoc
+// @Summary m-vidu 任务查询
+// @Description Query a Vidu-compatible task result by task ID
+// @Tags Origin
+// @Accept json
+// @Produce json
+// @Param task_id path string true "Task ID"
+// @Router /m-vidu/ent/v2/tasks/{task_id}/creations [get]
+func MViduTaskCreations(c *gin.Context) {}

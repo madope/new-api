@@ -16,6 +16,7 @@ import (
 	"github.com/QuantumNous/new-api/model"
 	"github.com/QuantumNous/new-api/relay/channel"
 	taskdoubao "github.com/QuantumNous/new-api/relay/channel/task/doubao"
+	mvidu "github.com/QuantumNous/new-api/relay/channel/task/m_vidu"
 	"github.com/QuantumNous/new-api/relay/channel/task/taskcommon"
 	relaycommon "github.com/QuantumNous/new-api/relay/common"
 	relayconstant "github.com/QuantumNous/new-api/relay/constant"
@@ -380,6 +381,13 @@ func videoFetchByIDRespBodyBuilder(c *gin.Context) (respBody []byte, taskResp *d
 
 	if common.GetContextKeyBool(c, constant.ContextKeyVolcesCompat) {
 		respBody, taskResp = volcesFetchByIDRespBodyBuilder(originTask)
+		return
+	}
+	if common.GetContextKeyBool(c, constant.ContextKeyMViduCompat) {
+		respBody, err = mvidu.BuildQueryResponse(originTask)
+		if err != nil {
+			taskResp = service.TaskErrorWrapper(err, "build_m_vidu_response_failed", http.StatusInternalServerError)
+		}
 		return
 	}
 
