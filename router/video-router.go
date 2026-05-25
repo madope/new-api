@@ -85,6 +85,46 @@ func SetVideoRouter(router *gin.Engine) {
 		klingV1Router.GET("/videos/image2video/:task_id", controller.RelayTaskFetch)
 	}
 
+	mKlingSubmitRouter := router.Group("/m-kling/v1/videos")
+	mKlingSubmitRouter.Use(middleware.RouteTag("relay"))
+	mKlingSubmitRouter.Use(middleware.MKlingRequestConvert(), middleware.TokenAuth(), middleware.Distribute())
+	{
+		mKlingSubmitRouter.POST("/text2video", controller.RelayTask)
+		mKlingSubmitRouter.POST("/image2video", controller.RelayTask)
+		mKlingSubmitRouter.POST("/multi-image2video", controller.RelayTask)
+		mKlingSubmitRouter.POST("/omni-video", controller.RelayTask)
+	}
+
+	mKlingFetchRouter := router.Group("/m-kling/v1/videos")
+	mKlingFetchRouter.Use(middleware.RouteTag("relay"))
+	mKlingFetchRouter.Use(middleware.TokenAuth())
+	{
+		mKlingFetchRouter.GET("/text2video/:task_id", func(c *gin.Context) {
+			common.SetContextKey(c, constant.ContextKeyMKlingCompat, true)
+			c.Set("relay_mode", relayconstant.RelayModeVideoFetchByID)
+			c.Set("task_id", c.Param("task_id"))
+			controller.RelayTaskFetch(c)
+		})
+		mKlingFetchRouter.GET("/image2video/:task_id", func(c *gin.Context) {
+			common.SetContextKey(c, constant.ContextKeyMKlingCompat, true)
+			c.Set("relay_mode", relayconstant.RelayModeVideoFetchByID)
+			c.Set("task_id", c.Param("task_id"))
+			controller.RelayTaskFetch(c)
+		})
+		mKlingFetchRouter.GET("/multi-image2video/:task_id", func(c *gin.Context) {
+			common.SetContextKey(c, constant.ContextKeyMKlingCompat, true)
+			c.Set("relay_mode", relayconstant.RelayModeVideoFetchByID)
+			c.Set("task_id", c.Param("task_id"))
+			controller.RelayTaskFetch(c)
+		})
+		mKlingFetchRouter.GET("/omni-video/:task_id", func(c *gin.Context) {
+			common.SetContextKey(c, constant.ContextKeyMKlingCompat, true)
+			c.Set("relay_mode", relayconstant.RelayModeVideoFetchByID)
+			c.Set("task_id", c.Param("task_id"))
+			controller.RelayTaskFetch(c)
+		})
+	}
+
 	// Jimeng official API routes - direct mapping to official API format
 	jimengOfficialGroup := router.Group("jimeng")
 	jimengOfficialGroup.Use(middleware.RouteTag("relay"))

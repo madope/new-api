@@ -184,3 +184,83 @@ func MViduReference2Video(c *gin.Context) {}
 // @Param task_id path string true "Task ID"
 // @Router /m-vidu/ent/v2/tasks/{task_id}/creations [get]
 func MViduTaskCreations(c *gin.Context) {}
+
+// MKlingText2Video godoc
+// @Summary m-kling 文生视频
+// @Description Submit a Kling-compatible text-to-video generation request
+// @Tags Origin
+// @Accept json
+// @Produce json
+// @Param Authorization header string true "用户认证令牌 (Bearer sk-xxxx)"
+// @Router /m-kling/v1/videos/text2video [post]
+func MKlingText2Video(c *gin.Context) {}
+
+// MKlingImage2Video godoc
+// @Summary m-kling 首尾帧生视频
+// @Description Submit a Kling-compatible first-tail-frame video generation request
+// @Tags Origin
+// @Accept json
+// @Produce json
+// @Param Authorization header string true "用户认证令牌 (Bearer sk-xxxx)"
+// @Router /m-kling/v1/videos/image2video [post]
+func MKlingImage2Video(c *gin.Context) {}
+
+// MKlingMultiImage2Video godoc
+// @Summary m-kling 多帧生视频
+// @Description Submit a Kling-compatible multi-image video generation request
+// @Tags Origin
+// @Accept json
+// @Produce json
+// @Param Authorization header string true "用户认证令牌 (Bearer sk-xxxx)"
+// @Router /m-kling/v1/videos/multi-image2video [post]
+func MKlingMultiImage2Video(c *gin.Context) {}
+
+// MKlingOmniVideo godoc
+// @Summary m-kling 参考生视频
+// @Description Submit a Kling-compatible omni/reference video generation request
+// @Tags Origin
+// @Accept json
+// @Produce json
+// @Param Authorization header string true "用户认证令牌 (Bearer sk-xxxx)"
+// @Router /m-kling/v1/videos/omni-video [post]
+func MKlingOmniVideo(c *gin.Context) {}
+
+// MKlingText2VideoTask godoc
+// @Summary m-kling 文生视频任务查询
+// @Description Query a Kling-compatible text-to-video task by task ID
+// @Tags Origin
+// @Accept json
+// @Produce json
+// @Param task_id path string true "Task ID"
+// @Router /m-kling/v1/videos/text2video/{task_id} [get]
+func MKlingText2VideoTask(c *gin.Context) {}
+
+// MKlingImage2VideoTask godoc
+// @Summary m-kling 首尾帧生视频任务查询
+// @Description Query a Kling-compatible first-tail-frame video task by task ID
+// @Tags Origin
+// @Accept json
+// @Produce json
+// @Param task_id path string true "Task ID"
+// @Router /m-kling/v1/videos/image2video/{task_id} [get]
+func MKlingImage2VideoTask(c *gin.Context) {}
+
+// MKlingMultiImage2VideoTask godoc
+// @Summary m-kling 多帧生视频任务查询
+// @Description Query a Kling-compatible multi-image video task by task ID
+// @Tags Origin
+// @Accept json
+// @Produce json
+// @Param task_id path string true "Task ID"
+// @Router /m-kling/v1/videos/multi-image2video/{task_id} [get]
+func MKlingMultiImage2VideoTask(c *gin.Context) {}
+
+// MKlingOmniVideoTask godoc
+// @Summary m-kling 参考生视频任务查询
+// @Description Query a Kling-compatible omni/reference video task by task ID
+// @Tags Origin
+// @Accept json
+// @Produce json
+// @Param task_id path string true "Task ID"
+// @Router /m-kling/v1/videos/omni-video/{task_id} [get]
+func MKlingOmniVideoTask(c *gin.Context) {}

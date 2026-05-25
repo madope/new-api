@@ -68,4 +68,5 @@ const (
 	ContextKeyIsStream     ContextKey = "is_stream"
 	ContextKeyVolcesCompat ContextKey = "volces_compat"
 	ContextKeyMViduCompat  ContextKey = "m_vidu_compat"
+	ContextKeyMKlingCompat ContextKey = "m_kling_compat"
 )

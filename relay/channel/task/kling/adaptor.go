@@ -22,6 +22,7 @@ import (
 	"github.com/QuantumNous/new-api/constant"
 	"github.com/QuantumNous/new-api/dto"
 	"github.com/QuantumNous/new-api/relay/channel"
+	mkling "github.com/QuantumNous/new-api/relay/channel/task/m_kling"
 	taskcommon "github.com/QuantumNous/new-api/relay/channel/task/taskcommon"
 	relaycommon "github.com/QuantumNous/new-api/relay/common"
 	"github.com/QuantumNous/new-api/service"
@@ -204,6 +205,15 @@ func (a *TaskAdaptor) DoResponse(c *gin.Context, resp *http.Response, info *rela
 	if kResp.Code != 0 {
 		taskErr = service.TaskErrorWrapperLocal(fmt.Errorf("%s", kResp.Message), "task_failed", http.StatusBadRequest)
 		return
+	}
+	if common.GetContextKeyBool(c, constant.ContextKeyMKlingCompat) {
+		compatResp, err := mkling.BuildSubmitResponse(info.PublicTaskID)
+		if err != nil {
+			taskErr = service.TaskErrorWrapper(err, "marshal_response_body_failed", http.StatusInternalServerError)
+			return
+		}
+		c.Data(http.StatusOK, "application/json", compatResp)
+		return kResp.Data.TaskId, responseBody, nil
 	}
 	ov := dto.NewOpenAIVideo()
 	ov.ID = info.PublicTaskID

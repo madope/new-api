@@ -16,6 +16,7 @@ import (
 	"github.com/QuantumNous/new-api/model"
 	"github.com/QuantumNous/new-api/relay/channel"
 	taskdoubao "github.com/QuantumNous/new-api/relay/channel/task/doubao"
+	mkling "github.com/QuantumNous/new-api/relay/channel/task/m_kling"
 	mvidu "github.com/QuantumNous/new-api/relay/channel/task/m_vidu"
 	"github.com/QuantumNous/new-api/relay/channel/task/taskcommon"
 	relaycommon "github.com/QuantumNous/new-api/relay/common"
@@ -387,6 +388,13 @@ func videoFetchByIDRespBodyBuilder(c *gin.Context) (respBody []byte, taskResp *d
 		respBody, err = mvidu.BuildQueryResponse(originTask)
 		if err != nil {
 			taskResp = service.TaskErrorWrapper(err, "build_m_vidu_response_failed", http.StatusInternalServerError)
+		}
+		return
+	}
+	if common.GetContextKeyBool(c, constant.ContextKeyMKlingCompat) {
+		respBody, err = mkling.BuildQueryResponse(originTask)
+		if err != nil {
+			taskResp = service.TaskErrorWrapper(err, "build_m_kling_response_failed", http.StatusInternalServerError)
 		}
 		return
 	}

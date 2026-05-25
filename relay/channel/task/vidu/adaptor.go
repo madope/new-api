@@ -15,6 +15,7 @@ import (
 	"github.com/QuantumNous/new-api/dto"
 	"github.com/QuantumNous/new-api/model"
 	"github.com/QuantumNous/new-api/relay/channel"
+	mkling "github.com/QuantumNous/new-api/relay/channel/task/m_kling"
 	mvidu "github.com/QuantumNous/new-api/relay/channel/task/m_vidu"
 	taskcommon "github.com/QuantumNous/new-api/relay/channel/task/taskcommon"
 	relaycommon "github.com/QuantumNous/new-api/relay/common"
@@ -185,6 +186,15 @@ func (a *TaskAdaptor) DoResponse(c *gin.Context, resp *http.Response, info *rela
 	}
 	if common.GetContextKeyBool(c, constant.ContextKeyMViduCompat) {
 		compatResp, err := mvidu.BuildSubmitResponse(info.PublicTaskID)
+		if err != nil {
+			taskErr = service.TaskErrorWrapper(err, "marshal_response_body_failed", http.StatusInternalServerError)
+			return
+		}
+		c.Data(http.StatusOK, "application/json", compatResp)
+		return vResp.TaskId, responseBody, nil
+	}
+	if common.GetContextKeyBool(c, constant.ContextKeyMKlingCompat) {
+		compatResp, err := mkling.BuildSubmitResponse(info.PublicTaskID)
 		if err != nil {
 			taskErr = service.TaskErrorWrapper(err, "marshal_response_body_failed", http.StatusInternalServerError)
 			return
