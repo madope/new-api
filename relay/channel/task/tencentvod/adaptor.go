@@ -38,7 +38,14 @@ const (
 	BillingRatioMode       = "mode"
 	BillingRatioDuration   = "duration"
 	BillingRatioResolution = "resolution"
+	BillingRatioKlingMode  = "kling_mode"
 )
+
+var klingModeResolutionMap = map[string]string{
+	"std": "720p",
+	"pro": "1080p",
+	"4k":  "4k",
+}
 
 type BillingMode string
 
@@ -241,10 +248,12 @@ func (a *TaskAdaptor) estimateBillingFromRequest(req *relaycommon.TaskSubmitReq,
 	mode := DetectBillingMode(req)
 	duration := resolveDuration(req)
 	resolutionRatio := resolveResolutionRatio(req)
+	klingModeRatio := resolveMKlingModeRatio(req)
 	return map[string]float64{
 		BillingRatioMode:       ModeRatioMap[mode],
 		BillingRatioDuration:   float64(duration) / float64(defaultDuration),
 		BillingRatioResolution: resolutionRatio,
+		BillingRatioKlingMode:  klingModeRatio,
 	}
 }
 
@@ -625,6 +634,7 @@ func parseTaskMeta(metadata map[string]interface{}) (*taskMeta, error) {
 		meta.SubjectInfos = subjects
 	}
 	applyMViduRawMappings(meta, metadata)
+	applyMKlingRawMappings(meta, metadata)
 	return meta, nil
 }
 
@@ -676,6 +686,26 @@ func applyMViduRawMappings(meta *taskMeta, metadata map[string]interface{}) {
 		if outputConfig.OffPeak == "" {
 			outputConfig.OffPeak = enableFlag(offPeak)
 		}
+	}
+}
+
+func applyMKlingRawMappings(meta *taskMeta, metadata map[string]interface{}) {
+	if meta == nil || metadata == nil {
+		return
+	}
+	mode := strings.ToLower(strings.TrimSpace(stringValue(metadata, "mode")))
+	if mode == "" {
+		return
+	}
+	resolution, ok := klingModeResolutionMap[mode]
+	if !ok {
+		return
+	}
+	if meta.OutputConfig == nil {
+		meta.OutputConfig = &AigcVideoOutputConfig{}
+	}
+	if meta.OutputConfig.Resolution == "" {
+		meta.OutputConfig.Resolution = resolution
 	}
 }
 
@@ -775,6 +805,22 @@ func resolveResolutionRatio(req *relaycommon.TaskSubmitReq) float64 {
 		}
 	}
 	return float64(height) / float64(defaultHeight)
+}
+
+func resolveMKlingModeRatio(req *relaycommon.TaskSubmitReq) float64 {
+	if req == nil {
+		return 1.0
+	}
+	mode := strings.ToLower(strings.TrimSpace(req.Mode))
+	if mode == "" && req.Metadata != nil {
+		mode = strings.ToLower(strings.TrimSpace(stringValue(req.Metadata, "mode")))
+	}
+	switch mode {
+	case "", "std", "pro", "4k":
+		return 1.0
+	default:
+		return 1.0
+	}
 }
 
 func resolveFinalDuration(task *AigcVideoTask) int {

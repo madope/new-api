@@ -148,6 +148,92 @@ func TestEstimateBillingUsesModeDurationResolution(t *testing.T) {
 	assert.Equal(t, 1080.0/720.0, ratios[BillingRatioResolution])
 }
 
+func TestConvertToRequestPayloadMapsMKlingModeToDefaultResolution(t *testing.T) {
+	adaptor := &TaskAdaptor{
+		keyConfig: KeyConfig{SubAppID: 10001},
+	}
+	info := &relaycommon.RelayInfo{
+		ChannelMeta: &relaycommon.ChannelMeta{
+			UpstreamModelName: "kling-2.6",
+		},
+		TaskRelayInfo: &relaycommon.TaskRelayInfo{},
+	}
+	req := &relaycommon.TaskSubmitReq{
+		Model:    "kling-2.6",
+		Prompt:   "cinematic city walk",
+		Metadata: map[string]any{"mode": "pro"},
+	}
+
+	payload, err := adaptor.convertToRequestPayload(req, info)
+	require.NoError(t, err)
+	require.NotNil(t, payload.OutputConfig)
+	assert.Equal(t, "1080p", payload.OutputConfig.Resolution)
+}
+
+func TestConvertToRequestPayloadPrefersExplicitResolutionOverMKlingMode(t *testing.T) {
+	adaptor := &TaskAdaptor{
+		keyConfig: KeyConfig{SubAppID: 10001},
+	}
+	info := &relaycommon.RelayInfo{
+		ChannelMeta: &relaycommon.ChannelMeta{
+			UpstreamModelName: "kling-2.6",
+		},
+		TaskRelayInfo: &relaycommon.TaskRelayInfo{},
+	}
+	req := &relaycommon.TaskSubmitReq{
+		Model:  "kling-2.6",
+		Prompt: "cinematic city walk",
+		Metadata: map[string]any{
+			"mode":       "std",
+			"resolution": "4k",
+		},
+	}
+
+	payload, err := adaptor.convertToRequestPayload(req, info)
+	require.NoError(t, err)
+	require.NotNil(t, payload.OutputConfig)
+	assert.Equal(t, "4k", payload.OutputConfig.Resolution)
+}
+
+func TestEstimateBillingFromRequestAddsMKlingModeOtherRatio(t *testing.T) {
+	adaptor := &TaskAdaptor{}
+	req := relaycommon.TaskSubmitReq{
+		Model:  "kling-2.6",
+		Prompt: "cinematic city walk",
+		Metadata: map[string]any{
+			"mode": "4k",
+		},
+	}
+
+	ratios := adaptor.estimateBillingFromRequest(&req, nil)
+	value, ok := ratios["kling_mode"]
+	require.True(t, ok)
+	assert.Equal(t, 1.0, value)
+}
+
+func TestParseTaskMetaKeepsMViduMappingsAfterMKlingSupport(t *testing.T) {
+	meta, err := parseTaskMeta(map[string]any{
+		"resolution":   "1080p",
+		"aspect_ratio": "16:9",
+		"audio":        true,
+	})
+	require.NoError(t, err)
+	require.NotNil(t, meta.OutputConfig)
+	assert.Equal(t, "1080p", meta.OutputConfig.Resolution)
+	assert.Equal(t, "16:9", meta.OutputConfig.AspectRatio)
+	assert.Equal(t, "Enabled", meta.OutputConfig.AudioGeneration)
+}
+
+func TestParseTaskMetaIgnoresUnknownMKlingModeResolutionFallback(t *testing.T) {
+	meta, err := parseTaskMeta(map[string]any{
+		"mode":       "custom_mode",
+		"resolution": "1080p",
+	})
+	require.NoError(t, err)
+	require.NotNil(t, meta.OutputConfig)
+	assert.Equal(t, "1080p", meta.OutputConfig.Resolution)
+}
+
 func TestInitUsesDefaultRegionOnly(t *testing.T) {
 	adaptor := &TaskAdaptor{}
 	adaptor.Init(&relaycommon.RelayInfo{
