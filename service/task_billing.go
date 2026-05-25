@@ -25,13 +25,22 @@ func LogTaskConsumption(c *gin.Context, info *relaycommon.RelayInfo) {
 	} else {
 		if len(info.PriceData.OtherRatios) > 0 {
 			var contents []string
+			var ratio float64 = 1.0
 			for key, ra := range info.PriceData.OtherRatios {
-				if 1.0 != ra {
+				ratio *= ra
+				if ra != 1.0 {
 					contents = append(contents, fmt.Sprintf("%s: %.2f", key, ra))
 				}
 			}
 			if len(contents) > 0 {
 				logContent = fmt.Sprintf("%s, 计算参数：%s", logContent, strings.Join(contents, ", "))
+			}
+			if ratio != 1.0 {
+				logContent = fmt.Sprintf("%s, %.2f * %.2f = %.2f",
+					logContent,
+					info.PriceData.ModelPrice*ratio,
+					info.PriceData.GroupRatioInfo.GroupRatio,
+					info.PriceData.ModelPrice*ratio*info.PriceData.GroupRatioInfo.GroupRatio)
 			}
 		}
 	}

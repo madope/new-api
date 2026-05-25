@@ -17,14 +17,13 @@ import (
 	"github.com/QuantumNous/new-api/constant"
 	"github.com/QuantumNous/new-api/dto"
 	"github.com/QuantumNous/new-api/relay/channel"
-	taskcommon "github.com/QuantumNous/new-api/relay/channel/task/taskcommon"
 	relaycommon "github.com/QuantumNous/new-api/relay/common"
+	"github.com/QuantumNous/new-api/relay/helper/videopricing"
 	"github.com/QuantumNous/new-api/service"
 )
 
 // https://platform.minimaxi.com/docs/api-reference/video-generation-intro
 type TaskAdaptor struct {
-	taskcommon.BaseBilling
 	ChannelType int
 	apiKey      string
 	baseURL     string
@@ -142,6 +141,76 @@ func (a *TaskAdaptor) GetChannelName() string {
 	return ChannelName
 }
 
+func (a *TaskAdaptor) EstimateBilling(c *gin.Context, info *relaycommon.RelayInfo) map[string]float64 {
+	adaptor := &HailuoVideoPricingAdaptor{
+		BaseVideoPricingAdaptor: &videopricing.BaseVideoPricingAdaptor{ChannelType: a.ChannelType},
+	}
+	return adaptor.EstimateBilling(c, info)
+}
+
+// HailuoVideoPricingAdaptor 是 Hailuo 渠道特有的视频定价适配器
+type HailuoVideoPricingAdaptor struct {
+	*videopricing.BaseVideoPricingAdaptor
+}
+
+// EstimateBilling 重写基础方法，确保调用 Hailuo 特有的 ParseParams
+func (a *HailuoVideoPricingAdaptor) EstimateBilling(c *gin.Context, info *relaycommon.RelayInfo) map[string]float64 {
+	common.SysLog("Hailuo pricing: entering HailuoVideoPricingAdaptor.EstimateBilling")
+
+	params, err := a.ParseParams(c, info)
+	if err != nil {
+		common.SysLog(fmt.Sprintf("Hailuo pricing: ParseParams failed: %v", err))
+		return nil
+	}
+
+	ratio, err := videopricing.ComputeVideoRatio(info.OriginModelName, params)
+	if err != nil {
+		common.SysLog(fmt.Sprintf("Hailuo pricing: ComputeVideoRatio failed: %v", err))
+		return nil
+	}
+
+	return map[string]float64{
+		"video_ratio": ratio,
+	}
+}
+
+// ParseParams 重写基础方法，复用父类解析结果，补充 Hailuo 特有的 first_frame_image 检测
+func (a *HailuoVideoPricingAdaptor) ParseParams(c *gin.Context, info *relaycommon.RelayInfo) (videopricing.VideoPricingParams, error) {
+    params, err := a.BaseVideoPricingAdaptor.ParseParams(c, info)
+    if err != nil {
+        return videopricing.VideoPricingParams{}, err
+    }
+
+    if v, exists := c.Get("task_request"); exists {
+        if req, ok := v.(relaycommon.TaskSubmitReq); ok {
+            if req.Metadata != nil {
+                if firstFrameImage, ok := req.Metadata["first_frame_image"].(string); ok && firstFrameImage != "" {
+                    params.ReferenceTypes = a.mergeReferenceTypes(params.ReferenceTypes, videopricing.ReferenceImage)
+                }
+            }
+        }
+    }
+
+    return params, nil
+}
+
+func (a *HailuoVideoPricingAdaptor) mergeReferenceTypes(types []videopricing.ReferenceType, newType videopricing.ReferenceType) []videopricing.ReferenceType {
+    for _, t := range types {
+        if t == newType {
+            return types
+        }
+    }
+    return append(types, newType)
+}
+
+func (a *TaskAdaptor) AdjustBillingOnSubmit(info *relaycommon.RelayInfo, taskData []byte) map[string]float64 {
+	return nil
+}
+
+func (a *TaskAdaptor) AdjustBillingOnComplete(task *model.Task, taskResult *relaycommon.TaskInfo) int {
+	return 0
+}
+
 func (a *TaskAdaptor) convertToRequestPayload(req *relaycommon.TaskSubmitReq, info *relaycommon.RelayInfo) (*VideoRequest, error) {
 	modelConfig := GetModelConfig(info.UpstreamModelName)
 	duration := DefaultDuration
@@ -158,6 +227,13 @@ func (a *TaskAdaptor) convertToRequestPayload(req *relaycommon.TaskSubmitReq, in
 		Prompt:     req.Prompt,
 		Duration:   &duration,
 		Resolution: resolution,
+	}
+
+	// 处理图片输入（图生视频模式）
+	if req.Image != "" {
+		videoRequest.FirstFrameImage = req.Image
+	} else if len(req.Images) > 0 {
+		videoRequest.FirstFrameImage = req.Images[0]
 	}
 	if err := req.UnmarshalMetadata(&videoRequest); err != nil {
 		return nil, errors.Wrap(err, "unmarshal metadata to video request failed")
