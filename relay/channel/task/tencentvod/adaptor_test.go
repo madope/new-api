@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/QuantumNous/new-api/common"
+	"github.com/QuantumNous/new-api/constant"
 	"github.com/QuantumNous/new-api/dto"
 	"github.com/QuantumNous/new-api/model"
 	relaycommon "github.com/QuantumNous/new-api/relay/common"
@@ -274,4 +275,218 @@ func TestConvertToOpenAIVideo(t *testing.T) {
 	require.NoError(t, err)
 	assert.Contains(t, string(out), `"model":"kling-2.6"`)
 	assert.Contains(t, string(out), "video.mp4")
+}
+
+func TestConvertToRequestPayloadMapsMViduCommonFields(t *testing.T) {
+	adaptor := &TaskAdaptor{}
+	req := &relaycommon.TaskSubmitReq{
+		Model:    "vidu-q3",
+		Prompt:   "cinematic scene",
+		Duration: 8,
+		Metadata: map[string]interface{}{
+			"seed":         123,
+			"payload":      "trace-1",
+			"resolution":   "1080p",
+			"aspect_ratio": "16:9",
+			"audio":        true,
+			"bgm":          false,
+			"off_peak":     true,
+		},
+	}
+	info := &relaycommon.RelayInfo{
+		ChannelMeta: &relaycommon.ChannelMeta{
+			UpstreamModelName: "vidu-q3",
+		},
+	}
+
+	payload, err := adaptor.convertToRequestPayload(req, info)
+	require.NoError(t, err)
+	require.NotNil(t, payload)
+	require.NotNil(t, payload.OutputConfig)
+	assert.Equal(t, 123, payload.Seed)
+	assert.Equal(t, "trace-1", payload.SessionContext)
+	assert.Equal(t, "1080p", payload.OutputConfig.Resolution)
+	assert.Equal(t, "16:9", payload.OutputConfig.AspectRatio)
+	assert.Equal(t, "Enabled", payload.OutputConfig.AudioGeneration)
+	assert.Equal(t, "Disabled", payload.OutputConfig.EnableBGM)
+	assert.Equal(t, "Enabled", payload.OutputConfig.OffPeak)
+	assert.Equal(t, 8, payload.OutputConfig.Duration)
+}
+
+func TestConvertToRequestPayloadMapsMViduStartEndImages(t *testing.T) {
+	adaptor := &TaskAdaptor{}
+	req := &relaycommon.TaskSubmitReq{
+		Model:  "vidu-q3",
+		Prompt: "smooth transition",
+		Images: []string{
+			"https://example.com/first.png",
+			"https://example.com/last.png",
+		},
+		Metadata: map[string]interface{}{
+			"images": []interface{}{
+				"https://example.com/first.png",
+				"https://example.com/last.png",
+			},
+		},
+	}
+	info := &relaycommon.RelayInfo{
+		ChannelMeta: &relaycommon.ChannelMeta{
+			UpstreamModelName: "vidu-q3",
+		},
+		TaskRelayInfo: &relaycommon.TaskRelayInfo{
+			Action: constant.TaskActionFirstTailGenerate,
+		},
+	}
+
+	payload, err := adaptor.convertToRequestPayload(req, info)
+	require.NoError(t, err)
+	require.NotNil(t, payload)
+	require.Len(t, payload.FileInfos, 1)
+	assert.Equal(t, "FirstFrame", payload.FileInfos[0].Usage)
+	assert.Equal(t, "https://example.com/first.png", payload.FileInfos[0].URL)
+	assert.Equal(t, "https://example.com/last.png", payload.LastFrameURL)
+}
+
+func TestConvertToRequestPayloadMapsMViduReferenceVideos(t *testing.T) {
+	adaptor := &TaskAdaptor{}
+	req := &relaycommon.TaskSubmitReq{
+		Model:  "vidu-q3",
+		Prompt: "cinematic motion",
+		Metadata: map[string]interface{}{
+			"videos": []interface{}{
+				"https://example.com/ref.mp4",
+			},
+		},
+	}
+	info := &relaycommon.RelayInfo{
+		ChannelMeta: &relaycommon.ChannelMeta{
+			UpstreamModelName: "vidu-q3",
+		},
+		TaskRelayInfo: &relaycommon.TaskRelayInfo{
+			Action: constant.TaskActionReferenceGenerate,
+		},
+	}
+
+	payload, err := adaptor.convertToRequestPayload(req, info)
+	require.NoError(t, err)
+	require.NotNil(t, payload)
+	require.Len(t, payload.FileInfos, 1)
+	assert.Equal(t, "Video", payload.FileInfos[0].Category)
+	assert.Equal(t, "https://example.com/ref.mp4", payload.FileInfos[0].URL)
+}
+
+func TestConvertToRequestPayloadMapsMViduReferenceImagesAndVideos(t *testing.T) {
+	adaptor := &TaskAdaptor{}
+	req := &relaycommon.TaskSubmitReq{
+		Model:  "vidu-q3",
+		Prompt: "reference mix",
+		Images: []string{
+			"https://example.com/ref.png",
+		},
+		Metadata: map[string]interface{}{
+			"images": []interface{}{
+				"https://example.com/ref.png",
+			},
+			"videos": []interface{}{
+				"https://example.com/ref.mp4",
+			},
+		},
+	}
+	info := &relaycommon.RelayInfo{
+		ChannelMeta: &relaycommon.ChannelMeta{
+			UpstreamModelName: "vidu-q3",
+		},
+		TaskRelayInfo: &relaycommon.TaskRelayInfo{
+			Action: constant.TaskActionReferenceGenerate,
+		},
+	}
+
+	payload, err := adaptor.convertToRequestPayload(req, info)
+	require.NoError(t, err)
+	require.NotNil(t, payload)
+	require.Len(t, payload.FileInfos, 2)
+	var imageFound, videoFound bool
+	for _, item := range payload.FileInfos {
+		switch item.Category {
+		case "Image":
+			imageFound = true
+			assert.Equal(t, "https://example.com/ref.png", item.URL)
+			assert.Equal(t, "Reference", item.Usage)
+		case "Video":
+			videoFound = true
+			assert.Equal(t, "https://example.com/ref.mp4", item.URL)
+		}
+	}
+	assert.True(t, imageFound)
+	assert.True(t, videoFound)
+}
+
+func TestConvertToRequestPayloadMapsMViduSubjectsToFileInfosOnly(t *testing.T) {
+	adaptor := &TaskAdaptor{}
+	req := &relaycommon.TaskSubmitReq{
+		Model:  "vidu-q3",
+		Prompt: "subject showcase",
+		Metadata: map[string]interface{}{
+			"subjects": []interface{}{
+				map[string]interface{}{
+					"name":      "hero",
+					"server_id": "obj_123",
+					"voice_id":  "voice_1",
+					"images": []interface{}{
+						"https://example.com/hero-1.png",
+					},
+					"videos": []interface{}{
+						"https://example.com/hero-1.mp4",
+					},
+				},
+			},
+		},
+	}
+	info := &relaycommon.RelayInfo{
+		ChannelMeta: &relaycommon.ChannelMeta{
+			UpstreamModelName: "vidu-q3",
+		},
+		TaskRelayInfo: &relaycommon.TaskRelayInfo{
+			Action: constant.TaskActionReferenceGenerate,
+		},
+	}
+
+	payload, err := adaptor.convertToRequestPayload(req, info)
+	require.NoError(t, err)
+	require.NotNil(t, payload)
+	assert.Empty(t, payload.SubjectInfos)
+	require.Len(t, payload.FileInfos, 2)
+	assert.Equal(t, "obj_123", payload.FileInfos[0].ObjectID)
+	assert.Equal(t, "hero", payload.FileInfos[0].Text)
+	assert.Equal(t, "voice_1", payload.FileInfos[0].VoiceID)
+	assert.Equal(t, "Reference", payload.FileInfos[0].Usage)
+	assert.Equal(t, "Video", payload.FileInfos[1].Category)
+	assert.Equal(t, "hero", payload.FileInfos[1].Text)
+}
+
+func TestConvertToRequestPayloadIgnoresUnsupportedMViduFields(t *testing.T) {
+	adaptor := &TaskAdaptor{}
+	req := &relaycommon.TaskSubmitReq{
+		Model:  "vidu-q3",
+		Prompt: "ignore unsupported fields",
+		Metadata: map[string]interface{}{
+			"style":              "anime",
+			"movement_amplitude": "large",
+			"watermark":          true,
+			"wm_position":        "bottom-right",
+			"callback_url":       "https://example.com/callback",
+		},
+	}
+	info := &relaycommon.RelayInfo{
+		ChannelMeta: &relaycommon.ChannelMeta{
+			UpstreamModelName: "vidu-q3",
+		},
+	}
+
+	payload, err := adaptor.convertToRequestPayload(req, info)
+	require.NoError(t, err)
+	require.NotNil(t, payload)
+	assert.Empty(t, payload.ExtInfo)
+	assert.Empty(t, payload.SceneType)
+	assert.Empty(t, payload.Procedure)
 }

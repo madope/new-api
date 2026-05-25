@@ -493,8 +493,40 @@ func (a *TaskAdaptor) convertToRequestPayload(req *relaycommon.TaskSubmitReq, in
 	if err != nil {
 		return nil, err
 	}
+	action := detectAction(req, meta)
+	if info != nil && info.TaskRelayInfo != nil && info.Action != "" {
+		action = info.Action
+	}
+	if action == constant.TaskActionFirstTailGenerate && meta.LastFrameURL == "" {
+		rawImages := stringSliceValue(req.Metadata["images"])
+		if len(rawImages) >= 2 && strings.TrimSpace(rawImages[1]) != "" {
+			meta.LastFrameURL = rawImages[1]
+		}
+	}
 	fileInfos := cloneFileInfos(meta.FileInfos)
-	if len(fileInfos) == 0 && len(req.Images) > 0 {
+	if action == constant.TaskActionReferenceGenerate && !hasExplicitFileInfos(req.Metadata) {
+		if subjectFileInfos, err := parseMViduSubjects(req.Metadata["subjects"]); err == nil && len(subjectFileInfos) > 0 {
+			fileInfos = append(fileInfos, subjectFileInfos...)
+		}
+		for _, videoURL := range stringSliceValue(req.Metadata["videos"]) {
+			if strings.TrimSpace(videoURL) == "" {
+				continue
+			}
+			fileInfos = append(fileInfos, AigcVideoTaskInputFileInfo{
+				Type:     "Url",
+				Category: "Video",
+				URL:      videoURL,
+			})
+		}
+	}
+	if action == constant.TaskActionFirstTailGenerate && len(fileInfos) == 0 && len(req.Images) > 0 {
+		fileInfos = append(fileInfos, AigcVideoTaskInputFileInfo{
+			Type:     "Url",
+			Category: "Image",
+			URL:      req.Images[0],
+			Usage:    "FirstFrame",
+		})
+	} else if len(req.Images) > 0 && !hasExplicitFileInfos(req.Metadata) {
 		usage := "Reference"
 		if meta.LastFrameFileID != "" || meta.LastFrameURL != "" {
 			usage = "FirstFrame"
@@ -583,7 +615,59 @@ func parseTaskMeta(metadata map[string]interface{}) (*taskMeta, error) {
 		}
 		meta.SubjectInfos = subjects
 	}
+	applyMViduRawMappings(meta, metadata)
 	return meta, nil
+}
+
+func applyMViduRawMappings(meta *taskMeta, metadata map[string]interface{}) {
+	if meta == nil || metadata == nil {
+		return
+	}
+	ensureOutputConfig := func() *AigcVideoOutputConfig {
+		if meta.OutputConfig == nil {
+			meta.OutputConfig = &AigcVideoOutputConfig{}
+		}
+		return meta.OutputConfig
+	}
+
+	if meta.Seed == nil {
+		if seed := intPointerValue(metadata["seed"]); seed != nil {
+			meta.Seed = seed
+		}
+	}
+	if meta.SessionContext == "" {
+		meta.SessionContext = stringValue(metadata, "payload")
+	}
+	if aspectRatio := stringValue(metadata, "aspect_ratio"); aspectRatio != "" {
+		outputConfig := ensureOutputConfig()
+		if outputConfig.AspectRatio == "" {
+			outputConfig.AspectRatio = aspectRatio
+		}
+	}
+	if resolution := stringValue(metadata, "resolution"); resolution != "" {
+		outputConfig := ensureOutputConfig()
+		if outputConfig.Resolution == "" {
+			outputConfig.Resolution = resolution
+		}
+	}
+	if audio, ok := boolValue(metadata["audio"]); ok {
+		outputConfig := ensureOutputConfig()
+		if outputConfig.AudioGeneration == "" {
+			outputConfig.AudioGeneration = enableFlag(audio)
+		}
+	}
+	if bgm, ok := boolValue(metadata["bgm"]); ok {
+		outputConfig := ensureOutputConfig()
+		if outputConfig.EnableBGM == "" {
+			outputConfig.EnableBGM = enableFlag(bgm)
+		}
+	}
+	if offPeak, ok := boolValue(metadata["off_peak"]); ok {
+		outputConfig := ensureOutputConfig()
+		if outputConfig.OffPeak == "" {
+			outputConfig.OffPeak = enableFlag(offPeak)
+		}
+	}
 }
 
 func validateTencentVODRequest(req *relaycommon.TaskSubmitReq, meta *taskMeta) error {
@@ -801,6 +885,18 @@ func cloneFileInfos(files []AigcVideoTaskInputFileInfo) []AigcVideoTaskInputFile
 	return out
 }
 
+func hasExplicitFileInfos(metadata map[string]interface{}) bool {
+	if metadata == nil {
+		return false
+	}
+	raw, ok := metadata["file_infos"]
+	if !ok || raw == nil {
+		return false
+	}
+	items, err := parseFileInfos(raw)
+	return err == nil && len(items) > 0
+}
+
 func parseFileInfos(raw any) ([]AigcVideoTaskInputFileInfo, error) {
 	data, err := common.Marshal(raw)
 	if err != nil {
@@ -847,6 +943,58 @@ func parseSubjectInfos(raw any) ([]AigcVideoTaskInputSubjectInfo, error) {
 	return out, nil
 }
 
+func parseMViduSubjects(raw any) ([]AigcVideoTaskInputFileInfo, error) {
+	if raw == nil {
+		return nil, nil
+	}
+	data, err := common.Marshal(raw)
+	if err != nil {
+		return nil, err
+	}
+	var items []map[string]any
+	if err := common.Unmarshal(data, &items); err != nil {
+		return nil, err
+	}
+	fileInfos := make([]AigcVideoTaskInputFileInfo, 0)
+	for _, item := range items {
+		name := stringValue(item, "name", "Name")
+		objectID := stringValue(item, "server_id", "ServerId")
+		if objectID == "" {
+			objectID = name
+		}
+		voiceID := stringValue(item, "voice_id", "VoiceId")
+		text := name
+		for _, imageURL := range stringSliceValue(item["images"]) {
+			if strings.TrimSpace(imageURL) == "" {
+				continue
+			}
+			fileInfos = append(fileInfos, AigcVideoTaskInputFileInfo{
+				Type:     "Url",
+				Category: "Image",
+				URL:      imageURL,
+				ObjectID: objectID,
+				VoiceID:  voiceID,
+				Text:     text,
+				Usage:    "Reference",
+			})
+		}
+		for _, videoURL := range stringSliceValue(item["videos"]) {
+			if strings.TrimSpace(videoURL) == "" {
+				continue
+			}
+			fileInfos = append(fileInfos, AigcVideoTaskInputFileInfo{
+				Type:     "Url",
+				Category: "Video",
+				URL:      videoURL,
+				ObjectID: objectID,
+				VoiceID:  voiceID,
+				Text:     text,
+			})
+		}
+	}
+	return fileInfos, nil
+}
+
 func stringValue(m map[string]any, keys ...string) string {
 	for _, key := range keys {
 		if value, ok := m[key]; ok {
@@ -856,6 +1004,78 @@ func stringValue(m map[string]any, keys ...string) string {
 		}
 	}
 	return ""
+}
+
+func stringSliceValue(raw any) []string {
+	switch v := raw.(type) {
+	case []string:
+		return v
+	case []any:
+		out := make([]string, 0, len(v))
+		for _, item := range v {
+			if s, ok := item.(string); ok && strings.TrimSpace(s) != "" {
+				out = append(out, s)
+			}
+		}
+		return out
+	default:
+		return nil
+	}
+}
+
+func intPointerValue(raw any) *int {
+	switch v := raw.(type) {
+	case int:
+		return &v
+	case int8:
+		n := int(v)
+		return &n
+	case int16:
+		n := int(v)
+		return &n
+	case int32:
+		n := int(v)
+		return &n
+	case int64:
+		n := int(v)
+		return &n
+	case float64:
+		n := int(v)
+		return &n
+	case float32:
+		n := int(v)
+		return &n
+	case string:
+		if strings.TrimSpace(v) == "" {
+			return nil
+		}
+		if n, err := strconv.Atoi(v); err == nil {
+			return &n
+		}
+	}
+	return nil
+}
+
+func boolValue(raw any) (bool, bool) {
+	switch v := raw.(type) {
+	case bool:
+		return v, true
+	case string:
+		switch strings.ToLower(strings.TrimSpace(v)) {
+		case "true", "1", "enabled":
+			return true, true
+		case "false", "0", "disabled":
+			return false, true
+		}
+	}
+	return false, false
+}
+
+func enableFlag(v bool) string {
+	if v {
+		return "Enabled"
+	}
+	return "Disabled"
 }
 
 func parseResolutionHeight(resolution string) int {
