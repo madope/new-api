@@ -125,6 +125,25 @@ func SetVideoRouter(router *gin.Engine) {
 		})
 	}
 
+	// MiniMax native API route — accepts MiniMax native input, returns MiniMax native response
+	minimaxSubmitRouter := router.Group("/minimax")
+	minimaxSubmitRouter.Use(middleware.RouteTag("relay"))
+	minimaxSubmitRouter.Use(middleware.MiniMaxNativeRequestConvert(), middleware.TokenAuth(), middleware.Distribute())
+	{
+		minimaxSubmitRouter.POST("/v1/video_generation", controller.RelayTask)
+	}
+	minimaxFetchRouter := router.Group("/minimax")
+	minimaxFetchRouter.Use(middleware.RouteTag("relay"))
+	minimaxFetchRouter.Use(middleware.TokenAuth())
+	{
+		minimaxFetchRouter.GET("/v1/video_generation/:task_id", func(c *gin.Context) {
+			common.SetContextKey(c, constant.ContextKeyMiniMaxNativeCompat, true)
+			c.Set("relay_mode", relayconstant.RelayModeVideoFetchByID)
+			c.Set("task_id", c.Param("task_id"))
+			controller.RelayTaskFetch(c)
+		})
+	}
+
 	// Jimeng official API routes - direct mapping to official API format
 	jimengOfficialGroup := router.Group("jimeng")
 	jimengOfficialGroup.Use(middleware.RouteTag("relay"))

@@ -100,13 +100,27 @@ func (a *TaskAdaptor) DoResponse(c *gin.Context, resp *http.Response, info *rela
 		return
 	}
 
-	ov := dto.NewOpenAIVideo()
-	ov.ID = info.PublicTaskID
-	ov.TaskID = info.PublicTaskID
-	ov.CreatedAt = time.Now().Unix()
-	ov.Model = info.OriginModelName
-
-	c.JSON(http.StatusOK, ov)
+	if common.GetContextKeyBool(c, constant.ContextKeyMiniMaxNativeCompat) {
+		var nativeResp map[string]any
+		if err := common.Unmarshal(responseBody, &nativeResp); err != nil {
+			taskErr = service.TaskErrorWrapper(err, "unmarshal_response_failed", http.StatusInternalServerError)
+			return
+		}
+		nativeResp["task_id"] = info.PublicTaskID
+		modifiedBody, err := common.Marshal(nativeResp)
+		if err != nil {
+			taskErr = service.TaskErrorWrapper(err, "marshal_response_failed", http.StatusInternalServerError)
+			return
+		}
+		c.Data(http.StatusOK, "application/json", modifiedBody)
+	} else {
+		ov := dto.NewOpenAIVideo()
+		ov.ID = info.PublicTaskID
+		ov.TaskID = info.PublicTaskID
+		ov.CreatedAt = time.Now().Unix()
+		ov.Model = info.OriginModelName
+		c.JSON(http.StatusOK, ov)
+	}
 	return hResp.TaskID, responseBody, nil
 }
 

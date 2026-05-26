@@ -380,6 +380,17 @@ func videoFetchByIDRespBodyBuilder(c *gin.Context) (respBody []byte, taskResp *d
 		return
 	}
 
+	if common.GetContextKeyBool(c, constant.ContextKeyMiniMaxNativeCompat) {
+		var resp map[string]any
+		if err := common.Unmarshal(originTask.Data, &resp); err != nil {
+			taskResp = service.TaskErrorWrapper(err, "unmarshal_response_failed", http.StatusInternalServerError)
+			return
+		}
+		resp["task_id"] = originTask.TaskID
+		respBody, _ = common.Marshal(resp)
+		return
+	}
+
 	if common.GetContextKeyBool(c, constant.ContextKeyVolcesCompat) {
 		respBody, taskResp = volcesFetchByIDRespBodyBuilder(originTask)
 		return

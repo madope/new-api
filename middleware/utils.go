@@ -4,12 +4,24 @@ import (
 	"fmt"
 
 	"github.com/QuantumNous/new-api/common"
+	"github.com/QuantumNous/new-api/constant"
 	"github.com/QuantumNous/new-api/logger"
 	"github.com/QuantumNous/new-api/types"
 	"github.com/gin-gonic/gin"
 )
 
 func abortWithOpenAiMessage(c *gin.Context, statusCode int, message string, code ...types.ErrorCode) {
+	if common.GetContextKeyBool(c, constant.ContextKeyMiniMaxNativeCompat) {
+		c.JSON(statusCode, gin.H{
+			"task_id": "",
+			"base_resp": gin.H{
+				"status_code": 2013,
+				"status_msg":  "invalid params",
+			},
+		})
+		c.Abort()
+		return
+	}
 	codeStr := ""
 	if len(code) > 0 {
 		codeStr = string(code[0])

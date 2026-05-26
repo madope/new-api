@@ -66,7 +66,8 @@ const (
 	// ContextKeyLanguage stores the user's language preference for i18n
 	ContextKeyLanguage     ContextKey = "language"
 	ContextKeyIsStream     ContextKey = "is_stream"
-	ContextKeyVolcesCompat ContextKey = "volces_compat"
-	ContextKeyMViduCompat  ContextKey = "m_vidu_compat"
-	ContextKeyMKlingCompat ContextKey = "m_kling_compat"
+	ContextKeyVolcesCompat      ContextKey = "volces_compat"
+	ContextKeyMViduCompat       ContextKey = "m_vidu_compat"
+	ContextKeyMKlingCompat      ContextKey = "m_kling_compat"
+	ContextKeyMiniMaxNativeCompat ContextKey = "minimax_native_compat"
 )
