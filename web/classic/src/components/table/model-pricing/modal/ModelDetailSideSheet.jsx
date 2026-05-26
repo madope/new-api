@@ -26,6 +26,7 @@ import ModelHeader from './components/ModelHeader';
 import ModelBasicInfo from './components/ModelBasicInfo';
 import ModelEndpoints from './components/ModelEndpoints';
 import ModelPricingTable from './components/ModelPricingTable';
+import ModelPricingRules from './components/ModelPricingRules';
 import DynamicPricingBreakdown from './components/DynamicPricingBreakdown';
 
 const { Text } = Typography;
@@ -118,6 +119,19 @@ const ModelDetailSideSheet = ({
                 showRatio={showRatio}
                 usableGroup={usableGroup}
                 autoGroups={autoGroups}
+                t={t}
+              />
+            </div>
+            <Divider margin={16} />
+            <div style={{ padding: '0 24px' }}>
+              <ModelPricingRules
+                modelData={modelData}
+                groupRatio={groupRatio}
+                currency={currency}
+                siteDisplayType={siteDisplayType}
+                tokenUnit={tokenUnit}
+                displayPrice={displayPrice}
+                usableGroup={usableGroup}
                 t={t}
               />
             </div>

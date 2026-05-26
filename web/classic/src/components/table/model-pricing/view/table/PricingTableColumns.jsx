@@ -33,23 +33,28 @@ import {
 } from '../../../../common/ui/RenderUtils';
 import { useIsMobile } from '../../../../../hooks/common/useIsMobile';
 
-function renderQuotaType(type, t) {
-  switch (type) {
-    case 1:
-      return (
-        <Tag color='teal' shape='circle'>
-          {t('按次计费')}
+function renderQuotaType(type, t, record) {
+  const base = (() => {
+    switch (type) {
+      case 1:
+        return <Tag color='teal' shape='circle'>{t('按次计费')}</Tag>;
+      case 0:
+        return <Tag color='violet' shape='circle'>{t('按量计费')}</Tag>;
+      default:
+        return <Tag color='white' shape='circle'>{t('未知')}</Tag>;
+    }
+  })();
+  const hasVideo = record?.video_pricing?.rules?.length > 0;
+  return (
+    <Space>
+      {base}
+      {hasVideo && (
+        <Tag color='orange' shape='circle' size='small'>
+          {t('视频')}
         </Tag>
-      );
-    case 0:
-      return (
-        <Tag color='violet' shape='circle'>
-          {t('按量计费')}
-        </Tag>
-      );
-    default:
-      return t('未知');
-  }
+      )}
+    </Space>
+  );
 }
 
 // Render vendor name
@@ -160,7 +165,7 @@ export const getPricingTableColumns = ({
     title: t('计费类型'),
     dataIndex: 'quota_type',
     render: (text, record, index) => {
-      return renderQuotaType(parseInt(text), t);
+      return renderQuotaType(parseInt(text), t, record);
     },
     sorter: (a, b) => a.quota_type - b.quota_type,
   };
@@ -233,6 +238,25 @@ export const getPricingTableColumns = ({
     dataIndex: 'model_price',
     ...(isMobile ? {} : { fixed: 'right' }),
     render: (text, record, index) => {
+      const videoRules = record.video_pricing?.rules
+      if (videoRules?.length > 0) {
+        const priceData = getPriceData(record)
+        const factor = priceData?.usedGroupRatio ?? 1
+        const prices = videoRules.map((r) => r.price * factor)
+        const min = Math.min(...prices)
+        const max = Math.max(...prices)
+        const minDisplay = displayPrice(min)
+        const maxDisplay = displayPrice(max)
+        return (
+          <div className='text-gray-700'>
+            {min === max
+              ? `${minDisplay} / ${t('次')}`
+              : `${minDisplay} ~ ${maxDisplay} / ${t('次')}`
+            }
+          </div>
+        )
+      }
+
       const priceData = getPriceData(record);
       const priceItems = getModelPriceItems(priceData, t, siteDisplayType);
 

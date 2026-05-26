@@ -40,6 +40,8 @@ const ModelPricingTable = ({
     ? modelData.enable_groups
     : [];
   const autoChain = autoGroups.filter((g) => modelEnableGroups.includes(g));
+  const hasVideoPricing = modelData?.video_pricing?.rules?.length > 0;
+
   const renderGroupPriceTable = () => {
     // 仅展示模型可用的分组：模型 enable_groups 与用户可用分组的交集
 
@@ -50,6 +52,32 @@ const ModelPricingTable = ({
 
     // 准备表格数据
     const tableData = availableGroups.map((group) => {
+      // 获取分组倍率
+      const groupRatioValue =
+        groupRatio && groupRatio[group] ? groupRatio[group] : 1;
+
+      // 视频定价模型：按规则计算价格区间
+      if (hasVideoPricing) {
+        const rules = modelData.video_pricing.rules;
+        const prices = rules.map((r) => r.price * groupRatioValue);
+        const min = Math.min(...prices);
+        const max = Math.max(...prices);
+        const minDisplay = displayPrice(min);
+        const maxDisplay = displayPrice(max);
+        const priceText = min === max
+          ? `${minDisplay} / ${t('次')}`
+          : `${minDisplay} ~ ${maxDisplay} / ${t('次')}`;
+        return {
+          key: group,
+          group: group,
+          ratio: groupRatioValue,
+          billingType: t('按次计费'),
+          priceItems: [
+            { key: 'video', label: '', value: priceText, suffix: '', isDynamic: false },
+          ],
+        };
+      }
+
       const priceData = modelData
         ? calculateModelPrice({
             record: modelData,
@@ -61,10 +89,6 @@ const ModelPricingTable = ({
             quotaDisplayType: siteDisplayType,
           })
         : { inputPrice: '-', outputPrice: '-', price: '-' };
-
-      // 获取分组倍率
-      const groupRatioValue =
-        groupRatio && groupRatio[group] ? groupRatio[group] : 1;
 
       return {
         key: group,

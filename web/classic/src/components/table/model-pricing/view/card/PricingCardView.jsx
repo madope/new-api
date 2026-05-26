@@ -174,6 +174,8 @@ const PricingCardView = ({
       );
     }
 
+    const hasVideoPricing = record.video_pricing?.rules?.length > 0;
+
     // 自定义标签（右边）
     const customTags = [];
     if (record.tags) {
@@ -194,7 +196,14 @@ const PricingCardView = ({
 
     return (
       <div className='flex items-center justify-between'>
-        <div className='flex items-center gap-2'>{billingTag}</div>
+        <div className='flex items-center gap-2'>
+          {billingTag}
+          {hasVideoPricing && (
+            <Tag shape='circle' color='orange' size='small'>
+              {t('视频')}
+            </Tag>
+          )}
+        </div>
         <div className='flex items-center gap-1'>
           {customTags.length > 0 &&
             renderLimitedItems({
@@ -251,6 +260,16 @@ const PricingCardView = ({
             quotaDisplayType: siteDisplayType,
           });
 
+          const videoPriceRange = model.video_pricing?.rules?.length
+            ? (() => {
+                const factor = priceData.usedGroupRatio || 1
+                const prices = model.video_pricing.rules.map((r) => r.price * factor)
+                const min = Math.min(...prices)
+                const max = Math.max(...prices)
+                return { min: displayPrice(min), max: displayPrice(max) }
+              })()
+            : null
+
           return (
             <Card
               key={modelKey || index}
@@ -270,6 +289,13 @@ const PricingCardView = ({
                       <div className='flex flex-col gap-1 text-xs mt-1'>
                         {priceData.isDynamicPricing ? (
                           formatDynamicPriceSummary(priceData.billingExpr, t, priceData.usedGroupRatio)
+                        ) : videoPriceRange ? (
+                          <span>
+                            {videoPriceRange.min === videoPriceRange.max
+                              ? `${t('模型价格')} ${videoPriceRange.min} / ${t('次')}`
+                              : `${t('模型价格')} ${videoPriceRange.min} ~ ${videoPriceRange.max} / ${t('次')}`
+                            }
+                          </span>
                         ) : (
                           formatPriceInfo(priceData, t, siteDisplayType)
                         )}

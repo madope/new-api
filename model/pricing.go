@@ -35,7 +35,32 @@ type Pricing struct {
 	SupportedEndpointTypes []constant.EndpointType `json:"supported_endpoint_types"`
 	BillingMode            string                  `json:"billing_mode,omitempty"`
 	BillingExpr            string                  `json:"billing_expr,omitempty"`
+	VideoPricing           *VideoPricingInfo       `json:"video_pricing,omitempty"`
 	PricingVersion         string                  `json:"pricing_version,omitempty"`
+}
+
+// VideoPricingInfo holds video pricing rules for display on the pricing page.
+type VideoPricingInfo struct {
+	BillingMode           string             `json:"billing_mode"`
+	BasePrice             float64            `json:"base_price"`
+	Markup                float64            `json:"markup"`
+	DefaultResolution     string             `json:"default_resolution"`
+	DefaultDuration       int                `json:"default_duration"`
+	DefaultReferenceTypes []string           `json:"default_reference_types"`
+	Rules                 []VideoPricingRule `json:"rules"`
+}
+
+// VideoPricingRule is a single video pricing rule with conditions and price.
+type VideoPricingRule struct {
+	Conditions VideoPricingCondition `json:"conditions"`
+	Price      float64               `json:"price"`
+}
+
+// VideoPricingCondition describes when a video pricing rule applies.
+type VideoPricingCondition struct {
+	Resolution     []string `json:"resolution"`
+	Duration       []int    `json:"duration"`
+	ReferenceTypes []string `json:"reference_types"`
 }
 
 type PricingVendor struct {
@@ -105,6 +130,123 @@ func GetModelSupportEndpointTypes(model string) []constant.EndpointType {
 		return endpoints
 	}
 	return make([]constant.EndpointType, 0)
+}
+
+const videoPricingConfigKey = "video_pricing_config"
+
+// rawVideoConfig is used to unmarshal the video pricing option JSON.
+type rawVideoConfig struct {
+	Models map[string]rawModelVideoPricing `json:"models"`
+}
+
+type rawModelVideoPricing struct {
+	BillingMode           string            `json:"billing_mode"`
+	BasePrice             float64           `json:"base_price"`
+	Markup                float64           `json:"markup"`
+	DefaultResolution     string            `json:"default_resolution"`
+	DefaultDuration       int               `json:"default_duration"`
+	DefaultReferenceTypes []string          `json:"default_reference_types"`
+	PricingRules          []json.RawMessage `json:"pricing_rules"`
+}
+
+type rawPricingRule struct {
+	Conditions rawPricingCondition `json:"conditions"`
+	Price      float64             `json:"price"`
+}
+
+type rawPricingCondition struct {
+	Resolution     []string `json:"resolution"`
+	Duration       []int    `json:"duration"`
+	ReferenceTypes []string `json:"reference_types"`
+}
+
+func loadVideoPricingConfig() map[string]VideoPricingInfo {
+	common.OptionMapRWMutex.RLock()
+	configStr, ok := common.OptionMap[videoPricingConfigKey]
+	common.OptionMapRWMutex.RUnlock()
+
+	if !ok || configStr == "" {
+		return nil
+	}
+
+	var raw rawVideoConfig
+	if err := json.Unmarshal([]byte(configStr), &raw); err != nil {
+		return nil
+	}
+
+	result := make(map[string]VideoPricingInfo, len(raw.Models))
+	for modelName, mp := range raw.Models {
+		info := VideoPricingInfo{
+			BillingMode:           mp.BillingMode,
+			BasePrice:             mp.BasePrice,
+			Markup:                mp.Markup,
+			DefaultResolution:     mp.DefaultResolution,
+			DefaultDuration:       mp.DefaultDuration,
+			DefaultReferenceTypes: mp.DefaultReferenceTypes,
+			Rules:                 make([]VideoPricingRule, 0, len(mp.PricingRules)),
+		}
+		for _, rawRule := range mp.PricingRules {
+			var rule rawPricingRule
+			if err := json.Unmarshal(rawRule, &rule); err != nil {
+				continue
+			}
+			info.Rules = append(info.Rules, VideoPricingRule{
+				Conditions: VideoPricingCondition{
+					Resolution:     rule.Conditions.Resolution,
+					Duration:       rule.Conditions.Duration,
+					ReferenceTypes: rule.Conditions.ReferenceTypes,
+				},
+				Price: rule.Price,
+			})
+		}
+		result[modelName] = info
+	}
+	return result
+}
+
+func getVideoPricingForModel(modelName string) (*VideoPricingInfo, bool) {
+	common.OptionMapRWMutex.RLock()
+	configStr, ok := common.OptionMap[videoPricingConfigKey]
+	common.OptionMapRWMutex.RUnlock()
+
+	if !ok || configStr == "" {
+		return nil, false
+	}
+
+	var raw rawVideoConfig
+	if err := json.Unmarshal([]byte(configStr), &raw); err != nil {
+		return nil, false
+	}
+
+	mp, ok := raw.Models[modelName]
+	if !ok {
+		return nil, false
+	}
+
+	info := &VideoPricingInfo{
+		BillingMode:           mp.BillingMode,
+		BasePrice:             mp.BasePrice,
+		Markup:                mp.Markup,
+		DefaultResolution:     mp.DefaultResolution,
+		DefaultDuration:       mp.DefaultDuration,
+		DefaultReferenceTypes: mp.DefaultReferenceTypes,
+		Rules:                 make([]VideoPricingRule, 0, len(mp.PricingRules)),
+	}
+	for _, rawRule := range mp.PricingRules {
+		var rule rawPricingRule
+		if err := json.Unmarshal(rawRule, &rule); err != nil {
+			continue
+		}
+		info.Rules = append(info.Rules, VideoPricingRule{
+			Conditions: VideoPricingCondition{
+				Resolution:     rule.Conditions.Resolution,
+				Duration:       rule.Conditions.Duration,
+				ReferenceTypes: rule.Conditions.ReferenceTypes,
+			},
+			Price: rule.Price,
+		})
+	}
+	return info, true
 }
 
 func updatePricing() {
@@ -336,6 +478,9 @@ func updatePricing() {
 				pricing.BillingMode = billingMode
 				pricing.BillingExpr = expr
 			}
+		}
+		if videoInfo, ok := getVideoPricingForModel(model); ok {
+			pricing.VideoPricing = videoInfo
 		}
 		pricingMap = append(pricingMap, pricing)
 	}

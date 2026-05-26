@@ -13,10 +13,13 @@ func BuildPricingConfig(models []ModelPricingConfig) (string, error) {
 
 	for _, modelConfig := range models {
 		modelPricing := ModelPricing{
-			BillingMode:  BillingMode(modelConfig.BillingMode),
-			BasePrice:    modelConfig.BasePrice,
-			Markup:       modelConfig.Markup,
-			PricingRules: make([]PricingRule, 0),
+			BillingMode:           BillingMode(modelConfig.BillingMode),
+			BasePrice:             modelConfig.BasePrice,
+			Markup:                modelConfig.Markup,
+			DefaultResolution:     modelConfig.DefaultResolution,
+			DefaultDuration:       modelConfig.DefaultDuration,
+			DefaultReferenceTypes: toReferenceTypes(modelConfig.DefaultReferenceTypes),
+			PricingRules:          make([]PricingRule, 0),
 		}
 
 		for _, ruleConfig := range modelConfig.PricingRules {
@@ -60,11 +63,14 @@ type PricingRuleConfig struct {
 }
 
 type ModelPricingConfig struct {
-	ModelName     string             `json:"model_name"`
-	BillingMode   string             `json:"billing_mode"`
-	BasePrice     float64            `json:"base_price"`      // 基础价格（元/M token）
-	Markup        float64            `json:"markup"`
-	PricingRules  []PricingRuleConfig `json:"pricing_rules"`
+	ModelName             string             `json:"model_name"`
+	BillingMode           string             `json:"billing_mode"`
+	BasePrice             float64            `json:"base_price"`              // 基础价格（元/M token）
+	Markup                float64            `json:"markup"`
+	DefaultResolution     string             `json:"default_resolution"`      // 默认分辨率，空时回落 "768p"
+	DefaultDuration       int                `json:"default_duration"`        // 默认时长（秒），0 时回落 6
+	DefaultReferenceTypes []string           `json:"default_reference_types"` // 默认参考类型，仅用于展示
+	PricingRules          []PricingRuleConfig `json:"pricing_rules"`
 }
 
 func GenerateMiniMaxConfig() (string, error) {
@@ -240,4 +246,12 @@ func GetConfigSummary(configStr string) (string, error) {
 	summary.WriteString("\n")
 
 	return summary.String(), nil
+}
+
+func toReferenceTypes(types []string) []ReferenceType {
+	result := make([]ReferenceType, 0, len(types))
+	for _, t := range types {
+		result = append(result, ReferenceType(t))
+	}
+	return result
 }

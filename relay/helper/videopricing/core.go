@@ -42,10 +42,13 @@ type PricingRule struct {
 }
 
 type ModelPricing struct {
-	BillingMode    BillingMode  `json:"billing_mode"`
-	BasePrice      float64      `json:"base_price"`      // 基础价格（元/M token）
-	Markup         float64      `json:"markup"`
-	PricingRules   []PricingRule `json:"pricing_rules"`
+	BillingMode           BillingMode    `json:"billing_mode"`
+	BasePrice             float64        `json:"base_price"`              // 基础价格（元/M token）
+	Markup                float64        `json:"markup"`
+	DefaultResolution     string         `json:"default_resolution"`      // 默认分辨率，空时回落 "768p"
+	DefaultDuration       int            `json:"default_duration"`        // 默认时长（秒），0 时回落 6
+	DefaultReferenceTypes []ReferenceType `json:"default_reference_types"` // 默认参考类型，仅用于展示
+	PricingRules          []PricingRule  `json:"pricing_rules"`
 }
 
 type VideoPricingConfig struct {

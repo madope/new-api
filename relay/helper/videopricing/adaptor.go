@@ -44,8 +44,9 @@ func (a *BaseVideoPricingAdaptor) ParseParams(c *gin.Context, info *relaycommon.
 		return VideoPricingParams{}, fmt.Errorf("task_request is not TaskSubmitReq")
 	}
 
-	resolution := a.parseResolution(req)
-	duration := a.parseDuration(req)
+	modelPricing, _ := a.GetModelPricing(info.OriginModelName)
+	resolution := a.parseResolution(req, modelPricing.DefaultResolution)
+	duration := a.parseDuration(req, modelPricing.DefaultDuration)
 	referenceTypes := a.parseReferenceTypes(req)
 	inputTokens, outputTokens := a.parseTokens(req)
 
@@ -60,7 +61,10 @@ func (a *BaseVideoPricingAdaptor) ParseParams(c *gin.Context, info *relaycommon.
 	}, nil
 }
 
-func (a *BaseVideoPricingAdaptor) parseResolution(req relaycommon.TaskSubmitReq) string {
+func (a *BaseVideoPricingAdaptor) parseResolution(req relaycommon.TaskSubmitReq, defaultResolution string) string {
+	if defaultResolution == "" {
+		defaultResolution = "768p"
+	}
 	// 优先从 Metadata 获取 resolution（主要参数）
 	if req.Metadata != nil {
 		if res, ok := req.Metadata["resolution"].(string); ok && res != "" {
@@ -77,10 +81,13 @@ func (a *BaseVideoPricingAdaptor) parseResolution(req relaycommon.TaskSubmitReq)
 			return strings.ToLower(res)
 		}
 	}
-	return "768p"
+	return defaultResolution
 }
 
-func (a *BaseVideoPricingAdaptor) parseDuration(req relaycommon.TaskSubmitReq) int {
+func (a *BaseVideoPricingAdaptor) parseDuration(req relaycommon.TaskSubmitReq, defaultDuration int) int {
+	if defaultDuration <= 0 {
+		defaultDuration = 6
+	}
 	if req.Duration > 0 {
 		return req.Duration
 	}
@@ -89,7 +96,7 @@ func (a *BaseVideoPricingAdaptor) parseDuration(req relaycommon.TaskSubmitReq) i
 			return int(dur)
 		}
 	}
-	return 6
+	return defaultDuration
 }
 
 func (a *BaseVideoPricingAdaptor) parseReferenceTypes(req relaycommon.TaskSubmitReq) []ReferenceType {
@@ -203,16 +210,29 @@ func ExtractPricingParams(c *gin.Context, info *relaycommon.RelayInfo) (VideoPri
 		return VideoPricingParams{}, err
 	}
 
+	modelPricing, _ := GetModelPricing(info.OriginModelName)
+
 	resolution := videoReq.Size
 	if resolution == "" {
-		resolution = "768p"
+		resolution = modelPricing.DefaultResolution
+		if resolution == "" {
+			resolution = "768p"
+		}
+	}
+
+	duration := videoReq.Duration
+	if duration <= 0 {
+		duration = modelPricing.DefaultDuration
+		if duration <= 0 {
+			duration = 6
+		}
 	}
 
 	return VideoPricingParams{
 		Channel:        fmt.Sprintf("channel_%d", info.ChannelType),
 		Model:          info.OriginModelName,
 		Resolution:     strings.ToLower(resolution),
-		Duration:       videoReq.Duration,
+		Duration:       duration,
 		ReferenceTypes: []ReferenceType{},
 		InputTokens:    0,
 		OutputTokens:   0,
