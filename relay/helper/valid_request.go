@@ -46,9 +46,12 @@ func GetAndValidateRequest(c *gin.Context, format types.RelayFormat) (request dt
 	case types.RelayFormatOpenAIAudio:
 		request, err = GetAndValidAudioRequest(c, relayMode)
 	case types.RelayFormatMiniMaxNative:
-		if relayMode == relayconstant.RelayModeMiniMaxLyricsGeneration {
+		switch relayMode {
+		case relayconstant.RelayModeMiniMaxMusicGeneration:
+			request, err = GetAndValidateMiniMaxNativeMusicRequest(c)
+		case relayconstant.RelayModeMiniMaxLyricsGeneration:
 			request, err = GetAndValidateMiniMaxNativeLyricsRequest(c)
-		} else {
+		default:
 			request, err = GetAndValidateMiniMaxNativeImageRequest(c)
 		}
 	case types.RelayFormatOpenAIRealtime:
@@ -245,6 +248,17 @@ func GetAndValidateMiniMaxNativeImageRequest(c *gin.Context) (*dto.MiniMaxNative
 
 func GetAndValidateMiniMaxNativeLyricsRequest(c *gin.Context) (*dto.MiniMaxLyricsRequest, error) {
 	req := &dto.MiniMaxLyricsRequest{}
+	if err := common.UnmarshalBodyReusable(c, req); err != nil {
+		return nil, err
+	}
+	if req.Model == "" {
+		return nil, fmt.Errorf("model is required")
+	}
+	return req, nil
+}
+
+func GetAndValidateMiniMaxNativeMusicRequest(c *gin.Context) (*dto.MiniMaxMusicRequest, error) {
+	req := &dto.MiniMaxMusicRequest{}
 	if err := common.UnmarshalBodyReusable(c, req); err != nil {
 		return nil, err
 	}

@@ -41,6 +41,8 @@ func relayHandler(c *gin.Context, info *relaycommon.RelayInfo) *types.NewAPIErro
 		err = relay.MiniMaxImageHelper(c, info)
 	case relayconstant.RelayModeMiniMaxLyricsGeneration:
 		err = relay.MiniMaxLyricsHelper(c, info)
+	case relayconstant.RelayModeMiniMaxMusicGeneration:
+		err = relay.MiniMaxMusicHelper(c, info)
 	case relayconstant.RelayModeAudioSpeech:
 		fallthrough
 	case relayconstant.RelayModeAudioTranslation:
