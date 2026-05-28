@@ -693,19 +693,64 @@ func applyMKlingRawMappings(meta *taskMeta, metadata map[string]interface{}) {
 	if meta == nil || metadata == nil {
 		return
 	}
+	ensureOutputConfig := func() *AigcVideoOutputConfig {
+		if meta.OutputConfig == nil {
+			meta.OutputConfig = &AigcVideoOutputConfig{}
+		}
+		return meta.OutputConfig
+	}
+
+	if meta.NegativePrompt == "" {
+		meta.NegativePrompt = stringValue(metadata, "negative_prompt", "NegativePrompt")
+	}
+	if meta.Seed == nil {
+		if seed := intPointerValue(metadata["seed"]); seed != nil {
+			meta.Seed = seed
+		}
+	}
+	if meta.LastFrameURL == "" {
+		meta.LastFrameURL = stringValue(metadata, "image_tail", "ImageTail", "last_frame_url", "LastFrameUrl")
+		if meta.LastFrameURL == "" {
+			rawImages := stringSliceValue(metadata["images"])
+			if len(rawImages) >= 2 && strings.TrimSpace(rawImages[1]) != "" {
+				meta.LastFrameURL = rawImages[1]
+			}
+		}
+	}
+
 	mode := strings.ToLower(strings.TrimSpace(stringValue(metadata, "mode")))
-	if mode == "" {
-		return
+	if meta.OutputConfig != nil && meta.OutputConfig.Duration == 0 {
+		if duration := intPointerValue(metadata["duration"]); duration != nil && *duration > 0 {
+			meta.OutputConfig.Duration = *duration
+		}
+	} else if meta.OutputConfig == nil {
+		if duration := intPointerValue(metadata["duration"]); duration != nil && *duration > 0 {
+			ensureOutputConfig().Duration = *duration
+		}
 	}
-	resolution, ok := klingModeResolutionMap[mode]
-	if !ok {
-		return
+	if aspectRatio := stringValue(metadata, "aspect_ratio", "AspectRatio"); aspectRatio != "" {
+		outputConfig := ensureOutputConfig()
+		if outputConfig.AspectRatio == "" {
+			outputConfig.AspectRatio = aspectRatio
+		}
 	}
-	if meta.OutputConfig == nil {
-		meta.OutputConfig = &AigcVideoOutputConfig{}
+	if audio, ok := boolValue(metadata["audio"]); ok {
+		outputConfig := ensureOutputConfig()
+		if outputConfig.AudioGeneration == "" {
+			outputConfig.AudioGeneration = enableFlag(audio)
+		}
 	}
-	if meta.OutputConfig.Resolution == "" {
-		meta.OutputConfig.Resolution = resolution
+	if watermark, ok := boolValue(metadata["watermark"]); ok {
+		outputConfig := ensureOutputConfig()
+		if outputConfig.LogoAdd == "" {
+			outputConfig.LogoAdd = enableFlag(watermark)
+		}
+	}
+	if resolution, ok := klingModeResolutionMap[mode]; ok {
+		outputConfig := ensureOutputConfig()
+		if outputConfig.Resolution == "" {
+			outputConfig.Resolution = resolution
+		}
 	}
 }
 
