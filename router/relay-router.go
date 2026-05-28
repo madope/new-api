@@ -186,6 +186,18 @@ func SetRelayRouter(router *gin.Engine) {
 		relaySunoRouter.GET("/fetch/:id", controller.RelayTaskFetch)
 	}
 
+	relayMiniMaxNativeRouter := router.Group("/minimax/v1")
+	relayMiniMaxNativeRouter.Use(middleware.RouteTag("relay"))
+	relayMiniMaxNativeRouter.Use(middleware.SystemPerformanceCheck())
+	relayMiniMaxNativeRouter.Use(middleware.TokenAuth())
+	relayMiniMaxNativeRouter.Use(middleware.ModelRequestRateLimit())
+	relayMiniMaxNativeRouter.Use(middleware.Distribute())
+	{
+		relayMiniMaxNativeRouter.POST("/image_generation", func(c *gin.Context) {
+			controller.Relay(c, types.RelayFormatMiniMaxNative)
+		})
+	}
+
 	relayGeminiRouter := router.Group("/v1beta")
 	relayGeminiRouter.Use(middleware.RouteTag("relay"))
 	relayGeminiRouter.Use(middleware.SystemPerformanceCheck())

@@ -45,6 +45,8 @@ func GetAndValidateRequest(c *gin.Context, format types.RelayFormat) (request dt
 		request, err = GetAndValidateRerankRequest(c)
 	case types.RelayFormatOpenAIAudio:
 		request, err = GetAndValidAudioRequest(c, relayMode)
+	case types.RelayFormatMiniMaxNative:
+		request, err = GetAndValidateMiniMaxNativeImageRequest(c)
 	case types.RelayFormatOpenAIRealtime:
 		request = &dto.BaseRequest{}
 	default:
@@ -224,6 +226,17 @@ func GetAndValidOpenAIImageRequest(c *gin.Context, relayMode int) (*dto.ImageReq
 	}
 
 	return imageRequest, nil
+}
+
+func GetAndValidateMiniMaxNativeImageRequest(c *gin.Context) (*dto.MiniMaxNativeImageRequest, error) {
+	req := &dto.MiniMaxNativeImageRequest{}
+	if err := common.UnmarshalBodyReusable(c, req); err != nil {
+		return nil, err
+	}
+	if req.Model == "" {
+		return nil, fmt.Errorf("model is required")
+	}
+	return req, nil
 }
 
 func GetAndValidateClaudeRequest(c *gin.Context) (textRequest *dto.ClaudeRequest, err error) {

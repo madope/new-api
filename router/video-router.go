@@ -125,7 +125,6 @@ func SetVideoRouter(router *gin.Engine) {
 		})
 	}
 
-	// MiniMax native API route — accepts MiniMax native input, returns MiniMax native response
 	minimaxSubmitRouter := router.Group("/minimax")
 	minimaxSubmitRouter.Use(middleware.RouteTag("relay"))
 	minimaxSubmitRouter.Use(middleware.MiniMaxNativeRequestConvert(), middleware.TokenAuth(), middleware.Distribute())

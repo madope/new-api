@@ -16,14 +16,20 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+type SubjectReference struct {
+	Type      string `json:"type"`
+	ImageFile string `json:"image_file"`
+}
+
 type MiniMaxImageRequest struct {
-	Model           string `json:"model"`
-	Prompt          string `json:"prompt"`
-	AspectRatio     string `json:"aspect_ratio,omitempty"`
-	ResponseFormat  string `json:"response_format,omitempty"`
-	N               int    `json:"n,omitempty"`
-	PromptOptimizer *bool  `json:"prompt_optimizer,omitempty"`
-	AigcWatermark   *bool  `json:"aigc_watermark,omitempty"`
+	Model            string              `json:"model"`
+	Prompt           string              `json:"prompt"`
+	AspectRatio      string              `json:"aspect_ratio,omitempty"`
+	ResponseFormat   string              `json:"response_format,omitempty"`
+	N                int                 `json:"n,omitempty"`
+	PromptOptimizer  *bool               `json:"prompt_optimizer,omitempty"`
+	AigcWatermark    *bool               `json:"aigc_watermark,omitempty"`
+	SubjectReference []SubjectReference  `json:"subject_reference,omitempty"`
 }
 
 type MiniMaxImageResponse struct {
