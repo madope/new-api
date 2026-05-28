@@ -65,7 +65,7 @@ import { StatusContext } from '../../context/Status';
 import { useTranslation } from 'react-i18next';
 import { SiDiscord } from 'react-icons/si';
 
-const RegisterForm = () => {
+const RegisterForm = ({ loginPath = '/login' }) => {
   let navigate = useNavigate();
   const { t } = useTranslation();
   const githubButtonTextKeyByState = {
@@ -241,7 +241,7 @@ const RegisterForm = () => {
         );
         const { success, message } = res.data;
         if (success) {
-          navigate('/login');
+          navigate(loginPath);
           showSuccess('注册成功！');
         } else {
           showError(message);
@@ -540,7 +540,7 @@ const RegisterForm = () => {
                 <Text>
                   {t('已有账户？')}{' '}
                   <Link
-                    to='/login'
+                    to={loginPath}
                     className='text-blue-600 hover:text-blue-800 font-medium'
                   >
                     {t('登录')}
@@ -716,7 +716,7 @@ const RegisterForm = () => {
                 <Text>
                   {t('已有账户？')}{' '}
                   <Link
-                    to='/login'
+                    to={loginPath}
                     className='text-blue-600 hover:text-blue-800 font-medium'
                   >
                     {t('登录')}

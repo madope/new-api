@@ -24,6 +24,8 @@ import User from './pages/User';
 import { AuthRedirect, PrivateRoute, AdminRoute } from './helpers';
 import RegisterForm from './components/auth/RegisterForm';
 import LoginForm from './components/auth/LoginForm';
+import EmbeddedLoginForm from './components/auth/EmbeddedLoginForm';
+import EmbeddedRegisterForm from './components/auth/EmbeddedRegisterForm';
 import NotFound from './pages/NotFound';
 import Forbidden from './pages/Forbidden';
 import Setting from './pages/Setting';
@@ -185,6 +187,26 @@ function App() {
             <Suspense fallback={<Loading></Loading>} key={location.pathname}>
               <AuthRedirect>
                 <LoginForm />
+              </AuthRedirect>
+            </Suspense>
+          }
+        />
+        <Route
+          path='/embedded-sign-in'
+          element={
+            <Suspense fallback={<Loading></Loading>} key={location.pathname}>
+              <AuthRedirect>
+                <EmbeddedLoginForm />
+              </AuthRedirect>
+            </Suspense>
+          }
+        />
+        <Route
+          path='/embedded-sign-up'
+          element={
+            <Suspense fallback={<Loading></Loading>} key={location.pathname}>
+              <AuthRedirect>
+                <EmbeddedRegisterForm />
               </AuthRedirect>
             </Suspense>
           }
