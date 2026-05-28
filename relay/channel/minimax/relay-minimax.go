@@ -25,6 +25,8 @@ func GetRequestURL(info *relaycommon.RelayInfo) (string, error) {
 			return fmt.Sprintf("%s/v1/image_generation", baseUrl), nil
 		case constant.RelayModeMiniMaxImageGeneration:
 			return fmt.Sprintf("%s/v1/image_generation", baseUrl), nil
+		case constant.RelayModeMiniMaxLyricsGeneration:
+			return fmt.Sprintf("%s/v1/lyrics_generation", baseUrl), nil
 		case constant.RelayModeAudioSpeech:
 			return fmt.Sprintf("%s/v1/t2a_v2", baseUrl), nil
 		default:

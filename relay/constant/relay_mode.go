@@ -54,6 +54,7 @@ const (
 	RelayModeResponsesCompact
 
 	RelayModeMiniMaxImageGeneration
+	RelayModeMiniMaxLyricsGeneration
 )
 
 func Path2RelayMode(path string) int {
@@ -90,6 +91,8 @@ func Path2RelayMode(path string) int {
 		relayMode = RelayModeRealtime
 	} else if strings.HasPrefix(path, "/minimax/v1/image_generation") {
 		relayMode = RelayModeMiniMaxImageGeneration
+	} else if strings.HasPrefix(path, "/minimax/v1/lyrics_generation") {
+		relayMode = RelayModeMiniMaxLyricsGeneration
 	} else if strings.HasPrefix(path, "/v1beta/models") || strings.HasPrefix(path, "/v1/models") {
 		relayMode = RelayModeGemini
 	} else if strings.HasPrefix(path, "/mj") {
