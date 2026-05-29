@@ -14,23 +14,25 @@
 // 运行方式（项目根目录执行）:
 //
 //   # 全部 Kling 用例（mock 模式，不真实扣费）
-//   go test -v -run TestKling -kv-token 'sk-xxx' -kv-mock=true ./tests/
+//   go test -v -run TestKling -kv-token 'sk-xxx' . /tests/
 //
-//   # 单个接口
-//   go test -v -run 'TestKling/text2video' -kv-token 'sk-xxx' -kv-mock=true ./tests/
+//   # 单个接口（text2video / image2video / multi_image2video / omni_video）
+//   go test -v -run 'TestKling/text2video' . /tests/
 //
-//   # 单个模型（正则匹配）
-//   go test -v -run 'TestKling/text2video/kling_3_0' -kv-token 'sk-xxx' -kv-mock=true ./tests/
+//   # 单个模型（正则，. 表示任意字符）
+//   go test -v -run 'TestKling/.*kling-3.0' . /tests/
 //
-//   # 单条定价规则
-//   go test -v -run 'TestKling/text2video/720p_voice' -kv-token 'sk-xxx' -kv-mock=true ./tests/
+//   # 单个定价规则（需包含完整路径）
+//   go test -v -run 'TestKling/.*kling-3.0/720p_voice' . /tests/
 //
+//   # Hailuo 测试
+//   go test -v -run TestHailuo . /tests/
 //
 //   # kv-mock 默认 true，会在 URL 末尾追加 ?mock=true，不走真实上游
-//   go test -v -run TestKling -kv-token 'sk-xxx' ./tests/
+//   go test -v -run TestKling . /tests/
 //
 //   # -kv-mock=false 发起真实上游请求（会真实扣费，谨慎使用）
-//   go test -v -run TestKling -kv-token 'sk-xxx' -kv-mock=false ./tests/
+//   go test -v -run TestKling -kv-mock=false . /tests/
 //
 // Kling 官方 API 参数 ↔ 定价字段映射:
 //
@@ -391,7 +393,7 @@ var kvO1Cases = []kvO1Case{
 func kvBuildBody(model string, dur int, rp kvRP, sound string) map[string]any {
 	body := map[string]any{
 		"model_name": model,
-		"prompt":     fmt.Sprintf("自动化测试 %s %s", model, rp.label),
+		"prompt":     "跳舞的美女 大方热情 ",//fmt.Sprintf("自动化测试 %s %s", model, rp.label),
 		"duration":   dur,
 	}
 	if rp.mode != "" {
