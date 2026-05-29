@@ -263,10 +263,12 @@ const PricingCardView = ({
           const videoPriceRange = model.video_pricing?.rules?.length
             ? (() => {
                 const factor = priceData.usedGroupRatio || 1
+                const mode = model.video_pricing.billing_mode
+                const unit = mode === 'per_second' ? t('秒') : t('次')
                 const prices = model.video_pricing.rules.map((r) => r.price * factor)
                 const min = Math.min(...prices)
                 const max = Math.max(...prices)
-                return { min: displayPrice(min), max: displayPrice(max) }
+                return { min: displayPrice(min), max: displayPrice(max), unit }
               })()
             : null
 
@@ -292,8 +294,8 @@ const PricingCardView = ({
                         ) : videoPriceRange ? (
                           <span>
                             {videoPriceRange.min === videoPriceRange.max
-                              ? `${t('模型价格')} ${videoPriceRange.min} / ${t('次')}`
-                              : `${t('模型价格')} ${videoPriceRange.min} ~ ${videoPriceRange.max} / ${t('次')}`
+                              ? `${t('模型价格')} ${videoPriceRange.min} / ${videoPriceRange.unit}`
+                              : `${t('模型价格')} ${videoPriceRange.min} ~ ${videoPriceRange.max} / ${videoPriceRange.unit}`
                             }
                           </span>
                         ) : (

@@ -51,64 +51,6 @@ func TestResolveModelRejectsUnknownProvider(t *testing.T) {
 	require.Error(t, err)
 }
 
-func TestDetectBillingMode(t *testing.T) {
-	tests := []struct {
-		name string
-		req  relaycommon.TaskSubmitReq
-		want BillingMode
-	}{
-		{
-			name: "scene mode",
-			req:  relaycommon.TaskSubmitReq{Metadata: map[string]interface{}{"scene_type": "motion_control"}},
-			want: BillingModeSceneMotionControl,
-		},
-		{
-			name: "video edit",
-			req: relaycommon.TaskSubmitReq{Metadata: map[string]interface{}{
-				"file_infos": []interface{}{
-					map[string]interface{}{"category": "Video", "reference_type": "Edit"},
-				},
-			}},
-			want: BillingModeVideoEdit,
-		},
-		{
-			name: "video reference",
-			req: relaycommon.TaskSubmitReq{Metadata: map[string]interface{}{
-				"file_infos": []interface{}{
-					map[string]interface{}{"category": "Video"},
-				},
-			}},
-			want: BillingModeReferenceVideo,
-		},
-		{
-			name: "first last frame",
-			req: relaycommon.TaskSubmitReq{
-				Images: []string{"https://example.com/a.png"},
-				Metadata: map[string]interface{}{
-					"last_frame_url": "https://example.com/b.png",
-				},
-			},
-			want: BillingModeFirstLastFrame,
-		},
-		{
-			name: "reference image",
-			req:  relaycommon.TaskSubmitReq{Images: []string{"https://example.com/a.png"}},
-			want: BillingModeReferenceImage,
-		},
-		{
-			name: "text to video",
-			req:  relaycommon.TaskSubmitReq{Prompt: "hello"},
-			want: BillingModeTextToVideo,
-		},
-	}
-
-	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, DetectBillingMode(&tc.req))
-		})
-	}
-}
-
 func TestParseTaskResultFinish(t *testing.T) {
 	body := []byte(`{
 		"Response":{
@@ -129,23 +71,6 @@ func TestParseTaskResultFinish(t *testing.T) {
 	assert.Equal(t, model.TaskStatusSuccess, info.Status)
 	assert.Equal(t, "100%", info.Progress)
 	assert.Equal(t, "https://vod.example.com/video.mp4", info.Url)
-}
-
-func TestEstimateBillingUsesModeDurationResolution(t *testing.T) {
-	adaptor := &TaskAdaptor{}
-	info := &relaycommon.RelayInfo{OriginModelName: "kling-2.6"}
-
-	req := relaycommon.TaskSubmitReq{
-		Prompt:   "hello",
-		Duration: 8,
-		Size:     "1920x1080",
-	}
-
-	ratios := adaptor.estimateBillingFromRequest(&req, info)
-	require.NotNil(t, ratios)
-	assert.Equal(t, ModeRatioMap[BillingModeTextToVideo], ratios[BillingRatioMode])
-	assert.Equal(t, 8.0/4.0, ratios[BillingRatioDuration])
-	assert.Equal(t, 1080.0/720.0, ratios[BillingRatioResolution])
 }
 
 func TestConvertToRequestPayloadMapsMKlingModeToDefaultResolution(t *testing.T) {
@@ -193,22 +118,6 @@ func TestConvertToRequestPayloadPrefersExplicitResolutionOverMKlingMode(t *testi
 	require.NoError(t, err)
 	require.NotNil(t, payload.OutputConfig)
 	assert.Equal(t, "4k", payload.OutputConfig.Resolution)
-}
-
-func TestEstimateBillingFromRequestAddsMKlingModeOtherRatio(t *testing.T) {
-	adaptor := &TaskAdaptor{}
-	req := relaycommon.TaskSubmitReq{
-		Model:  "kling-2.6",
-		Prompt: "cinematic city walk",
-		Metadata: map[string]any{
-			"mode": "4k",
-		},
-	}
-
-	ratios := adaptor.estimateBillingFromRequest(&req, nil)
-	value, ok := ratios["kling_mode"]
-	require.True(t, ok)
-	assert.Equal(t, 1.0, value)
 }
 
 func TestParseTaskMetaKeepsMViduMappingsAfterMKlingSupport(t *testing.T) {

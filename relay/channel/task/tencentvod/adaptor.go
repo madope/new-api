@@ -22,6 +22,7 @@ import (
 	mvidu "github.com/QuantumNous/new-api/relay/channel/task/m_vidu"
 	taskcommon "github.com/QuantumNous/new-api/relay/channel/task/taskcommon"
 	relaycommon "github.com/QuantumNous/new-api/relay/common"
+	"github.com/QuantumNous/new-api/relay/helper/videopricing"
 	"github.com/QuantumNous/new-api/service"
 
 	"github.com/gin-gonic/gin"
@@ -151,6 +152,7 @@ type TaskAdaptor struct {
 	baseURL     string
 	keyConfig   KeyConfig
 	region      string
+	mockService *MockService
 }
 
 func ParseKey(raw string) (KeyConfig, error) {
@@ -204,6 +206,7 @@ func (a *TaskAdaptor) Init(info *relaycommon.RelayInfo) {
 	if err == nil {
 		a.keyConfig = cfg
 	}
+	a.mockService = NewMockService(info.ApiKey)
 }
 
 func (a *TaskAdaptor) ValidateRequestAndSetAction(c *gin.Context, info *relaycommon.RelayInfo) (taskErr *dto.TaskError) {
@@ -237,24 +240,10 @@ func (a *TaskAdaptor) ValidateRequestAndSetAction(c *gin.Context, info *relaycom
 }
 
 func (a *TaskAdaptor) EstimateBilling(c *gin.Context, info *relaycommon.RelayInfo) map[string]float64 {
-	req, err := relaycommon.GetTaskRequest(c)
-	if err != nil {
-		return nil
+	adaptor := &TencentVODVideoPricingAdaptor{
+		BaseVideoPricingAdaptor: &videopricing.BaseVideoPricingAdaptor{ChannelType: a.ChannelType},
 	}
-	return a.estimateBillingFromRequest(&req, info)
-}
-
-func (a *TaskAdaptor) estimateBillingFromRequest(req *relaycommon.TaskSubmitReq, _ *relaycommon.RelayInfo) map[string]float64 {
-	mode := DetectBillingMode(req)
-	duration := resolveDuration(req)
-	resolutionRatio := resolveResolutionRatio(req)
-	klingModeRatio := resolveMKlingModeRatio(req)
-	return map[string]float64{
-		BillingRatioMode:       ModeRatioMap[mode],
-		BillingRatioDuration:   float64(duration) / float64(defaultDuration),
-		BillingRatioResolution: resolutionRatio,
-		BillingRatioKlingMode:  klingModeRatio,
-	}
+	return adaptor.EstimateBilling(c, info)
 }
 
 func (a *TaskAdaptor) AdjustBillingOnComplete(task *model.Task, taskResult *relaycommon.TaskInfo) int {
@@ -339,6 +328,10 @@ func (a *TaskAdaptor) BuildRequestBody(c *gin.Context, info *relaycommon.RelayIn
 }
 
 func (a *TaskAdaptor) DoRequest(c *gin.Context, info *relaycommon.RelayInfo, requestBody io.Reader) (*http.Response, error) {
+	if a.mockService != nil && a.mockService.IsEnabled(c) {
+		a.mockService.AddMockHeaders(c)
+		return a.mockService.CreateTaskResponse()
+	}
 	return channel.DoTaskApiRequest(a, c, info, requestBody)
 }
 
@@ -381,6 +374,14 @@ func (a *TaskAdaptor) DoResponse(c *gin.Context, resp *http.Response, info *rela
 }
 
 func (a *TaskAdaptor) FetchTask(baseURL, key string, body map[string]any, proxy string) (*http.Response, error) {
+	if a.mockService != nil && a.mockService.IsEnabledFromBody(body) {
+		return a.mockService.CreateFetchResponse(body)
+	}
+	// mock 任务（task_id 以 mock- 开头）直接返回 mock 查询结果，不走真实请求
+	if taskID, _ := body["task_id"].(string); strings.HasPrefix(taskID, "mock-") {
+		return (&MockService{}).CreateFetchResponse(body)
+	}
+
 	cfg, err := ParseKey(key)
 	if err != nil {
 		return nil, err
@@ -738,6 +739,13 @@ func applyMKlingRawMappings(meta *taskMeta, metadata map[string]interface{}) {
 		outputConfig := ensureOutputConfig()
 		if outputConfig.AudioGeneration == "" {
 			outputConfig.AudioGeneration = enableFlag(audio)
+		}
+	}
+	// sound → AudioGeneration（Kling 官方参数）
+	if sound := strings.ToLower(strings.TrimSpace(stringValue(metadata, "sound"))); sound == "on" {
+		outputConfig := ensureOutputConfig()
+		if outputConfig.AudioGeneration == "" {
+			outputConfig.AudioGeneration = "Enabled"
 		}
 	}
 	if watermark, ok := boolValue(metadata["watermark"]); ok {

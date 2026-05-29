@@ -16,22 +16,41 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Banner,
   Button,
+  Collapse,
+  Input,
+  Modal,
+  Popconfirm,
   Radio,
   RadioGroup,
   TextArea,
   Typography,
 } from '@douyinfe/semi-ui';
-import { IconCopy } from '@douyinfe/semi-icons';
+import { IconCopy, IconDelete, IconPlus } from '@douyinfe/semi-icons';
 import { useTranslation } from 'react-i18next';
 import { API, copy, showError, showSuccess } from '../../../helpers';
 
 const { Text } = Typography;
 
 const OPTION_KEY = 'video_pricing_config';
+
+const EMPTY_MODEL_TEMPLATE = {
+  billing_mode: 'per_call',
+  base_price: 1.0,
+  markup: 1.0,
+  pricing_rules: [
+    {
+      conditions: {
+        resolution: ['768p'],
+        duration: [6],
+      },
+      price: 1.0,
+    },
+  ],
+};
 
 const DEFAULT_VIDEO_PRICING = {
   models: {
@@ -77,77 +96,250 @@ const DEFAULT_VIDEO_PRICING = {
   },
 };
 
+function parseRawConfig(raw) {
+  let config = { ...DEFAULT_VIDEO_PRICING };
+  try {
+    if (raw) {
+      const parsed = typeof raw === 'string' ? JSON.parse(raw) : raw;
+      if (parsed && parsed.models && Object.keys(parsed.models).length > 0) {
+        config = parsed;
+      }
+    }
+  } catch {
+    config = { ...DEFAULT_VIDEO_PRICING };
+  }
+
+  const models = config.models || {};
+  const modelTexts = {};
+  const modelErrors = {};
+  for (const [name, modelConfig] of Object.entries(models)) {
+    modelTexts[name] = JSON.stringify(modelConfig, null, 2);
+    modelErrors[name] = '';
+  }
+
+  return { config, models, modelTexts, modelErrors };
+}
+
+function formatModelJson(obj) {
+  return JSON.stringify(obj, null, 2);
+}
+
+function validateJsonText(text) {
+  try {
+    const parsed = JSON.parse(text);
+    if (typeof parsed !== 'object' || Array.isArray(parsed) || parsed === null) {
+      return { valid: false, message: 'JSON 必须是对象' };
+    }
+    return { valid: true, message: '' };
+  } catch (e) {
+    return { valid: false, message: e.message };
+  }
+}
+
 export default function VideoPricingSettings({ options }) {
   const { t } = useTranslation();
+  const [editMode, setEditMode] = useState('per-model');
   const [jsonText, setJsonText] = useState('');
   const [jsonError, setJsonError] = useState('');
   const [saving, setSaving] = useState(false);
 
+  const [models, setModels] = useState({});
+  const [modelTexts, setModelTexts] = useState({});
+  const [modelErrors, setModelErrors] = useState({});
+  const [activeKeys, setActiveKeys] = useState([]);
+
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [newModelName, setNewModelName] = useState('');
+
   useEffect(() => {
-    let config = {};
-    try {
-      const raw = options?.[OPTION_KEY];
-      if (raw) {
-        config = typeof raw === 'string' ? JSON.parse(raw) : raw;
-      }
-    } catch {
-      config = {};
-    }
-
-    if (!config || Object.keys(config).length === 0) {
-      config = { ...DEFAULT_VIDEO_PRICING };
-    }
-
-    setJsonText(JSON.stringify(config, null, 2));
+    const raw = options?.[OPTION_KEY];
+    const parsed = parseRawConfig(raw);
+    setModels(parsed.models);
+    setModelTexts(parsed.modelTexts);
+    setModelErrors(parsed.modelErrors);
+    setJsonText(formatModelJson(parsed.config));
+    setJsonError('');
   }, [options]);
 
-  const validateJson = (text) => {
-    try {
-      const parsed = JSON.parse(text);
-      if (typeof parsed !== 'object' || Array.isArray(parsed) || parsed === null) {
-        return { valid: false, message: t('JSON 必须是对象') };
+  const modelNames = useMemo(
+    () => Object.keys(models).sort((a, b) => a.localeCompare(b)),
+    [models],
+  );
+
+  const hasAnyModelError = useMemo(
+    () => Object.values(modelErrors).some((e) => e),
+    [modelErrors],
+  );
+
+  const handleModelTextChange = useCallback(
+    (modelName, text) => {
+      setModelTexts((prev) => ({ ...prev, [modelName]: text }));
+      const validation = validateJsonText(text);
+      setModelErrors((prev) => ({
+        ...prev,
+        [modelName]: validation.valid ? '' : validation.message,
+      }));
+    },
+    [],
+  );
+
+  const assembleFullJson = useCallback(
+    () => {
+      const assembled = { models: {} };
+      for (const name of modelNames) {
+        try {
+          assembled.models[name] = JSON.parse(modelTexts[name]);
+        } catch {
+          assembled.models[name] = {};
+        }
       }
-      return { valid: true, message: '' };
-    } catch (e) {
-      return { valid: false, message: e.message };
-    }
-  };
+      return assembled;
+    },
+    [modelNames, modelTexts],
+  );
 
-  const handleTextChange = (text) => {
-    setJsonText(text);
-    const validation = validateJson(text);
-    setJsonError(validation.valid ? '' : validation.message);
-  };
+  const handleAddModel = useCallback(
+    () => {
+      const name = newModelName.trim();
+      if (!name) {
+        showError(t('请输入模型名称'));
+        return;
+      }
+      if (models[name]) {
+        showError(t('模型已存在'));
+        return;
+      }
+      const template = { ...EMPTY_MODEL_TEMPLATE };
+      setModels((prev) => ({ ...prev, [name]: template }));
+      setModelTexts((prev) => ({
+        ...prev,
+        [name]: formatModelJson(template),
+      }));
+      setModelErrors((prev) => ({ ...prev, [name]: '' }));
+      setNewModelName('');
+      setShowAddModal(false);
+      setActiveKeys((prev) => [...prev, name]);
+    },
+    [newModelName, models, t],
+  );
 
-  const resetToDefault = () => {
-    setJsonText(JSON.stringify(DEFAULT_VIDEO_PRICING, null, 2));
-    setJsonError('');
-  };
-
-  const handleSave = async () => {
-    const validation = validateJson(jsonText);
-    if (!validation.valid) {
-      setJsonError(validation.message);
-      return;
-    }
-
-    setSaving(true);
-    try {
-      const res = await API.put('/api/option/', {
-        key: OPTION_KEY,
-        value: jsonText,
+  const handleDeleteModel = useCallback(
+    (modelName) => {
+      setModels((prev) => {
+        const next = { ...prev };
+        delete next[modelName];
+        return next;
       });
-      if (res.data.success) {
-        showSuccess(t('保存成功'));
+      setModelTexts((prev) => {
+        const next = { ...prev };
+        delete next[modelName];
+        return next;
+      });
+      setModelErrors((prev) => {
+        const next = { ...prev };
+        delete next[modelName];
+        return next;
+      });
+      setActiveKeys((prev) => prev.filter((k) => k !== modelName));
+    },
+    [],
+  );
+
+  const handleToggleMode = useCallback(
+    (mode) => {
+      if (mode === 'raw-json') {
+        const assembled = assembleFullJson();
+        setJsonText(formatModelJson(assembled));
+        setJsonError('');
       } else {
-        showError(res.data.message || t('保存失败'));
+        const validation = validateJsonText(jsonText);
+        if (!validation.valid) {
+          setJsonError(validation.message);
+          return;
+        }
+        const parsed = parseRawConfig(jsonText);
+        setModels(parsed.models);
+        setModelTexts(parsed.modelTexts);
+        setModelErrors(parsed.modelErrors);
+        setJsonError('');
       }
-    } catch (e) {
-      showError(e.message);
-    } finally {
-      setSaving(false);
-    }
-  };
+      setEditMode(mode);
+    },
+    [jsonText, assembleFullJson],
+  );
+
+  const handleSave = useCallback(
+    async () => {
+      let finalJson;
+
+      if (editMode === 'per-model') {
+        if (hasAnyModelError) {
+          showError(t('部分模型 JSON 格式错误，请修正后保存'));
+          return;
+        }
+        const assembled = assembleFullJson();
+        finalJson = formatModelJson(assembled);
+      } else {
+        const validation = validateJsonText(jsonText);
+        if (!validation.valid) {
+          setJsonError(validation.message);
+          return;
+        }
+        finalJson = jsonText;
+      }
+
+      const saveValidation = validateJsonText(finalJson);
+      if (!saveValidation.valid) {
+        showError(t('JSON 格式错误'));
+        return;
+      }
+
+      setSaving(true);
+      try {
+        const res = await API.put('/api/option/', {
+          key: OPTION_KEY,
+          value: finalJson,
+        });
+        if (res.data.success) {
+          showSuccess(t('保存成功'));
+
+          const parsed = parseRawConfig(finalJson);
+          setModels(parsed.models);
+          setModelTexts(parsed.modelTexts);
+          setModelErrors(parsed.modelErrors);
+        } else {
+          showError(res.data.message || t('保存失败'));
+        }
+      } catch (e) {
+        showError(e.message);
+      } finally {
+        setSaving(false);
+      }
+    },
+    [editMode, jsonText, hasAnyModelError, assembleFullJson, t],
+  );
+
+  const handleTextChange = useCallback(
+    (text) => {
+      setJsonText(text);
+      const validation = validateJsonText(text);
+      setJsonError(validation.valid ? '' : validation.message);
+    },
+    [],
+  );
+
+  const handleReset = useCallback(
+    () => {
+      const parsed = parseRawConfig(JSON.stringify(DEFAULT_VIDEO_PRICING));
+      setModels(parsed.models);
+      setModelTexts(parsed.modelTexts);
+      setModelErrors(parsed.modelErrors);
+      setJsonText(formatModelJson(DEFAULT_VIDEO_PRICING));
+      setJsonError('');
+      setActiveKeys([]);
+    },
+    [],
+  );
 
   return (
     <div style={{ maxWidth: 800 }}>
@@ -170,18 +362,116 @@ export default function VideoPricingSettings({ options }) {
         style={{ marginBottom: 16 }}
       />
 
-      <TextArea
-        value={jsonText}
-        onChange={handleTextChange}
-        autosize={{ minRows: 15, maxRows: 30 }}
-        style={{ fontFamily: 'monospace', fontSize: 13 }}
-        placeholder={JSON.stringify(DEFAULT_VIDEO_PRICING, null, 2)}
-      />
+      <RadioGroup
+        value={editMode}
+        onChange={(e) => handleToggleMode(e.target.value)}
+        style={{ marginBottom: 16 }}
+      >
+        <Radio value='per-model'>{t('按模型编辑')}</Radio>
+        <Radio value='raw-json'>{t('原始JSON')}</Radio>
+      </RadioGroup>
 
-      {jsonError && (
-        <Text type='danger' size='small' style={{ display: 'block', marginTop: 8 }}>
-          {jsonError}
-        </Text>
+      {editMode === 'per-model' ? (
+        <div>
+          {modelNames.length === 0 ? (
+            <Text type='tertiary'>{t('暂未配置视频定价模型')}</Text>
+          ) : (
+            <Collapse
+              activeKey={activeKeys}
+              onChange={(keys) => setActiveKeys(Array.isArray(keys) ? keys : [keys])}
+              accordion
+            >
+              {modelNames.map((name) => (
+                <Collapse.Panel
+                  key={name}
+                  itemKey={name}
+                  header={
+                    <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <Text strong>{name}</Text>
+                    </span>
+                  }
+                  extra={
+                    <div onClick={(e) => e.stopPropagation()}>
+                      <Popconfirm
+                        title={t('确认删除该模型定价配置？')}
+                        onConfirm={() => handleDeleteModel(name)}
+                        okText={t('删除')}
+                        cancelText={t('取消')}
+                      >
+                        <Button
+                          icon={<IconDelete />}
+                          type='danger'
+                          size='small'
+                          theme='borderless'
+                        />
+                      </Popconfirm>
+                    </div>
+                  }
+                >
+                  <TextArea
+                    value={modelTexts[name]}
+                    onChange={(text) => handleModelTextChange(name, text)}
+                    autosize={{ minRows: 6, maxRows: 25 }}
+                    style={{ fontFamily: 'monospace', fontSize: 13 }}
+                  />
+                  {modelErrors[name] && (
+                    <Text type='danger' size='small' style={{ display: 'block', marginTop: 8 }}>
+                      {modelErrors[name]}
+                    </Text>
+                  )}
+                </Collapse.Panel>
+              ))}
+            </Collapse>
+          )}
+
+          <Button
+            icon={<IconPlus />}
+            theme='light'
+            onClick={() => setShowAddModal(true)}
+            style={{ marginTop: 12 }}
+          >
+            {t('添加模型')}
+          </Button>
+
+          <Modal
+            title={t('添加模型')}
+            visible={showAddModal}
+            onOk={handleAddModel}
+            onCancel={() => {
+              setShowAddModal(false);
+              setNewModelName('');
+            }}
+            okText={t('添加')}
+            cancelText={t('取消')}
+            size='small'
+          >
+            <div style={{ padding: '8px 0' }}>
+              <Text style={{ display: 'block', marginBottom: 8 }}>{t('模型名称')}</Text>
+              <Input
+                placeholder={t('输入模型名称，如 kling-3.0')}
+                value={newModelName}
+                onChange={setNewModelName}
+                onEnterPress={handleAddModel}
+              />
+            </div>
+          </Modal>
+        </div>
+      ) : (
+        <div>
+          <TextArea
+            value={jsonText}
+            onChange={handleTextChange}
+            autosize={{ minRows: 15, maxRows: 30 }}
+            style={{ fontFamily: 'monospace', fontSize: 13 }}
+            placeholder={JSON.stringify(DEFAULT_VIDEO_PRICING, null, 2)}
+          />
+
+          {jsonError && (
+            <Text type='danger' size='small' style={{ display: 'block', marginTop: 8 }}>
+              {jsonError}
+            </Text>
+          )}
+        </div>
       )}
 
       <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 16 }}>
@@ -191,12 +481,15 @@ export default function VideoPricingSettings({ options }) {
             size='small'
             theme='borderless'
             onClick={() => {
-              copy(jsonText, t('JSON'));
+              const text = editMode === 'per-model'
+                ? formatModelJson(assembleFullJson())
+                : jsonText;
+              copy(text, t('JSON'));
             }}
           >
             {t('复制')}
           </Button>
-          <Button size='small' theme='borderless' onClick={resetToDefault}>
+          <Button size='small' theme='borderless' onClick={handleReset}>
             {t('恢复默认')}
           </Button>
         </div>
@@ -205,7 +498,7 @@ export default function VideoPricingSettings({ options }) {
           theme='solid'
           type='primary'
           loading={saving}
-          disabled={!!jsonError}
+          disabled={editMode === 'per-model' ? hasAnyModelError : !!jsonError}
           onClick={handleSave}
         >
           {t('保存')}

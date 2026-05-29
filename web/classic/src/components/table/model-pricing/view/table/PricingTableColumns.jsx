@@ -242,6 +242,8 @@ export const getPricingTableColumns = ({
       if (videoRules?.length > 0) {
         const priceData = getPriceData(record)
         const factor = priceData?.usedGroupRatio ?? 1
+        const mode = record.video_pricing.billing_mode
+        const unit = mode === 'per_second' ? t('秒') : t('次')
         const prices = videoRules.map((r) => r.price * factor)
         const min = Math.min(...prices)
         const max = Math.max(...prices)
@@ -250,8 +252,8 @@ export const getPricingTableColumns = ({
         return (
           <div className='text-gray-700'>
             {min === max
-              ? `${minDisplay} / ${t('次')}`
-              : `${minDisplay} ~ ${maxDisplay} / ${t('次')}`
+              ? `${minDisplay} / ${unit}`
+              : `${minDisplay} ~ ${maxDisplay} / ${unit}`
             }
           </div>
         )

@@ -33,6 +33,7 @@ func BuildPricingConfig(models []ModelPricingConfig) (string, error) {
 					Resolution:     ruleConfig.Resolution,
 					Duration:       ruleConfig.Duration,
 					ReferenceTypes: referenceTypes,
+					AudioOutput:    ruleConfig.AudioOutput,
 				},
 				Price:              ruleConfig.Price,
 				InputPricePerMToken: ruleConfig.InputPricePerMToken,
@@ -57,6 +58,7 @@ type PricingRuleConfig struct {
 	Resolution          []string  `json:"resolution"`
 	Duration            []int     `json:"duration"`
 	ReferenceTypes      []string  `json:"reference_types"`
+	AudioOutput         string    `json:"audio_output,omitempty"`
 	Price               float64   `json:"price"`
 	InputPricePerMToken float64   `json:"input_price_per_m_token"`
 	OutputPricePerMToken float64  `json:"output_price_per_m_token"`
@@ -65,7 +67,7 @@ type PricingRuleConfig struct {
 type ModelPricingConfig struct {
 	ModelName             string             `json:"model_name"`
 	BillingMode           string             `json:"billing_mode"`
-	BasePrice             float64            `json:"base_price"`              // 基础价格（元/M token）
+	BasePrice             float64            `json:"base_price"`              // 基础价格（per_call/per_second 时为元/次或元/秒，per_token 时为元/M token）
 	Markup                float64            `json:"markup"`
 	DefaultResolution     string             `json:"default_resolution"`      // 默认分辨率，空时回落 "768p"
 	DefaultDuration       int                `json:"default_duration"`        // 默认时长（秒），0 时回落 6
@@ -148,19 +150,19 @@ func GenerateMiniMaxConfig() (string, error) {
 					{
 						Resolution:     []string{"768p"},
 						Duration:       []int{6},
-						ReferenceTypes: []string{"image", "video"},
+						ReferenceTypes: []string{"image"},
 						Price:          2.00,
 					},
 					{
 						Resolution:     []string{"768p"},
 						Duration:       []int{10},
-						ReferenceTypes: []string{"image", "video"},
+						ReferenceTypes: []string{"image"},
 						Price:          4.00,
 					},
 					{
 						Resolution:     []string{"1080p"},
 						Duration:       []int{6},
-						ReferenceTypes: []string{"image", "video"},
+						ReferenceTypes: []string{"image"},
 						Price:          3.50,
 					},
 				},
@@ -211,7 +213,7 @@ func ValidatePricingConfig(configStr string) error {
 		}
 
 		for i, rule := range modelPricing.PricingRules {
-			if modelPricing.BillingMode == BillingModePerCall && rule.Price <= 0 {
+			if (modelPricing.BillingMode == BillingModePerCall || modelPricing.BillingMode == BillingModePerSecond) && rule.Price <= 0 {
 				return fmt.Errorf("model %s rule %d has invalid price", modelName, i)
 			}
 			if modelPricing.BillingMode == BillingModePerToken && (rule.InputPricePerMToken <= 0 || rule.OutputPricePerMToken <= 0) {

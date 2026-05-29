@@ -61,6 +61,7 @@ type VideoPricingCondition struct {
 	Resolution     []string `json:"resolution"`
 	Duration       []int    `json:"duration"`
 	ReferenceTypes []string `json:"reference_types"`
+	AudioOutput    string   `json:"audio_output,omitempty"`
 }
 
 type PricingVendor struct {
@@ -158,6 +159,7 @@ type rawPricingCondition struct {
 	Resolution     []string `json:"resolution"`
 	Duration       []int    `json:"duration"`
 	ReferenceTypes []string `json:"reference_types"`
+	AudioOutput    string   `json:"audio_output,omitempty"`
 }
 
 func loadVideoPricingConfig() map[string]VideoPricingInfo {
@@ -195,6 +197,7 @@ func loadVideoPricingConfig() map[string]VideoPricingInfo {
 					Resolution:     rule.Conditions.Resolution,
 					Duration:       rule.Conditions.Duration,
 					ReferenceTypes: rule.Conditions.ReferenceTypes,
+					AudioOutput:    rule.Conditions.AudioOutput,
 				},
 				Price: rule.Price,
 			})
@@ -242,6 +245,7 @@ func getVideoPricingForModel(modelName string) (*VideoPricingInfo, bool) {
 				Resolution:     rule.Conditions.Resolution,
 				Duration:       rule.Conditions.Duration,
 				ReferenceTypes: rule.Conditions.ReferenceTypes,
+				AudioOutput:    rule.Conditions.AudioOutput,
 			},
 			Price: rule.Price,
 		})

@@ -53,17 +53,24 @@ function describeDuration(duration, defaultDuration) {
   return duration.map((d) => `${d}s`).join('/');
 }
 
-function describeCapability(referenceTypes, t) {
-  if (!referenceTypes || referenceTypes.length === 0) return [];
-  return referenceTypes.map((type) => {
-    switch (type) {
-      case 'text': return t('文生视频');
-      case 'image': return t('参考图片');
-      case 'video': return t('参考视频');
-      case 'audio': return t('音频生视频');
-      default: return type;
-    }
-  });
+function describeRefType(type, t) {
+  switch (type) {
+    case 'text': return t('文生视频');
+    case 'image': return t('参考图片');
+    case 'video': return t('有参考视频');
+    case 'audio': return t('音频生视频');
+    default: return type;
+  }
+}
+
+function describeAudioCapability(audioOutput) {
+  if (!audioOutput) return '';
+  switch (audioOutput) {
+    case 'none': return '无声';
+    case 'voice': return '有声';
+    case 'voice_timbre': return '有声（有音色）';
+    default: return audioOutput;
+  }
 }
 
 const ModelPricingRules = ({
@@ -130,6 +137,11 @@ const ModelPricingRules = ({
 
   const videoPricing = modelData.video_pricing;
   const hasVideoPricing = videoPricing?.rules?.length > 0;
+  const hasDurationConditions = videoPricing?.rules?.some(
+    (r) => r.conditions?.duration?.length > 0,
+  );
+  const isPerSecond = videoPricing?.billing_mode === 'per_second';
+  const showDurationColumn = !isPerSecond || hasDurationConditions;
 
   const rawColumns = [
     { title: t('参数'), dataIndex: 'label', width: 200 },
@@ -179,31 +191,54 @@ const ModelPricingRules = ({
 
   const videoColumns = [
     {
-      title: t('能力'),
+      title: t('属性'),
       dataIndex: 'capability',
-      width: 120,
+      width: 140,
       render: (caps) => {
-        if (!caps || caps.length === 0) return '-';
-        if (caps.length === 1) return caps[0];
-        return caps.map((c, i) => <div key={i}>{c}</div>);
+        if (!caps) return '-';
+        return caps;
       },
     },
     { title: t('清晰度'), dataIndex: 'resolution', width: 100 },
-    { title: t('时长'), dataIndex: 'duration', width: 100 },
+    ...(showDurationColumn ? [{ title: t('时长'), dataIndex: 'duration', width: 100 }] : []),
     { title: t('价格'), dataIndex: 'price', align: 'right' },
   ];
   const videoData = (videoPricing?.rules || []).map((rule, idx) => {
     const factor = effectiveGroup ? effectiveRatio : 1;
-    const caps = describeCapability(rule.conditions.reference_types);
-    const defaultCaps = describeCapability(videoPricing.default_reference_types);
+    const refs = rule.conditions?.reference_types;
+    const hasRef = refs && refs.length > 0;
+    const refParts = hasRef ? refs.map((r) => describeRefType(r, t)) : [];
+    const audioPart = describeAudioCapability(rule.conditions?.audio_output);
+    const hasAnyVideoRef = videoPricing?.rules?.some(
+      (r) => r.conditions?.reference_types?.includes('video'),
+    );
+    let capability;
+    if (refParts.length > 0 && audioPart) {
+      capability = refParts.join('/') + '+' + audioPart;
+    } else if (refParts.length > 0) {
+      capability = refParts.join('/');
+    } else if (audioPart) {
+      if (hasAnyVideoRef && !refs) {
+        capability = '无参考视频+' + audioPart;
+      } else {
+        capability = audioPart;
+      }
+    } else if (hasAnyVideoRef && !refs) {
+      capability = '无参考视频';
+    } else {
+      capability = '-';
+    }
+    const pn = videoPricing.billing_mode;
     return {
       key: idx,
-      capability: caps.length > 0 ? caps : defaultCaps,
+      capability,
       resolution: describeResolution(rule.conditions.resolution, videoPricing.default_resolution),
       duration: describeDuration(rule.conditions.duration, videoPricing.default_duration),
-      price: videoPricing.billing_mode === 'per_call'
+      price: pn === 'per_call'
         ? `${displayPrice(rule.price * factor)}/${t('次')}`
-        : displayPrice(rule.price * factor),
+        : pn === 'per_second'
+          ? `${displayPrice(rule.price * factor)}/${t('秒')}`
+          : displayPrice(rule.price * factor),
     };
   });
 
@@ -224,7 +259,7 @@ const ModelPricingRules = ({
       <div className='space-y-6'>
         {/* 表1：定价参数（视频模型不展示 token 倍率参数） */}
         {!hasVideoPricing && <div>
-          <Text className='text-sm font-medium mb-2 block'>
+          <Text className='block mb-2 text-sm font-medium'>
             {t('定价参数')}
           </Text>
           <Table
@@ -239,9 +274,9 @@ const ModelPricingRules = ({
         {/* 表2：有效价格（有视频定价时隐藏，改用视频表展示） */}
         {!hasVideoPricing && bestGroup && priceRows.length > 0 && (
           <div>
-            <Text className='text-sm font-medium mb-2 block'>
+            <Text className='block mb-2 text-sm font-medium'>
               {t('有效价格')}
-              <span className='text-gray-500 font-normal text-xs ml-2'>
+              <span className='ml-2 text-xs font-normal text-gray-500'>
                 {t('最优分组')}: <span className='font-mono'>{effectiveGroup}</span> ({effectiveRatio}x)
               </span>
             </Text>
@@ -258,10 +293,10 @@ const ModelPricingRules = ({
         {/* 表3：视频定价（显示为有效价格） */}
         {hasVideoPricing && (
           <div>
-            <Text className='text-sm font-medium mb-2 block'>
+            <Text className='block mb-2 text-sm font-medium'>
               {t('有效价格')}
               {effectiveGroup && (
-                <span className='text-gray-500 font-normal text-xs ml-2'>
+                <span className='ml-2 text-xs font-normal text-gray-500'>
                   {t('最优分组')}: <span className='font-mono'>{effectiveGroup}</span> ({effectiveRatio}x)
                 </span>
               )}

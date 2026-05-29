@@ -24,14 +24,16 @@ const (
 type BillingMode string
 
 const (
-	BillingModePerCall  BillingMode = "per_call"
-	BillingModePerToken BillingMode = "per_token"
+	BillingModePerCall    BillingMode = "per_call"
+	BillingModePerToken   BillingMode = "per_token"
+	BillingModePerSecond  BillingMode = "per_second"
 )
 
 type PricingCondition struct {
-	Resolution     []string      `json:"resolution"`
-	Duration       []int         `json:"duration"`
+	Resolution     []string        `json:"resolution"`
+	Duration       []int           `json:"duration"`
 	ReferenceTypes []ReferenceType `json:"reference_types"`
+	AudioOutput    string          `json:"audio_output,omitempty"` // 音频输出条件：""（不限）、"none"（无声）、"voice"（有声）、"voice_timbre"（有声+有音色）
 }
 
 type PricingRule struct {
@@ -67,6 +69,7 @@ type VideoPricingParams struct {
 	Resolution     string
 	Duration       int
 	ReferenceTypes []ReferenceType
+	AudioOutput    string // 音频输出类型："none"、"voice"、"voice_timbre"
 	InputTokens    int
 	OutputTokens   int
 }
@@ -147,13 +150,9 @@ func matchCondition(rule PricingRule, params VideoPricingParams) bool {
 	}
 
 	if len(rule.Conditions.ReferenceTypes) > 0 {
-		// 如果规则要求特定的参考类型，但请求中没有任何参考类型，则不匹配
-		if len(params.ReferenceTypes) == 0 {
-			return false
-		}
-		for _, refType := range params.ReferenceTypes {
+		for _, allowedType := range rule.Conditions.ReferenceTypes {
 			found := false
-			for _, allowedType := range rule.Conditions.ReferenceTypes {
+			for _, refType := range params.ReferenceTypes {
 				if refType == allowedType {
 					found = true
 					break
@@ -163,6 +162,10 @@ func matchCondition(rule PricingRule, params VideoPricingParams) bool {
 				return false
 			}
 		}
+	}
+
+	if rule.Conditions.AudioOutput != "" && rule.Conditions.AudioOutput != params.AudioOutput {
+		return false
 	}
 
 	return true
@@ -202,6 +205,8 @@ func Estimate(params VideoPricingParams) (float64, error) {
 	switch modelPricing.BillingMode {
 	case BillingModePerCall:
 		calculatedPrice = matchedRule.Price
+	case BillingModePerSecond:
+		calculatedPrice = matchedRule.Price * float64(params.Duration)
 	case BillingModePerToken:
 		calculatedPrice = (float64(params.InputTokens)/1000000*matchedRule.InputPricePerMToken +
 			float64(params.OutputTokens)/1000000*matchedRule.OutputPricePerMToken)
@@ -224,6 +229,8 @@ func Estimate(params VideoPricingParams) (float64, error) {
 	switch modelPricing.BillingMode {
 	case BillingModePerCall:
 		ratio = finalPrice / modelPricing.BasePrice
+	case BillingModePerSecond:
+		ratio = finalPrice / modelPricing.BasePrice
 	case BillingModePerToken:
 		totalTokens := params.InputTokens + params.OutputTokens
 		if totalTokens == 0 {
@@ -245,7 +252,7 @@ func EstimatePrice(params VideoPricingParams) (float64, error) {
 
 	matchedRule := findMatchedRule(modelPricing.PricingRules, params)
 	if matchedRule == nil {
-		if modelPricing.BillingMode == BillingModePerCall {
+		if modelPricing.BillingMode == BillingModePerCall || modelPricing.BillingMode == BillingModePerSecond {
 			common.SysLog(fmt.Sprintf("EstimatePrice: no rule matched for %s, using base_price as fallback", params.Model))
 			markup := modelPricing.Markup
 			if markup <= 0 {
@@ -260,6 +267,8 @@ func EstimatePrice(params VideoPricingParams) (float64, error) {
 	switch modelPricing.BillingMode {
 	case BillingModePerCall:
 		calculatedPrice = matchedRule.Price
+	case BillingModePerSecond:
+		calculatedPrice = matchedRule.Price * float64(params.Duration)
 	case BillingModePerToken:
 		calculatedPrice = float64(params.InputTokens)/1000000*matchedRule.InputPricePerMToken +
 			float64(params.OutputTokens)/1000000*matchedRule.OutputPricePerMToken

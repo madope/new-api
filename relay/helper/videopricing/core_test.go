@@ -164,7 +164,7 @@ func TestMatchCondition(t *testing.T) {
 			params: VideoPricingParams{
 				Resolution:     "768p",
 				Duration:       6,
-				ReferenceTypes: []ReferenceType{ReferenceImage},
+				ReferenceTypes: []ReferenceType{ReferenceImage, ReferenceVideo},
 			},
 			expected: true,
 		},
@@ -302,6 +302,225 @@ func TestValidatePricingConfig(t *testing.T) {
 			}
 			if !tt.expectError && err != nil {
 				t.Errorf("Unexpected error: %v", err)
+			}
+		})
+	}
+}
+
+const klingPerSecondConfig = `{
+	"models": {
+		"kling-3.0": {
+			"billing_mode": "per_second",
+			"base_price": 1.0,
+			"markup": 1.0,
+			"default_resolution": "720p",
+			"default_duration": 5,
+			"pricing_rules": [
+				{"conditions":{"resolution":["720p"],"duration":[5],"reference_types":["text"]},"price":0.15},
+				{"conditions":{"resolution":["1080p"],"duration":[5],"reference_types":["text"]},"price":0.21},
+				{"conditions":{"resolution":["720p"],"duration":[10],"reference_types":["text"]},"price":0.12},
+				{"conditions":{"duration":[5,10],"reference_types":["audio"],"audio_output":"none"},"price":0.18},
+				{"conditions":{"duration":[5,10],"reference_types":["audio"],"audio_output":"voice"},"price":0.23},
+				{"conditions":{"duration":[5,10],"reference_types":["audio"],"audio_output":"voice_timbre"},"price":0.28}
+			]
+		}
+	}
+}`
+
+func TestEstimatePerSecond(t *testing.T) {
+	common.OptionMap = map[string]string{VideoPricingConfigKey: klingPerSecondConfig}
+	LoadConfig()
+
+	tests := []struct {
+		name        string
+		params      VideoPricingParams
+		expected    float64
+		expectError bool
+	}{
+		{
+			name: "文生视频 720p 5s",
+			params: VideoPricingParams{
+				Model:          "kling-3.0",
+				Resolution:     "720p",
+				Duration:       5,
+				ReferenceTypes: []ReferenceType{"text"},
+			},
+			// (0.15 * 5 * 1.0) / 1.0 = 0.75
+			expected: (0.15 * 5 * 1.0) / 1.0,
+		},
+		{
+			name: "文生视频 1080p 5s",
+			params: VideoPricingParams{
+				Model:          "kling-3.0",
+				Resolution:     "1080p",
+				Duration:       5,
+				ReferenceTypes: []ReferenceType{"text"},
+			},
+			expected: (0.21 * 5 * 1.0) / 1.0,
+		},
+		{
+			name: "文生视频 720p 10s",
+			params: VideoPricingParams{
+				Model:          "kling-3.0",
+				Resolution:     "720p",
+				Duration:       10,
+				ReferenceTypes: []ReferenceType{"text"},
+			},
+			expected: (0.12 * 10 * 1.0) / 1.0,
+		},
+		{
+			name: "音频生视频 无声 5s",
+			params: VideoPricingParams{
+				Model:          "kling-3.0",
+				Resolution:     "720p",
+				Duration:       5,
+				ReferenceTypes: []ReferenceType{"audio"},
+				AudioOutput:    "none",
+			},
+			expected: (0.18 * 5 * 1.0) / 1.0,
+		},
+		{
+			name: "音频生视频 有声 5s",
+			params: VideoPricingParams{
+				Model:          "kling-3.0",
+				Resolution:     "720p",
+				Duration:       5,
+				ReferenceTypes: []ReferenceType{"audio"},
+				AudioOutput:    "voice",
+			},
+			expected: (0.23 * 5 * 1.0) / 1.0,
+		},
+		{
+			name: "音频生视频 有声+有音色 5s",
+			params: VideoPricingParams{
+				Model:          "kling-3.0",
+				Resolution:     "720p",
+				Duration:       5,
+				ReferenceTypes: []ReferenceType{"audio"},
+				AudioOutput:    "voice_timbre",
+			},
+			expected: (0.28 * 5 * 1.0) / 1.0,
+		},
+		{
+			name: "无匹配规则返回错误",
+			params: VideoPricingParams{
+				Model:          "kling-3.0",
+				Resolution:     "4k",
+				Duration:       5,
+				ReferenceTypes: []ReferenceType{"text"},
+			},
+			expectError: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ratio, err := Estimate(tt.params)
+			if tt.expectError {
+				if err == nil {
+					t.Errorf("Expected error, got nil")
+				}
+			} else {
+				if err != nil {
+					t.Errorf("Unexpected error: %v", err)
+				}
+				if math.Abs(ratio-tt.expected) > 0.0001 {
+					t.Errorf("Expected ratio %.4f, got %.4f", tt.expected, ratio)
+				}
+			}
+		})
+	}
+}
+
+func TestMatchConditionAudioOutput(t *testing.T) {
+	ruleWithVoice := PricingRule{
+		Conditions: PricingCondition{
+			ReferenceTypes: []ReferenceType{"text"},
+			AudioOutput:    "voice",
+		},
+		Price: 2.0,
+	}
+	ruleWithoutAudio := PricingRule{
+		Conditions: PricingCondition{
+			ReferenceTypes: []ReferenceType{"text"},
+			AudioOutput:    "",
+		},
+		Price: 2.0,
+	}
+
+	tests := []struct {
+		name     string
+		rule     PricingRule
+		params   VideoPricingParams
+		expected bool
+	}{
+		{
+			name: "规则有voice,参数有voice — 匹配",
+			rule: ruleWithVoice,
+			params: VideoPricingParams{
+				ReferenceTypes: []ReferenceType{"text"},
+				AudioOutput:    "voice",
+			},
+			expected: true,
+		},
+		{
+			name: "规则有voice,参数有none — 不匹配",
+			rule: ruleWithVoice,
+			params: VideoPricingParams{
+				ReferenceTypes: []ReferenceType{"text"},
+				AudioOutput:    "none",
+			},
+			expected: false,
+		},
+		{
+			name: "规则有voice,参数有voice_timbre — 不匹配",
+			rule: ruleWithVoice,
+			params: VideoPricingParams{
+				ReferenceTypes: []ReferenceType{"text"},
+				AudioOutput:    "voice_timbre",
+			},
+			expected: false,
+		},
+		{
+			name: "规则有none,参数有voice — 不匹配",
+			rule: PricingRule{
+				Conditions: PricingCondition{
+					ReferenceTypes: []ReferenceType{"text"},
+					AudioOutput:    "none",
+				},
+				Price: 2.0,
+			},
+			params: VideoPricingParams{
+				ReferenceTypes: []ReferenceType{"text"},
+				AudioOutput:    "voice",
+			},
+			expected: false,
+		},
+		{
+			name: "规则无audio条件(空),参数有值 — 匹配",
+			rule: ruleWithoutAudio,
+			params: VideoPricingParams{
+				ReferenceTypes: []ReferenceType{"text"},
+				AudioOutput:    "none",
+			},
+			expected: true,
+		},
+		{
+			name: "规则无audio条件(空),参数空 — 匹配",
+			rule: ruleWithoutAudio,
+			params: VideoPricingParams{
+				ReferenceTypes: []ReferenceType{"text"},
+				AudioOutput:    "",
+			},
+			expected: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := matchCondition(tt.rule, tt.params)
+			if result != tt.expected {
+				t.Errorf("Expected %v, got %v", tt.expected, result)
 			}
 		})
 	}

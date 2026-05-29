@@ -35,6 +35,26 @@ func ComputeVideoRatio(modelName string, params VideoPricingParams) (float64, er
 			modelName, estimatePrice, modelPrice, ratio))
 		return ratio, nil
 
+	case BillingModePerSecond:
+		estimatePrice, err := EstimatePrice(params)
+		if err != nil {
+			return 0, fmt.Errorf("estimate price failed: %w", err)
+		}
+
+		modelPrice, success := ratio_setting.GetModelPrice(modelName, true)
+		if !success {
+			modelPrice = modelPricing.BasePrice
+		}
+
+		if modelPrice <= 0 {
+			return 0, fmt.Errorf("invalid base price: %f", modelPrice)
+		}
+
+		ratio := estimatePrice / modelPrice
+		common.SysLog(fmt.Sprintf("ComputeVideoRatio (per_second): model=%s, estimatePrice=%.4f, modelPrice=%.4f, ratio=%.4f",
+			modelName, estimatePrice, modelPrice, ratio))
+		return ratio, nil
+
 	case BillingModePerToken:
 		// 按Token计费：复用new-api原有机制
 		// 从QuotaPerUnit实时计算系统基准价格

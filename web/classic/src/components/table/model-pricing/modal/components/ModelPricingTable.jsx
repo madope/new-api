@@ -64,9 +64,11 @@ const ModelPricingTable = ({
         const max = Math.max(...prices);
         const minDisplay = displayPrice(min);
         const maxDisplay = displayPrice(max);
+        const mode = modelData.video_pricing.billing_mode;
+        const unit = mode === 'per_second' ? t('秒') : t('次');
         const priceText = min === max
-          ? `${minDisplay} / ${t('次')}`
-          : `${minDisplay} ~ ${maxDisplay} / ${t('次')}`;
+          ? `${minDisplay} / ${unit}`
+          : `${minDisplay} ~ ${maxDisplay} / ${unit}`;
         return {
           key: group,
           group: group,
