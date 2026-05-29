@@ -18,6 +18,7 @@ For commercial licensing, please contact support@quantumnous.com
 */
 import { useEffect, useMemo, useState } from 'react'
 import type { z } from 'zod'
+import { useNavigate } from '@tanstack/react-router'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Loader2 } from 'lucide-react'
@@ -57,9 +58,13 @@ import { getAffiliateCode } from '@/features/auth/lib/storage'
 
 export function SignUpForm({
   className,
+  redirectToLoginPath,
   ...props
-}: React.HTMLAttributes<HTMLFormElement>) {
+}: React.HTMLAttributes<HTMLFormElement> & {
+  redirectToLoginPath?: string
+}) {
   const { t } = useTranslation()
+  const navigate = useNavigate()
   const [isLoading, setIsLoading] = useState(false)
   const [verificationCode, setVerificationCode] = useState('')
   const [agreedToLegal, setAgreedToLegal] = useState(false)
@@ -161,7 +166,11 @@ export function SignUpForm({
 
       if (res?.success) {
         toast.success(t('Account created! Please sign in'))
-        redirectToLogin()
+        if (redirectToLoginPath) {
+          navigate({ to: redirectToLoginPath, replace: true })
+        } else {
+          redirectToLogin()
+        }
       }
     } catch (_error) {
       // Errors are handled by global interceptor

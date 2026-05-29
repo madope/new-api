@@ -234,6 +234,50 @@ func TestParseTaskMetaIgnoresUnknownMKlingModeResolutionFallback(t *testing.T) {
 	assert.Equal(t, "1080p", meta.OutputConfig.Resolution)
 }
 
+func TestParseTaskMetaMapsMKlingSupportedFields(t *testing.T) {
+	meta, err := parseTaskMeta(map[string]any{
+		"mode":            "pro",
+		"duration":        10,
+		"negative_prompt": "low quality",
+		"seed":            123,
+		"aspect_ratio":    "16:9",
+		"audio":           true,
+		"watermark":       false,
+		"image_tail":      "https://example.com/last.png",
+	})
+	require.NoError(t, err)
+	require.NotNil(t, meta)
+	require.NotNil(t, meta.OutputConfig)
+	require.NotNil(t, meta.Seed)
+	assert.Equal(t, "low quality", meta.NegativePrompt)
+	assert.Equal(t, 123, *meta.Seed)
+	assert.Equal(t, "https://example.com/last.png", meta.LastFrameURL)
+	assert.Equal(t, "1080p", meta.OutputConfig.Resolution)
+	assert.Equal(t, 10, meta.OutputConfig.Duration)
+	assert.Equal(t, "16:9", meta.OutputConfig.AspectRatio)
+	assert.Equal(t, "Enabled", meta.OutputConfig.AudioGeneration)
+	assert.Equal(t, "Disabled", meta.OutputConfig.LogoAdd)
+}
+
+func TestParseTaskMetaIgnoresUnsupportedMKlingFields(t *testing.T) {
+	meta, err := parseTaskMeta(map[string]any{
+		"callback_url":     "https://example.com/callback",
+		"external_task_id": "task-ext-1",
+		"cfg_scale":        0.5,
+		"static_mask":      true,
+		"camera_control": map[string]any{
+			"type": "simple",
+		},
+	})
+	require.NoError(t, err)
+	require.NotNil(t, meta)
+	assert.Empty(t, meta.ExtInfo)
+	assert.Empty(t, meta.SessionContext)
+	assert.Empty(t, meta.Procedure)
+	assert.Empty(t, meta.InputRegion)
+	assert.Nil(t, meta.OutputConfig)
+}
+
 func TestInitUsesDefaultRegionOnly(t *testing.T) {
 	adaptor := &TaskAdaptor{}
 	adaptor.Init(&relaycommon.RelayInfo{
@@ -431,6 +475,79 @@ func TestConvertToRequestPayloadMapsMViduStartEndImages(t *testing.T) {
 	assert.Equal(t, "FirstFrame", payload.FileInfos[0].Usage)
 	assert.Equal(t, "https://example.com/first.png", payload.FileInfos[0].URL)
 	assert.Equal(t, "https://example.com/last.png", payload.LastFrameURL)
+}
+
+func TestConvertToRequestPayloadMapsMKlingImageTailAndFallbackMetadataImages(t *testing.T) {
+	adaptor := &TaskAdaptor{}
+	req := &relaycommon.TaskSubmitReq{
+		Model:  "kling-2.6",
+		Prompt: "smooth transition",
+		Images: []string{
+			"https://example.com/first.png",
+		},
+		Metadata: map[string]any{
+			"images": []any{
+				"https://example.com/first.png",
+				"https://example.com/last.png",
+			},
+		},
+	}
+	info := &relaycommon.RelayInfo{
+		ChannelMeta: &relaycommon.ChannelMeta{
+			UpstreamModelName: "kling-2.6",
+		},
+		TaskRelayInfo: &relaycommon.TaskRelayInfo{
+			Action: constant.TaskActionFirstTailGenerate,
+		},
+	}
+
+	payload, err := adaptor.convertToRequestPayload(req, info)
+	require.NoError(t, err)
+	require.NotNil(t, payload)
+	require.Len(t, payload.FileInfos, 1)
+	assert.Equal(t, "FirstFrame", payload.FileInfos[0].Usage)
+	assert.Equal(t, "https://example.com/first.png", payload.FileInfos[0].URL)
+	assert.Equal(t, "https://example.com/last.png", payload.LastFrameURL)
+}
+
+func TestConvertToRequestPayloadMapsMKlingFieldsWithoutOverwritingExplicitValues(t *testing.T) {
+	adaptor := &TaskAdaptor{}
+	req := &relaycommon.TaskSubmitReq{
+		Model:    "kling-2.6",
+		Prompt:   "cinematic skyline",
+		Duration: 6,
+		Metadata: map[string]any{
+			"mode":            "pro",
+			"duration":        10,
+			"negative_prompt": "low quality",
+			"seed":            456,
+			"aspect_ratio":    "16:9",
+			"audio":           true,
+			"watermark":       true,
+			"resolution":      "4k",
+			"callback_url":    "https://example.com/callback",
+		},
+	}
+	info := &relaycommon.RelayInfo{
+		ChannelMeta: &relaycommon.ChannelMeta{
+			UpstreamModelName: "kling-2.6",
+		},
+	}
+
+	payload, err := adaptor.convertToRequestPayload(req, info)
+	require.NoError(t, err)
+	require.NotNil(t, payload)
+	require.NotNil(t, payload.OutputConfig)
+	assert.Equal(t, "low quality", payload.NegativePrompt)
+	assert.Equal(t, 456, payload.Seed)
+	assert.Equal(t, "4k", payload.OutputConfig.Resolution)
+	assert.Equal(t, 10, payload.OutputConfig.Duration)
+	assert.Equal(t, "16:9", payload.OutputConfig.AspectRatio)
+	assert.Equal(t, "Enabled", payload.OutputConfig.AudioGeneration)
+	assert.Equal(t, "Enabled", payload.OutputConfig.LogoAdd)
+	assert.Empty(t, payload.ExtInfo)
+	assert.Empty(t, payload.SessionContext)
+	assert.Empty(t, payload.Procedure)
 }
 
 func TestConvertToRequestPayloadMapsMViduReferenceVideos(t *testing.T) {
