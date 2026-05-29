@@ -853,15 +853,15 @@ func TestHailuo(t *testing.T) {
 				E: kvBE{BP: 2, MP: 3.5, D: 1, M: 1, DS: "1080p+duration6+image → 3.5元/次"},
 			})
 		})
-		// 720p + duration=5 → fallback price=2（无图，无规则匹配）
-		t.Run("720p_duration5_fallback", func(t *testing.T) {
+		// 720p + duration=6 → fallback price=2（无图，无规则匹配）
+		t.Run("720p_duration6_fallback", func(t *testing.T) {	
 			kvRun(t, kvtc{
-				N: "MiniMax-Hailuo-2.3 720p+duration5 fallback",
+				N: "MiniMax-Hailuo-2.3 720p+duration6 fallback",
 				P: path, C: 200,
 				B: map[string]any{
 					"model":    "MiniMax-Hailuo-2.3",
-					"prompt":   "测试 MiniMax-Hailuo-2.3 720p 5s 文生视频 fallback",
-					"duration": 5,
+					"prompt":   "测试 MiniMax-Hailuo-2.3 720p 6s 文生视频 fallback",
+					"duration": 6,
 					"resolution": "720P",
 				},
 				E: kvBE{BP: 2, MP: 2, D: 1, M: 1, DS: "fallback → 2元/次"},
@@ -901,15 +901,15 @@ func TestHailuo(t *testing.T) {
 				E: kvBE{BP: 1.35, MP: 2.25, D: 1, M: 1, DS: "768p+duration10+image → 2.25元/次"},
 			})
 		})
-		// 720p + duration=5 → fallback price=1.35（无图）
-		t.Run("720p_duration5_fallback", func(t *testing.T) {
+		// 720p + duration=6 → fallback price=1.35（无图）
+		t.Run("720p_duration6_fallback", func(t *testing.T) {	
 			kvRun(t, kvtc{
-				N: "MiniMax-Hailuo-2.3-Fast 720p+duration5 fallback",
+				N: "MiniMax-Hailuo-2.3-Fast 720p+duration6 fallback",
 				P: path, C: 200,
 				B: map[string]any{
 					"model":    "MiniMax-Hailuo-2.3-Fast",
-					"prompt":   "测试 MiniMax-Hailuo-2.3-Fast 720p 5s 文生视频 fallback",
-					"duration": 5,
+					"prompt":   "测试 MiniMax-Hailuo-2.3-Fast 720p 6s 文生视频 fallback",
+					"duration": 6,
 					"resolution": "720P",
 				},
 				E: kvBE{BP: 1.35, MP: 1.35, D: 1, M: 1, DS: "fallback → 1.35元/次"},
