@@ -67,7 +67,7 @@ import TwoFAVerification from './TwoFAVerification';
 import { useTranslation } from 'react-i18next';
 import { SiDiscord } from 'react-icons/si';
 
-const LoginForm = ({ registerPath = '/register' }) => {
+const LoginForm = () => {
   let navigate = useNavigate();
   const { t } = useTranslation();
   const githubButtonTextKeyByState = {
@@ -701,7 +701,7 @@ const LoginForm = ({ registerPath = '/register' }) => {
                   <Text>
                     {t('没有账户？')}{' '}
                     <Link
-                    to={registerPath}
+                      to='/register'
                       className='text-blue-600 hover:text-blue-800 font-medium'
                     >
                       {t('注册')}
@@ -854,7 +854,7 @@ const LoginForm = ({ registerPath = '/register' }) => {
                   <Text>
                     {t('没有账户？')}{' '}
                     <Link
-                    to={registerPath}
+                      to='/register'
                       className='text-blue-600 hover:text-blue-800 font-medium'
                     >
                       {t('注册')}

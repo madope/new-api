@@ -33,8 +33,6 @@ import { Route as authResetRouteImport } from './routes/(auth)/reset'
 import { Route as authOtpRouteImport } from './routes/(auth)/otp'
 import { Route as authOauthRouteImport } from './routes/(auth)/oauth'
 import { Route as authForgotPasswordRouteImport } from './routes/(auth)/forgot-password'
-import { Route as authEmbeddedSignUpRouteImport } from './routes/(auth)/embedded-sign-up'
-import { Route as authEmbeddedSignInRouteImport } from './routes/(auth)/embedded-sign-in'
 import { Route as AuthenticatedSystemSettingsRouteRouteImport } from './routes/_authenticated/system-settings/route'
 import { Route as PricingModelIdIndexRouteImport } from './routes/pricing/$modelId/index'
 import { Route as AuthenticatedWalletIndexRouteImport } from './routes/_authenticated/wallet/index'
@@ -186,16 +184,6 @@ const authOauthRoute = authOauthRouteImport.update({
 const authForgotPasswordRoute = authForgotPasswordRouteImport.update({
   id: '/forgot-password',
   path: '/forgot-password',
-  getParentRoute: () => authRouteRoute,
-} as any)
-const authEmbeddedSignUpRoute = authEmbeddedSignUpRouteImport.update({
-  id: '/embedded-sign-up',
-  path: '/embedded-sign-up',
-  getParentRoute: () => authRouteRoute,
-} as any)
-const authEmbeddedSignInRoute = authEmbeddedSignInRouteImport.update({
-  id: '/embedded-sign-in',
-  path: '/embedded-sign-in',
   getParentRoute: () => authRouteRoute,
 } as any)
 const AuthenticatedSystemSettingsRouteRoute =
@@ -403,8 +391,6 @@ export interface FileRoutesByFullPath {
   '/privacy-policy': typeof PrivacyPolicyRoute
   '/user-agreement': typeof UserAgreementRoute
   '/system-settings': typeof AuthenticatedSystemSettingsRouteRouteWithChildren
-  '/embedded-sign-in': typeof authEmbeddedSignInRoute
-  '/embedded-sign-up': typeof authEmbeddedSignUpRoute
   '/forgot-password': typeof authForgotPasswordRoute
   '/oauth': typeof authOauthRoute
   '/otp': typeof authOtpRoute
@@ -462,8 +448,6 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/privacy-policy': typeof PrivacyPolicyRoute
   '/user-agreement': typeof UserAgreementRoute
-  '/embedded-sign-in': typeof authEmbeddedSignInRoute
-  '/embedded-sign-up': typeof authEmbeddedSignUpRoute
   '/forgot-password': typeof authForgotPasswordRoute
   '/oauth': typeof authOauthRoute
   '/otp': typeof authOtpRoute
@@ -525,8 +509,6 @@ export interface FileRoutesById {
   '/privacy-policy': typeof PrivacyPolicyRoute
   '/user-agreement': typeof UserAgreementRoute
   '/_authenticated/system-settings': typeof AuthenticatedSystemSettingsRouteRouteWithChildren
-  '/(auth)/embedded-sign-in': typeof authEmbeddedSignInRoute
-  '/(auth)/embedded-sign-up': typeof authEmbeddedSignUpRoute
   '/(auth)/forgot-password': typeof authForgotPasswordRoute
   '/(auth)/oauth': typeof authOauthRoute
   '/(auth)/otp': typeof authOtpRoute
@@ -587,8 +569,6 @@ export interface FileRouteTypes {
     | '/privacy-policy'
     | '/user-agreement'
     | '/system-settings'
-    | '/embedded-sign-in'
-    | '/embedded-sign-up'
     | '/forgot-password'
     | '/oauth'
     | '/otp'
@@ -646,8 +626,6 @@ export interface FileRouteTypes {
     | '/'
     | '/privacy-policy'
     | '/user-agreement'
-    | '/embedded-sign-in'
-    | '/embedded-sign-up'
     | '/forgot-password'
     | '/oauth'
     | '/otp'
@@ -708,8 +686,6 @@ export interface FileRouteTypes {
     | '/privacy-policy'
     | '/user-agreement'
     | '/_authenticated/system-settings'
-    | '/(auth)/embedded-sign-in'
-    | '/(auth)/embedded-sign-up'
     | '/(auth)/forgot-password'
     | '/(auth)/oauth'
     | '/(auth)/otp'
@@ -955,20 +931,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof authForgotPasswordRouteImport
       parentRoute: typeof authRouteRoute
     }
-    '/(auth)/embedded-sign-up': {
-      id: '/(auth)/embedded-sign-up'
-      path: '/embedded-sign-up'
-      fullPath: '/embedded-sign-up'
-      preLoaderRoute: typeof authEmbeddedSignUpRouteImport
-      parentRoute: typeof authRouteRoute
-    }
-    '/(auth)/embedded-sign-in': {
-      id: '/(auth)/embedded-sign-in'
-      path: '/embedded-sign-in'
-      fullPath: '/embedded-sign-in'
-      preLoaderRoute: typeof authEmbeddedSignInRouteImport
-      parentRoute: typeof authRouteRoute
-    }
     '/_authenticated/system-settings': {
       id: '/_authenticated/system-settings'
       path: '/system-settings'
@@ -1211,8 +1173,6 @@ declare module '@tanstack/react-router' {
 }
 
 interface authRouteRouteChildren {
-  authEmbeddedSignInRoute: typeof authEmbeddedSignInRoute
-  authEmbeddedSignUpRoute: typeof authEmbeddedSignUpRoute
   authForgotPasswordRoute: typeof authForgotPasswordRoute
   authOauthRoute: typeof authOauthRoute
   authOtpRoute: typeof authOtpRoute
@@ -1223,8 +1183,6 @@ interface authRouteRouteChildren {
 }
 
 const authRouteRouteChildren: authRouteRouteChildren = {
-  authEmbeddedSignInRoute: authEmbeddedSignInRoute,
-  authEmbeddedSignUpRoute: authEmbeddedSignUpRoute,
   authForgotPasswordRoute: authForgotPasswordRoute,
   authOauthRoute: authOauthRoute,
   authOtpRoute: authOtpRoute,
