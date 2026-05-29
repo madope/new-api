@@ -202,6 +202,9 @@ func SetRelayRouter(router *gin.Engine) {
 		relayMiniMaxNativeRouter.POST("/music_generation", func(c *gin.Context) {
 			controller.Relay(c, types.RelayFormatMiniMaxNative)
 		})
+		relayMiniMaxNativeRouter.POST("/voice_generation", func(c *gin.Context) {
+			controller.Relay(c, types.RelayFormatMiniMaxNative)
+		})
 	}
 
 	relayGeminiRouter := router.Group("/v1beta")
