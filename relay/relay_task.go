@@ -283,9 +283,10 @@ func recalcQuotaFromRatios(info *relaycommon.RelayInfo, ratios map[string]float6
 }
 
 var fetchRespBuilders = map[int]func(c *gin.Context) (respBody []byte, taskResp *dto.TaskError){
-	relayconstant.RelayModeSunoFetchByID:  sunoFetchByIDRespBodyBuilder,
-	relayconstant.RelayModeSunoFetch:      sunoFetchRespBodyBuilder,
-	relayconstant.RelayModeVideoFetchByID: videoFetchByIDRespBodyBuilder,
+	relayconstant.RelayModeSunoFetchByID:             sunoFetchByIDRespBodyBuilder,
+	relayconstant.RelayModeSunoFetch:                 sunoFetchRespBodyBuilder,
+	relayconstant.RelayModeVideoFetchByID:            videoFetchByIDRespBodyBuilder,
+	relayconstant.RelayModeMiniMaxAsyncVoiceQuery:    minimaxVoiceQueryRespBodyBuilder,
 }
 
 func RelayTaskFetch(c *gin.Context, relayMode int) (taskResp *dto.TaskError) {
@@ -447,6 +448,72 @@ func videoFetchByIDRespBodyBuilder(c *gin.Context) (respBody []byte, taskResp *d
 		taskResp = service.TaskErrorWrapper(err, "marshal_response_failed", http.StatusInternalServerError)
 	}
 	return
+}
+
+func minimaxVoiceQueryRespBodyBuilder(c *gin.Context) (respBody []byte, taskResp *dto.TaskError) {
+	taskID := c.Param("task_id")
+	if taskID == "" {
+		taskID = c.GetString("task_id")
+	}
+	if taskID == "" {
+		return nil, service.TaskErrorWrapperLocal(errors.New("task_id is required"), "invalid_task_id", http.StatusBadRequest)
+	}
+
+	userId := c.GetInt("id")
+	originTask, exist, err := model.GetByTaskId(userId, taskID)
+	if err != nil {
+		return nil, service.TaskErrorWrapper(err, "get_task_failed", http.StatusInternalServerError)
+	}
+	if !exist {
+		return nil, service.TaskErrorWrapperLocal(errors.New("task_not_exist"), "task_not_exist", http.StatusNotFound)
+	}
+
+	upstreamTaskID := originTask.GetUpstreamTaskID()
+	if upstreamTaskID == "" {
+		upstreamTaskID = originTask.TaskID
+	}
+
+	channelModel, err := model.CacheGetChannel(originTask.ChannelId)
+	if err != nil {
+		return nil, service.TaskErrorWrapper(err, "get_channel_failed", http.StatusInternalServerError)
+	}
+
+	baseURL := channelModel.GetBaseURL()
+	key := channelModel.Key
+
+	uri := fmt.Sprintf("%s/v1/query/t2a_async_query_v2?task_id=%s", baseURL, upstreamTaskID)
+
+	req, err := http.NewRequest(http.MethodGet, uri, nil)
+	if err != nil {
+		return nil, service.TaskErrorWrapper(err, "build_query_request_failed", http.StatusInternalServerError)
+	}
+	req.Header.Set("Authorization", "Bearer "+key)
+	req.Header.Set("Accept", "application/json")
+
+	client := &http.Client{Timeout: 30 * time.Second}
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, service.TaskErrorWrapper(err, "query_upstream_failed", http.StatusInternalServerError)
+	}
+	defer resp.Body.Close()
+
+	respBody, err = io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, service.TaskErrorWrapper(err, "read_query_response_failed", http.StatusInternalServerError)
+	}
+
+	// Replace upstream task_id with system task_id
+	var nativeResp map[string]any
+	if err := common.Unmarshal(respBody, &nativeResp); err != nil {
+		return nil, service.TaskErrorWrapper(err, "unmarshal_response_failed", http.StatusInternalServerError)
+	}
+	nativeResp["task_id"] = originTask.TaskID
+	modifiedBody, err := common.Marshal(nativeResp)
+	if err != nil {
+		return nil, service.TaskErrorWrapper(err, "marshal_response_failed", http.StatusInternalServerError)
+	}
+
+	return modifiedBody, nil
 }
 
 func volcesFetchByIDRespBodyBuilder(originTask *model.Task) (respBody []byte, taskResp *dto.TaskError) {

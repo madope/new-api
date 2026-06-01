@@ -5,6 +5,7 @@ import (
 	"github.com/QuantumNous/new-api/controller"
 	"github.com/QuantumNous/new-api/middleware"
 	"github.com/QuantumNous/new-api/relay"
+	relayconstant "github.com/QuantumNous/new-api/relay/constant"
 	"github.com/QuantumNous/new-api/types"
 
 	"github.com/gin-gonic/gin"
@@ -205,6 +206,30 @@ func SetRelayRouter(router *gin.Engine) {
 		relayMiniMaxNativeRouter.POST("/voice_generation", func(c *gin.Context) {
 			controller.Relay(c, types.RelayFormatMiniMaxNative)
 		})
+		relayMiniMaxNativeRouter.POST("/async_voice_generation", func(c *gin.Context) {
+			c.Set("platform", string(constant.TaskPlatformMiniMaxVoice))
+			c.Set("relay_mode", relayconstant.RelayModeMiniMaxAsyncVoiceGeneration)
+			controller.RelayTask(c)
+		})
+	}
+
+	relayMiniMaxVoiceFetchRouter := router.Group("/minimax/v1")
+	relayMiniMaxVoiceFetchRouter.Use(middleware.RouteTag("relay"))
+	relayMiniMaxVoiceFetchRouter.Use(middleware.TokenAuth())
+	{
+		relayMiniMaxVoiceFetchRouter.GET("/async_query_voice/:task_id", func(c *gin.Context) {
+			c.Set("platform", string(constant.TaskPlatformMiniMaxVoice))
+			c.Set("relay_mode", relayconstant.RelayModeMiniMaxAsyncVoiceQuery)
+			c.Set("task_id", c.Param("task_id"))
+			controller.RelayTaskFetch(c)
+		})
+	}
+
+	relayMiniMaxFilesRouter := router.Group("/minimax/v1")
+	relayMiniMaxFilesRouter.Use(middleware.RouteTag("relay"))
+	relayMiniMaxFilesRouter.Use(middleware.TokenAuth())
+	{
+		relayMiniMaxFilesRouter.GET("/files/:file_id", controller.MiniMaxFileRetrieve)
 	}
 
 	relayGeminiRouter := router.Group("/v1beta")

@@ -57,6 +57,8 @@ const (
 	RelayModeMiniMaxLyricsGeneration
 	RelayModeMiniMaxMusicGeneration
 	RelayModeMiniMaxVoiceGeneration
+	RelayModeMiniMaxAsyncVoiceGeneration
+	RelayModeMiniMaxAsyncVoiceQuery
 )
 
 func Path2RelayMode(path string) int {
@@ -99,6 +101,10 @@ func Path2RelayMode(path string) int {
 		relayMode = RelayModeMiniMaxMusicGeneration
 	} else if strings.HasPrefix(path, "/minimax/v1/voice_generation") {
 		relayMode = RelayModeMiniMaxVoiceGeneration
+	} else if strings.HasPrefix(path, "/minimax/v1/async_voice_generation") {
+		relayMode = RelayModeMiniMaxAsyncVoiceGeneration
+	} else if strings.HasPrefix(path, "/minimax/v1/async_query_voice") {
+		relayMode = RelayModeMiniMaxAsyncVoiceQuery
 	} else if strings.HasPrefix(path, "/v1beta/models") || strings.HasPrefix(path, "/v1/models") {
 		relayMode = RelayModeGemini
 	} else if strings.HasPrefix(path, "/mj") {
