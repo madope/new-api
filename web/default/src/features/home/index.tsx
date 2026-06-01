@@ -24,7 +24,7 @@ import { Markdown } from '@/components/ui/markdown'
 import { PublicLayout } from '@/components/layout'
 import { Footer } from '@/components/layout/components/footer'
 import { useTheme } from '@/context/theme-provider'
-import { isRegisterEnabled } from '@/features/auth'
+import { hasRegisterStatusValue, isRegisterEnabled } from '@/features/auth'
 import { CTA, Features, Hero, HowItWorks, Stats } from './components'
 import { useHomePageContent } from './hooks'
 
@@ -33,7 +33,8 @@ export function Home() {
   const { auth } = useAuthStore()
   const isAuthenticated = !!auth.user
   const { status } = useStatus()
-  const showRegisterEntry = !!status && isRegisterEnabled(status)
+  const showRegisterEntry =
+    !!status && hasRegisterStatusValue(status) && isRegisterEnabled(status)
   const { content, isLoaded, isUrl } = useHomePageContent()
   const { resolvedTheme } = useTheme()
   const iframeRef = useRef<HTMLIFrameElement | null>(null)

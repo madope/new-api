@@ -32,7 +32,7 @@ import { NotificationButton } from '@/components/notification-button'
 import { NotificationDialog } from '@/components/notification-dialog'
 import { ProfileDropdown } from '@/components/profile-dropdown'
 import { ThemeSwitch } from '@/components/theme-switch'
-import { isRegisterEnabled } from '@/features/auth'
+import { hasRegisterStatusValue, isRegisterEnabled } from '@/features/auth'
 import { isNoticeButtonEnabled } from '../lib/notice-button'
 import { defaultTopNavLinks } from '../config/top-nav.config'
 import type { TopNavLink } from '../types'
@@ -91,6 +91,7 @@ export function PublicHeader(props: PublicHeaderProps) {
     !isAuthenticated &&
     !status?.self_use_mode_enabled &&
     !!status &&
+    hasRegisterStatusValue(status) &&
     isRegisterEnabled(status)
   const notificationsVisible =
     showNotifications && isNoticeButtonEnabled(status)

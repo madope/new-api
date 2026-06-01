@@ -34,6 +34,7 @@ const DashboardSetting = () => {
     'console_setting.uptime_kuma_groups': '',
     'console_setting.api_info_enabled': '',
     'console_setting.announcements_enabled': '',
+    NoticeButtonEnabled: '',
     'console_setting.faq_enabled': '',
     'console_setting.uptime_kuma_enabled': '',
 

@@ -12,6 +12,18 @@ function toBooleanWithDefault(value: unknown, fallback: boolean): boolean {
   return fallback
 }
 
+export function hasRegisterStatusValue(
+  status?: SystemStatus | Record<string, unknown> | null
+): boolean {
+  const directValue = status?.register_enabled
+  const nestedValue =
+    status && 'data' in status && status.data && typeof status.data === 'object'
+      ? (status.data as Record<string, unknown>).register_enabled
+      : undefined
+
+  return directValue !== undefined || nestedValue !== undefined
+}
+
 export function isRegisterEnabled(status?: SystemStatus | Record<string, unknown> | null): boolean {
   const directValue = status?.register_enabled
   const nestedValue =

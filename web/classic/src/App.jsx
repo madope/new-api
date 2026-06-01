@@ -55,7 +55,11 @@ import OAuth2Callback from './components/auth/OAuth2Callback';
 import PersonalSetting from './components/settings/PersonalSetting';
 import Setup from './pages/Setup';
 import SetupCheck from './components/layout/SetupCheck';
-import { getCachedStatus, isRegisterEnabled } from './helpers/register-entry';
+import {
+  getCachedStatus,
+  hasRegisterStatusValue,
+  isRegisterEnabled,
+} from './helpers/register-entry';
 
 const Home = lazy(() => import('./pages/Home'));
 const Dashboard = lazy(() => import('./pages/Dashboard'));
@@ -97,10 +101,10 @@ function App() {
 
   const registerEnabled = useMemo(() => {
     const effectiveStatus = statusState?.status || cachedStatus || {};
-    return isRegisterEnabled(effectiveStatus);
+    return hasRegisterStatusValue(effectiveStatus) && isRegisterEnabled(effectiveStatus);
   }, [cachedStatus, statusState?.status]);
 
-  const registerStatusKnown = statusState?.status !== undefined || !!cachedStatus;
+  const registerStatusKnown = hasRegisterStatusValue(statusState?.status || cachedStatus);
 
   return (
     <SetupCheck>

@@ -21,14 +21,18 @@ import { useTranslation } from 'react-i18next'
 import { useStatus } from '@/hooks/use-status'
 import { AuthLayout } from '../auth-layout'
 import { TermsFooter } from '../components/terms-footer'
-import { isRegisterEnabled } from '../lib/register-entry'
+import {
+  hasRegisterStatusValue,
+  isRegisterEnabled,
+} from '../lib/register-entry'
 import { UserAuthForm } from './components/user-auth-form'
 
 export function SignIn() {
   const { t } = useTranslation()
   const { redirect } = useSearch({ from: '/(auth)/sign-in' })
   const { status } = useStatus()
-  const canShowRegisterEntry = !!status && isRegisterEnabled(status)
+  const canShowRegisterEntry =
+    !!status && hasRegisterStatusValue(status) && isRegisterEnabled(status)
 
   return (
     <AuthLayout>

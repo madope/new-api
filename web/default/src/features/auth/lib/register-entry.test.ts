@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { describe, test } from 'node:test'
 
-import { isRegisterEnabled } from './register-entry.ts'
+import { hasRegisterStatusValue, isRegisterEnabled } from './register-entry.ts'
 
 describe('isRegisterEnabled', () => {
   test('defaults to true when status is missing', () => {
@@ -23,5 +23,12 @@ describe('isRegisterEnabled', () => {
   test('supports string values from cached payloads', () => {
     assert.equal(isRegisterEnabled({ register_enabled: 'false' }), false)
     assert.equal(isRegisterEnabled({ register_enabled: 'true' }), true)
+  })
+
+  test('reports whether register status exists explicitly', () => {
+    assert.equal(hasRegisterStatusValue(undefined), false)
+    assert.equal(hasRegisterStatusValue({}), false)
+    assert.equal(hasRegisterStatusValue({ register_enabled: false }), true)
+    assert.equal(hasRegisterStatusValue({ data: { register_enabled: true } }), true)
   })
 })

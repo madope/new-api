@@ -30,6 +30,7 @@ import { useSidebarCollapsed } from './useSidebarCollapsed';
 import { useMinimumLoadingTime } from './useMinimumLoadingTime';
 import {
   getEffectiveStatus,
+  hasRegisterStatusValue,
   isRegisterEnabled,
 } from '../../helpers/register-entry';
 import { isNoticeButtonEnabled } from '../../helpers/notice-button';
@@ -57,7 +58,8 @@ export const useHeaderBar = ({ onMobileMenuToggle, drawerOpen }) => {
   const isSelfUseMode = effectiveStatus?.self_use_mode_enabled || false;
   const docsLink = effectiveStatus?.docs_link || '';
   const isDemoSiteMode = effectiveStatus?.demo_site_enabled || false;
-  const registerEnabled = isRegisterEnabled(effectiveStatus);
+  const registerEnabled =
+    hasRegisterStatusValue(effectiveStatus) && isRegisterEnabled(effectiveStatus);
   const noticeButtonEnabled = isNoticeButtonEnabled(effectiveStatus);
 
   // 获取顶栏模块配置

@@ -20,13 +20,17 @@ import { Link } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { useStatus } from '@/hooks/use-status'
 import { AuthLayout } from '../auth-layout'
-import { isRegisterEnabled } from '../lib/register-entry'
+import {
+  hasRegisterStatusValue,
+  isRegisterEnabled,
+} from '../lib/register-entry'
 import { ForgotPasswordForm } from './components/forgot-password-form'
 
 export function ForgotPassword() {
   const { t } = useTranslation()
   const { status } = useStatus()
-  const canShowRegisterEntry = !!status && isRegisterEnabled(status)
+  const canShowRegisterEntry =
+    !!status && hasRegisterStatusValue(status) && isRegisterEnabled(status)
   return (
     <AuthLayout>
       <div className='w-full space-y-8'>

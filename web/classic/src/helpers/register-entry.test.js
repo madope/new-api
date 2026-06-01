@@ -1,7 +1,10 @@
 import assert from 'node:assert/strict';
 import { describe, test } from 'node:test';
 
-import { isRegisterEnabled } from './register-entry.js';
+import {
+  hasRegisterStatusValue,
+  isRegisterEnabled,
+} from './register-entry.js';
 
 describe('isRegisterEnabled', () => {
   test('defaults to true when status is missing', () => {
@@ -20,5 +23,12 @@ describe('isRegisterEnabled', () => {
   test('supports cached string values', () => {
     assert.equal(isRegisterEnabled({ register_enabled: 'false' }), false);
     assert.equal(isRegisterEnabled({ register_enabled: 'true' }), true);
+  });
+
+  test('reports whether register status exists explicitly', () => {
+    assert.equal(hasRegisterStatusValue(undefined), false);
+    assert.equal(hasRegisterStatusValue({}), false);
+    assert.equal(hasRegisterStatusValue({ register_enabled: false }), true);
+    assert.equal(hasRegisterStatusValue({ data: { register_enabled: true } }), true);
   });
 });

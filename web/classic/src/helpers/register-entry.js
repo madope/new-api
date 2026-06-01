@@ -26,6 +26,15 @@ export function isRegisterEnabled(status) {
   return true;
 }
 
+export function hasRegisterStatusValue(status) {
+  return Boolean(
+    status?.register_enabled !== undefined ||
+    (status?.data &&
+      typeof status.data === 'object' &&
+      status.data.register_enabled !== undefined)
+  );
+}
+
 export function getCachedStatus() {
   try {
     if (typeof window === 'undefined') return null;

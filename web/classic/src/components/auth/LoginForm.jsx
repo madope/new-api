@@ -68,6 +68,7 @@ import { useTranslation } from 'react-i18next';
 import { SiDiscord } from 'react-icons/si';
 import {
   getCachedStatus,
+  hasRegisterStatusValue,
   isRegisterEnabled,
 } from '../../helpers/register-entry';
 
@@ -137,7 +138,9 @@ const LoginForm = () => {
   }, [statusState?.status]);
   const hasCustomOAuthProviders =
     (status.custom_oauth_providers || []).length > 0;
-  const hasRegisterStatusSnapshot = Boolean(statusState?.status || getCachedStatus());
+  const hasRegisterStatusSnapshot = hasRegisterStatusValue(
+    statusState?.status || getCachedStatus(),
+  );
   const canShowRegisterEntry =
     hasRegisterStatusSnapshot &&
     !status.self_use_mode_enabled &&
