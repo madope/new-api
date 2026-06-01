@@ -154,10 +154,17 @@ body {
   max-width: 42rem;
 }
 
+.brand-lockup {
+  display: inline-flex;
+  flex-direction: column;
+  width: fit-content;
+  max-width: 100%;
+}
+
 .brand-mark {
   margin: 0 0 48px;
   margin-left: -8px;
-  font-size: clamp(3rem, 10vw, 7.5rem);
+  font-size: clamp(2.7rem, 9vw, 6.8rem);
   line-height: 0.8;
   letter-spacing: -0.05em;
   font-weight: 900;
@@ -171,10 +178,13 @@ body {
 
 .hero-title {
   margin: 0 0 32px;
-  font-size: clamp(2rem, 5vw, 3.6rem);
+  font-size: clamp(1.25rem, 2.7vw, 2.2rem);
   line-height: 1.1;
   font-weight: 700;
   color: var(--accent-strong);
+  white-space: nowrap;
+  width: calc(100% + 2.25rem);
+  max-width: calc(100vw - 48px);
 }
 
 .feature-list {

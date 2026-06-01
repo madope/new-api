@@ -61,6 +61,7 @@ const CONTENT_SECTIONS = [
     build: (settings: ContentSettings) => (
       <AnnouncementsSection
         enabled={settings['console_setting.announcements_enabled']}
+        noticeButtonEnabled={settings.NoticeButtonEnabled}
         data={settings['console_setting.announcements']}
       />
     ),

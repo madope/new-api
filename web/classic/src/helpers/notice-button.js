@@ -1,8 +1,8 @@
-export function isRegisterEnabled(status) {
+export function isNoticeButtonEnabled(status) {
   const raw =
-    status?.register_enabled ??
+    status?.notice_button_enabled ??
     (status?.data && typeof status.data === 'object'
-      ? status.data.register_enabled
+      ? status.data.notice_button_enabled
       : undefined);
 
   if (raw === undefined || raw === null) {
@@ -24,18 +24,4 @@ export function isRegisterEnabled(status) {
     }
   }
   return true;
-}
-
-export function getCachedStatus() {
-  try {
-    if (typeof window === 'undefined') return null;
-    const saved = window.localStorage.getItem('status');
-    return saved ? JSON.parse(saved) : null;
-  } catch {
-    return null;
-  }
-}
-
-export function getEffectiveStatus(status) {
-  return status || getCachedStatus() || {};
 }

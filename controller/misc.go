@@ -97,6 +97,7 @@ func GetStatus(c *gin.Context) {
 		"api_info_enabled":      cs.ApiInfoEnabled,
 		"uptime_kuma_enabled":   cs.UptimeKumaEnabled,
 		"announcements_enabled": cs.AnnouncementsEnabled,
+		"notice_button_enabled": common.NoticeButtonEnabled,
 		"faq_enabled":           cs.FAQEnabled,
 
 		// 模块管理配置

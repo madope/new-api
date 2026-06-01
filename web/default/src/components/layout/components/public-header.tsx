@@ -22,6 +22,7 @@ import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '@/stores/auth-store'
 import { cn } from '@/lib/utils'
 import { useNotifications } from '@/hooks/use-notifications'
+import { useStatus } from '@/hooks/use-status'
 import { useSystemConfig } from '@/hooks/use-system-config'
 import { useTopNavLinks } from '@/hooks/use-top-nav-links'
 import { Button } from '@/components/ui/button'
@@ -31,6 +32,8 @@ import { NotificationButton } from '@/components/notification-button'
 import { NotificationDialog } from '@/components/notification-dialog'
 import { ProfileDropdown } from '@/components/profile-dropdown'
 import { ThemeSwitch } from '@/components/theme-switch'
+import { isRegisterEnabled } from '@/features/auth'
+import { isNoticeButtonEnabled } from '../lib/notice-button'
 import { defaultTopNavLinks } from '../config/top-nav.config'
 import type { TopNavLink } from '../types'
 import { HeaderLogo } from './header-logo'
@@ -76,6 +79,7 @@ export function PublicHeader(props: PublicHeaderProps) {
     loading,
     logoLoaded,
   } = useSystemConfig()
+  const { status } = useStatus()
   const dynamicLinks = useTopNavLinks()
   const notifications = useNotifications()
   const routerState = useRouterState()
@@ -83,6 +87,13 @@ export function PublicHeader(props: PublicHeaderProps) {
 
   const user = auth.user
   const isAuthenticated = !!user
+  const showRegisterButton =
+    !isAuthenticated &&
+    !status?.self_use_mode_enabled &&
+    !!status &&
+    isRegisterEnabled(status)
+  const notificationsVisible =
+    showNotifications && isNoticeButtonEnabled(status)
   const displaySiteName = customSiteName || systemName
   const links = dynamicLinks.length > 0 ? dynamicLinks : navLinks
   const isElevated = alwaysElevated || scrolled
@@ -177,13 +188,13 @@ export function PublicHeader(props: PublicHeaderProps) {
 
               {(showLanguageSwitcher ||
                 showThemeSwitch ||
-                showNotifications) && (
+                notificationsVisible) && (
                 <div className='bg-border/40 mx-2 h-4 w-px' />
               )}
 
               {showLanguageSwitcher && <LanguageSwitcher />}
               {showThemeSwitch && <ThemeSwitch />}
-              {showNotifications && (
+              {notificationsVisible && (
                 <NotificationButton
                   unreadCount={notifications.unreadCount}
                   onClick={() => notifications.openDialog()}
@@ -198,13 +209,25 @@ export function PublicHeader(props: PublicHeaderProps) {
                   ) : isAuthenticated ? (
                     <ProfileDropdown />
                   ) : (
-                    <Button
-                      size='sm'
-                      className='h-8 rounded-lg px-3.5 text-xs font-medium'
-                      render={<Link to='/sign-in' />}
-                    >
-                      {t('Sign in')}
-                    </Button>
+                    <div className='flex items-center gap-2'>
+                      {showRegisterButton && (
+                        <Button
+                          size='sm'
+                          variant='outline'
+                          className='h-8 rounded-lg px-3.5 text-xs font-medium'
+                          render={<Link to='/sign-up' />}
+                        >
+                          {t('Sign up')}
+                        </Button>
+                      )}
+                      <Button
+                        size='sm'
+                        className='h-8 rounded-lg px-3.5 text-xs font-medium'
+                        render={<Link to='/sign-in' />}
+                      >
+                        {t('Sign in')}
+                      </Button>
+                    </div>
                   )}
                 </>
               )}
@@ -295,20 +318,41 @@ export function PublicHeader(props: PublicHeaderProps) {
             style={{ transitionDelay: mobileOpen ? '250ms' : '0ms' }}
           >
             {showAuthButtons && (
-              <Link
-                to={isAuthenticated ? '/dashboard' : '/sign-in'}
-                onClick={() => setMobileOpen(false)}
-                className='bg-foreground text-background inline-flex h-10 items-center justify-center rounded-lg text-sm font-medium transition-opacity hover:opacity-90 active:opacity-80'
-              >
-                {isAuthenticated ? t('Go to Dashboard') : t('Sign in')}
-              </Link>
+              isAuthenticated ? (
+                <Link
+                  to='/dashboard'
+                  onClick={() => setMobileOpen(false)}
+                  className='bg-foreground text-background inline-flex h-10 items-center justify-center rounded-lg text-sm font-medium transition-opacity hover:opacity-90 active:opacity-80'
+                >
+                  {t('Go to Dashboard')}
+                </Link>
+              ) : (
+                <>
+                  {showRegisterButton && (
+                    <Link
+                      to='/sign-up'
+                      onClick={() => setMobileOpen(false)}
+                      className='border-border bg-background text-foreground inline-flex h-10 items-center justify-center rounded-lg border text-sm font-medium transition-opacity hover:opacity-90 active:opacity-80'
+                    >
+                      {t('Sign up')}
+                    </Link>
+                  )}
+                  <Link
+                    to='/sign-in'
+                    onClick={() => setMobileOpen(false)}
+                    className='bg-foreground text-background inline-flex h-10 items-center justify-center rounded-lg text-sm font-medium transition-opacity hover:opacity-90 active:opacity-80'
+                  >
+                    {t('Sign in')}
+                  </Link>
+                </>
+              )
             )}
           </div>
         </div>
       </div>
 
       {/* Notification Dialog */}
-      {showNotifications && (
+      {notificationsVisible && (
         <NotificationDialog
           open={notifications.dialogOpen}
           onOpenChange={notifications.setDialogOpen}

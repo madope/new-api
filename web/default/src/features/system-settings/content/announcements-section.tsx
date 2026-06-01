@@ -87,6 +87,7 @@ type Announcement = {
 
 type AnnouncementsSectionProps = {
   enabled: boolean
+  noticeButtonEnabled: boolean
   data: string
 }
 
@@ -140,12 +141,15 @@ const typeOptions = [
 
 export function AnnouncementsSection({
   enabled,
+  noticeButtonEnabled,
   data,
 }: AnnouncementsSectionProps) {
   const { t } = useTranslation()
   const updateOption = useUpdateOption()
   const [announcements, setAnnouncements] = useState<Announcement[]>([])
   const [isEnabled, setIsEnabled] = useState(enabled)
+  const [isNoticeButtonEnabled, setIsNoticeButtonEnabled] =
+    useState(noticeButtonEnabled)
   const [hasChanges, setHasChanges] = useState(false)
   const [selectedIds, setSelectedIds] = useState<number[]>([])
   const [showDialog, setShowDialog] = useState(false)
@@ -184,6 +188,10 @@ export function AnnouncementsSection({
     setIsEnabled(enabled)
   }, [enabled])
 
+  useEffect(() => {
+    setIsNoticeButtonEnabled(noticeButtonEnabled)
+  }, [noticeButtonEnabled])
+
   const handleToggleEnabled = async (checked: boolean) => {
     try {
       await updateOption.mutateAsync({
@@ -191,6 +199,19 @@ export function AnnouncementsSection({
         value: checked,
       })
       setIsEnabled(checked)
+      toast.success(t('Setting saved'))
+    } catch {
+      toast.error(t('Failed to update setting'))
+    }
+  }
+
+  const handleToggleNoticeButtonEnabled = async (checked: boolean) => {
+    try {
+      await updateOption.mutateAsync({
+        key: 'NoticeButtonEnabled',
+        value: checked,
+      })
+      setIsNoticeButtonEnabled(checked)
       toast.success(t('Setting saved'))
     } catch {
       toast.error(t('Failed to update setting'))
@@ -351,10 +372,24 @@ export function AnnouncementsSection({
             </Button>
           </div>
           <div className='flex items-center gap-2'>
-            <span className='text-muted-foreground text-sm'>
-              {t('Enabled')}
-            </span>
-            <Switch checked={isEnabled} onCheckedChange={handleToggleEnabled} />
+            <div className='flex items-center gap-2'>
+              <span className='text-muted-foreground text-sm'>
+                {t('Enabled')}
+              </span>
+              <Switch
+                checked={isEnabled}
+                onCheckedChange={handleToggleEnabled}
+              />
+            </div>
+            <div className='flex items-center gap-2'>
+              <span className='text-muted-foreground text-sm'>
+                {t('Show notice button')}
+              </span>
+              <Switch
+                checked={isNoticeButtonEnabled}
+                onCheckedChange={handleToggleNoticeButtonEnabled}
+              />
+            </div>
           </div>
         </div>
 

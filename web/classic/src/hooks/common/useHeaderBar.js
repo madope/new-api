@@ -32,6 +32,7 @@ import {
   getEffectiveStatus,
   isRegisterEnabled,
 } from '../../helpers/register-entry';
+import { isNoticeButtonEnabled } from '../../helpers/notice-button';
 
 export const useHeaderBar = ({ onMobileMenuToggle, drawerOpen }) => {
   const { t, i18n } = useTranslation();
@@ -57,6 +58,7 @@ export const useHeaderBar = ({ onMobileMenuToggle, drawerOpen }) => {
   const docsLink = effectiveStatus?.docs_link || '';
   const isDemoSiteMode = effectiveStatus?.demo_site_enabled || false;
   const registerEnabled = isRegisterEnabled(effectiveStatus);
+  const noticeButtonEnabled = isNoticeButtonEnabled(effectiveStatus);
 
   // 获取顶栏模块配置
   const headerNavModulesConfig = effectiveStatus?.HeaderNavModules;
@@ -267,6 +269,7 @@ export const useHeaderBar = ({ onMobileMenuToggle, drawerOpen }) => {
     headerNavModules,
     pricingRequireAuth,
     registerEnabled,
+    noticeButtonEnabled,
 
     // Actions
     logout,

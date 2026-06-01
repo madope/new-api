@@ -13,6 +13,10 @@ describe('isRegisterEnabled', () => {
     assert.equal(isRegisterEnabled({ register_enabled: false }), false);
   });
 
+  test('returns false when nested data.register_enabled is false', () => {
+    assert.equal(isRegisterEnabled({ data: { register_enabled: false } }), false);
+  });
+
   test('supports cached string values', () => {
     assert.equal(isRegisterEnabled({ register_enabled: 'false' }), false);
     assert.equal(isRegisterEnabled({ register_enabled: 'true' }), true);

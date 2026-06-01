@@ -47,6 +47,7 @@ const HeaderBar = ({ onMobileMenuToggle, drawerOpen }) => {
     headerNavModules,
     pricingRequireAuth,
     registerEnabled,
+    noticeButtonEnabled,
     logout,
     handleLanguageChange,
     handleThemeToggle,
@@ -121,6 +122,7 @@ const HeaderBar = ({ onMobileMenuToggle, drawerOpen }) => {
             onThemeToggle={handleThemeToggle}
             currentLang={currentLang}
             onLanguageChange={handleLanguageChange}
+            noticeButtonEnabled={noticeButtonEnabled}
             userState={userState}
             isLoading={isLoading}
             isMobile={isMobile}

@@ -72,6 +72,7 @@ const SettingsAnnouncements = ({ options, refresh }) => {
 
   // 面板启用状态
   const [panelEnabled, setPanelEnabled] = useState(true);
+  const [noticeButtonEnabled, setNoticeButtonEnabled] = useState(true);
 
   const formApiRef = useRef(null);
 
@@ -350,6 +351,15 @@ const SettingsAnnouncements = ({ options, refresh }) => {
     );
   }, [options['console_setting.announcements_enabled']]);
 
+  useEffect(() => {
+    const enabledStr = options.NoticeButtonEnabled;
+    setNoticeButtonEnabled(
+      enabledStr === undefined
+        ? true
+        : enabledStr === 'true' || enabledStr === true,
+    );
+  }, [options.NoticeButtonEnabled]);
+
   const handleToggleEnabled = async (checked) => {
     const newValue = checked ? 'true' : 'false';
     try {
@@ -359,6 +369,25 @@ const SettingsAnnouncements = ({ options, refresh }) => {
       });
       if (res.data.success) {
         setPanelEnabled(checked);
+        showSuccess(t('设置已保存'));
+        refresh?.();
+      } else {
+        showError(res.data.message);
+      }
+    } catch (err) {
+      showError(err.message);
+    }
+  };
+
+  const handleToggleNoticeButtonEnabled = async (checked) => {
+    const newValue = checked ? 'true' : 'false';
+    try {
+      const res = await API.put('/api/option/', {
+        key: 'NoticeButtonEnabled',
+        value: newValue,
+      });
+      if (res.data.success) {
+        setNoticeButtonEnabled(checked);
         showSuccess(t('设置已保存'));
         refresh?.();
       } else {
@@ -436,9 +465,18 @@ const SettingsAnnouncements = ({ options, refresh }) => {
         </div>
 
         {/* 启用开关 */}
-        <div className='order-1 md:order-2 flex items-center gap-2'>
-          <Switch checked={panelEnabled} onChange={handleToggleEnabled} />
-          <Text>{panelEnabled ? t('已启用') : t('已禁用')}</Text>
+        <div className='order-1 md:order-2 flex flex-col items-end gap-2'>
+          <div className='flex items-center gap-2'>
+            <Switch checked={panelEnabled} onChange={handleToggleEnabled} />
+            <Text>{panelEnabled ? t('已启用') : t('已禁用')}</Text>
+          </div>
+          <div className='flex items-center gap-2'>
+            <Switch
+              checked={noticeButtonEnabled}
+              onChange={handleToggleNoticeButtonEnabled}
+            />
+            <Text>{t('显示右上角系统公告按钮')}</Text>
+          </div>
         </div>
       </div>
     </div>

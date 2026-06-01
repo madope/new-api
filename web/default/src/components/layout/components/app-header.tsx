@@ -17,6 +17,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import { useNotifications } from '@/hooks/use-notifications'
+import { useStatus } from '@/hooks/use-status'
 import { useTopNavLinks } from '@/hooks/use-top-nav-links'
 import { ConfigDrawer } from '@/components/config-drawer'
 import { LanguageSwitcher } from '@/components/language-switcher'
@@ -25,6 +26,7 @@ import { NotificationDialog } from '@/components/notification-dialog'
 import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
 import { defaultTopNavLinks } from '../config/top-nav.config'
+import { isNoticeButtonEnabled } from '../lib/notice-button'
 import { type TopNavLink } from '../types'
 import { Header } from './header'
 import { SystemBrand } from './system-brand'
@@ -106,6 +108,9 @@ export function AppHeader({
   // Prioritize dynamically generated links from backend
   const dynamicLinks = useTopNavLinks()
   const links = dynamicLinks.length > 0 ? dynamicLinks : navLinks
+  const { status } = useStatus()
+  const notificationsVisible =
+    showNotifications && isNoticeButtonEnabled(status)
 
   // Notifications hook
   const notifications = useNotifications()
@@ -127,7 +132,7 @@ export function AppHeader({
               </div>
             )}
             {showSearch && <Search />}
-            {showNotifications && (
+            {notificationsVisible && (
               <NotificationButton
                 unreadCount={notifications.unreadCount}
                 onClick={() => notifications.openDialog()}
@@ -141,7 +146,7 @@ export function AppHeader({
       </Header>
 
       {/* Notification Dialog */}
-      {showNotifications && (
+      {notificationsVisible && (
         <NotificationDialog
           open={notifications.dialogOpen}
           onOpenChange={notifications.setDialogOpen}
