@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ISURELINK - 大模型 API 聚合网关</title>
+  <meta
+    name="description"
+    content="ISURELINK 大模型 API 聚合网关，多模型统一接入，稳定高效，安全可控。"
+  >
+  <link rel="stylesheet" href="./isuerlinkindex.local.css">
+</head>
+<body>
+  <div class="bg-layer bg-layer-mesh" aria-hidden="true"></div>
+  <div class="bg-layer bg-layer-orb bg-layer-orb-top" aria-hidden="true"></div>
+  <div class="bg-layer bg-layer-orb bg-layer-orb-bottom" aria-hidden="true"></div>
+
+  <nav class="top-nav glass-panel" data-purpose="navigation"></nav>
+
+  <main class="hero-shell" data-purpose="hero-container">
+    <section class="hero-panel hero-copy-panel">
+      <div class="hero-copy" data-purpose="hero-content">
+        <h1 class="brand-mark">
+          <span>ISURE</span><span class="brand-accent">LINK</span>
+        </h1>
+        <h2 class="hero-title" data-i18n="heroTitle">
+          大模型 API <span class="brand-inline">聚合网关</span>
+        </h2>
+
+        <div class="feature-list">
+          <div class="feature-item">
+            <span class="feature-dot" aria-hidden="true"></span>
+            <p data-i18n="featureOne">多模型统一接入</p>
+          </div>
+          <div class="feature-item">
+            <span class="feature-dot" aria-hidden="true"></span>
+            <p data-i18n="featureTwo">稳定高效</p>
+          </div>
+          <div class="feature-item">
+            <span class="feature-dot" aria-hidden="true"></span>
+            <p data-i18n="featureThree">安全可控</p>
+          </div>
+        </div>
+
+        <div class="cta-row">
+          <a
+            id="cta-login-button"
+            class="cta-button"
+            href="/login"
+            data-login-button
+            data-i18n="loginCta"
+          >
+            登录
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <section class="hero-panel hero-visual-panel" aria-label="Visual decoration">
+      <div class="hero-divider" aria-hidden="true"></div>
+      <div class="visual-stage">
+        <div class="exchange-halo" aria-hidden="true"></div>
+        <svg
+          class="exchange-network-svg"
+          viewBox="0 0 600 400"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          aria-hidden="true"
+        >
+          <defs>
+            <filter id="exchange-glow-strong" x="-25%" y="-25%" width="150%" height="150%">
+              <feGaussianBlur stdDeviation="4" result="blur"></feGaussianBlur>
+              <feComposite in="SourceGraphic" in2="blur" operator="over"></feComposite>
+            </filter>
+            <linearGradient id="exchange-line-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="rgba(37, 99, 235, 0.08)">
+                <animate attributeName="stop-color" dur="9s" repeatCount="indefinite" values="rgba(37, 99, 235, 0.08);rgba(37, 99, 235, 0.13);rgba(37, 99, 235, 0.08)"></animate>
+              </stop>
+              <stop offset="46%" stop-color="rgba(37, 99, 235, 0.22)">
+                <animate attributeName="offset" dur="12s" repeatCount="indefinite" values="42%;50%;42%"></animate>
+              </stop>
+              <stop offset="100%" stop-color="rgba(37, 99, 235, 0.11)">
+                <animate attributeName="stop-color" dur="10s" repeatCount="indefinite" values="rgba(37, 99, 235, 0.11);rgba(37, 99, 235, 0.17);rgba(37, 99, 235, 0.11)"></animate>
+              </stop>
+            </linearGradient>
+            <linearGradient id="exchange-line-gradient-strong" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="rgba(37, 99, 235, 0.12)"></stop>
+              <stop offset="54%" stop-color="rgba(37, 99, 235, 0.3)">
+                <animate attributeName="offset" dur="11s" repeatCount="indefinite" values="48%;58%;48%"></animate>
+              </stop>
+              <stop offset="100%" stop-color="rgba(37, 99, 235, 0.16)"></stop>
+            </linearGradient>
+            <linearGradient id="exchange-line-gradient-soft" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="rgba(37, 99, 235, 0.06)"></stop>
+              <stop offset="48%" stop-color="rgba(37, 99, 235, 0.16)">
+                <animate attributeName="offset" dur="13s" repeatCount="indefinite" values="40%;56%;40%"></animate>
+              </stop>
+              <stop offset="100%" stop-color="rgba(37, 99, 235, 0.09)"></stop>
+            </linearGradient>
+            <path id="exchange-path-1" d="M -50 64 H 248 V 136 H 284 M 316 136 H 452 V 48 H 650"></path>
+            <path id="exchange-path-2" d="M -50 112 H 54 V 164 H 284 M 316 164 H 390 V 208 H 650"></path>
+            <path id="exchange-path-3" d="M -50 164 H 256 V 192 H 284 M 316 192 H 534 V 128 H 650"></path>
+            <path id="exchange-path-4" d="M -50 220 H 78 V 220 H 284 M 316 220 H 392 V 304 H 650"></path>
+            <path id="exchange-path-5" d="M -50 284 H 244 V 248 H 284 M 316 248 H 548 V 208 H 650"></path>
+            <path id="exchange-path-6" d="M -50 340 H 42 V 276 H 284 M 316 276 H 408 V 392 H 650"></path>
+          </defs>
+
+          <g class="exchange-network-lines">
+            <use href="#exchange-path-1" class="exchange-network-line line-weight-heavy" stroke="url(#exchange-line-gradient-strong)"></use>
+            <use href="#exchange-path-2" class="exchange-network-line" stroke="url(#exchange-line-gradient)"></use>
+            <use href="#exchange-path-3" class="exchange-network-line line-weight-soft" stroke="url(#exchange-line-gradient-soft)"></use>
+            <use href="#exchange-path-4" class="exchange-network-line line-weight-strong" stroke="url(#exchange-line-gradient)"></use>
+            <use href="#exchange-path-5" class="exchange-network-line line-weight-soft" stroke="url(#exchange-line-gradient-soft)"></use>
+            <use href="#exchange-path-6" class="exchange-network-line line-weight-heavy" stroke="url(#exchange-line-gradient-strong)"></use>
+          </g>
+
+          <g class="exchange-network-particles" filter="url(#exchange-glow-strong)">
+            <circle class="exchange-particle particle-size-md" r="3.2">
+              <animateMotion dur="11s" repeatCount="indefinite" keyPoints="0;1" keyTimes="0;1" calcMode="spline" keySplines="0.4 0 0.2 1">
+                <mpath href="#exchange-path-1"></mpath>
+              </animateMotion>
+              <animate attributeName="opacity" dur="11s" repeatCount="indefinite" values="0;1;1;0" keyTimes="0;0.08;0.92;1"></animate>
+            </circle>
+            <circle class="exchange-particle" r="2.8">
+              <animateMotion begin="1.6s" dur="13.4s" repeatCount="indefinite" keyPoints="0;1" keyTimes="0;1" calcMode="spline" keySplines="0.4 0 0.2 1">
+                <mpath href="#exchange-path-2"></mpath>
+              </animateMotion>
+              <animate attributeName="opacity" begin="1.6s" dur="13.4s" repeatCount="indefinite" values="0;1;1;0" keyTimes="0;0.08;0.92;1"></animate>
+            </circle>
+            <circle class="exchange-particle particle-size-sm" r="2.4">
+              <animateMotion begin="0.8s" dur="12.2s" repeatCount="indefinite" keyPoints="0;1" keyTimes="0;1" calcMode="spline" keySplines="0.4 0 0.2 1">
+                <mpath href="#exchange-path-3"></mpath>
+              </animateMotion>
+              <animate attributeName="opacity" begin="0.8s" dur="12.2s" repeatCount="indefinite" values="0;1;1;0" keyTimes="0;0.08;0.92;1"></animate>
+            </circle>
+            <circle class="exchange-particle" r="2.8">
+              <animateMotion begin="2.4s" dur="14.8s" repeatCount="indefinite" keyPoints="0;1" keyTimes="0;1" calcMode="spline" keySplines="0.4 0 0.2 1">
+                <mpath href="#exchange-path-4"></mpath>
+              </animateMotion>
+              <animate attributeName="opacity" begin="2.4s" dur="14.8s" repeatCount="indefinite" values="0;1;1;0" keyTimes="0;0.08;0.92;1"></animate>
+            </circle>
+            <circle class="exchange-particle particle-size-md" r="3.1">
+              <animateMotion begin="3.5s" dur="12.8s" repeatCount="indefinite" keyPoints="0;1" keyTimes="0;1" calcMode="spline" keySplines="0.4 0 0.2 1">
+                <mpath href="#exchange-path-5"></mpath>
+              </animateMotion>
+              <animate attributeName="opacity" begin="3.5s" dur="12.8s" repeatCount="indefinite" values="0;1;1;0" keyTimes="0;0.08;0.92;1"></animate>
+            </circle>
+            <circle class="exchange-particle particle-size-sm" r="2.3">
+              <animateMotion begin="5.2s" dur="15.4s" repeatCount="indefinite" keyPoints="0;1" keyTimes="0;1" calcMode="spline" keySplines="0.4 0 0.2 1">
+                <mpath href="#exchange-path-6"></mpath>
+              </animateMotion>
+              <animate attributeName="opacity" begin="5.2s" dur="15.4s" repeatCount="indefinite" values="0;1;1;0" keyTimes="0;0.08;0.92;1"></animate>
+            </circle>
+          </g>
+        </svg>
+
+        <div class="exchange-lane-group exchange-lane-group-in" aria-hidden="true">
+          <div class="exchange-lane lane-in lane-in-1"></div>
+          <div class="exchange-lane lane-in lane-in-2"></div>
+          <div class="exchange-lane lane-in lane-in-3"></div>
+          <div class="exchange-lane lane-in lane-in-4"></div>
+          <div class="exchange-lane lane-in lane-in-5"></div>
+        </div>
+
+        <div class="exchange-lane-group exchange-lane-group-out" aria-hidden="true">
+          <div class="exchange-lane lane-out lane-out-1"></div>
+          <div class="exchange-lane lane-out lane-out-2"></div>
+          <div class="exchange-lane lane-out lane-out-3"></div>
+          <div class="exchange-lane lane-out lane-out-4"></div>
+          <div class="exchange-lane lane-out lane-out-5"></div>
+        </div>
+
+        <div class="exchange-board glass-panel">
+          <div class="exchange-board-sheen" aria-hidden="true"></div>
+          <div class="exchange-chip-grid" aria-hidden="true">
+            <span class="exchange-chip chip-1"></span>
+            <span class="exchange-chip chip-2"></span>
+            <span class="exchange-chip chip-3"></span>
+            <span class="exchange-chip chip-4"></span>
+            <span class="exchange-chip chip-5"></span>
+            <span class="exchange-chip chip-6"></span>
+          </div>
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <script src="./isuerlinkindex.local.js"></script>
+</body>
+</html>
