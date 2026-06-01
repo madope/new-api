@@ -19,10 +19,12 @@ For commercial licensing, please contact support@quantumnous.com
 import { useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '@/stores/auth-store'
+import { useStatus } from '@/hooks/use-status'
 import { Markdown } from '@/components/ui/markdown'
 import { PublicLayout } from '@/components/layout'
 import { Footer } from '@/components/layout/components/footer'
 import { useTheme } from '@/context/theme-provider'
+import { isRegisterEnabled } from '@/features/auth'
 import { CTA, Features, Hero, HowItWorks, Stats } from './components'
 import { useHomePageContent } from './hooks'
 
@@ -30,6 +32,8 @@ export function Home() {
   const { t, i18n } = useTranslation()
   const { auth } = useAuthStore()
   const isAuthenticated = !!auth.user
+  const { status } = useStatus()
+  const showRegisterEntry = !!status && isRegisterEnabled(status)
   const { content, isLoaded, isUrl } = useHomePageContent()
   const { resolvedTheme } = useTheme()
   const iframeRef = useRef<HTMLIFrameElement | null>(null)
@@ -101,11 +105,17 @@ export function Home() {
 
   return (
     <PublicLayout showMainContainer={false}>
-      <Hero isAuthenticated={isAuthenticated} />
+      <Hero
+        isAuthenticated={isAuthenticated}
+        showRegisterEntry={showRegisterEntry}
+      />
       <Stats />
       <Features />
       <HowItWorks />
-      <CTA isAuthenticated={isAuthenticated} />
+      <CTA
+        isAuthenticated={isAuthenticated}
+        showRegisterEntry={showRegisterEntry}
+      />
       <Footer />
     </PublicLayout>
   )

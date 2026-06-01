@@ -28,6 +28,10 @@ import { normalizeLanguage } from '../../i18n/language';
 import { useIsMobile } from './useIsMobile';
 import { useSidebarCollapsed } from './useSidebarCollapsed';
 import { useMinimumLoadingTime } from './useMinimumLoadingTime';
+import {
+  getEffectiveStatus,
+  isRegisterEnabled,
+} from '../../helpers/register-entry';
 
 export const useHeaderBar = ({ onMobileMenuToggle, drawerOpen }) => {
   const { t, i18n } = useTranslation();
@@ -47,13 +51,15 @@ export const useHeaderBar = ({ onMobileMenuToggle, drawerOpen }) => {
   const logo = getLogo();
   const currentDate = new Date();
   const isNewYear = currentDate.getMonth() === 0 && currentDate.getDate() === 1;
+  const effectiveStatus = getEffectiveStatus(statusState?.status);
 
-  const isSelfUseMode = statusState?.status?.self_use_mode_enabled || false;
-  const docsLink = statusState?.status?.docs_link || '';
-  const isDemoSiteMode = statusState?.status?.demo_site_enabled || false;
+  const isSelfUseMode = effectiveStatus?.self_use_mode_enabled || false;
+  const docsLink = effectiveStatus?.docs_link || '';
+  const isDemoSiteMode = effectiveStatus?.demo_site_enabled || false;
+  const registerEnabled = isRegisterEnabled(effectiveStatus);
 
   // 获取顶栏模块配置
-  const headerNavModulesConfig = statusState?.status?.HeaderNavModules;
+  const headerNavModulesConfig = effectiveStatus?.HeaderNavModules;
 
   // 使用useMemo确保headerNavModules正确响应statusState变化
   const headerNavModules = useMemo(() => {
@@ -260,6 +266,7 @@ export const useHeaderBar = ({ onMobileMenuToggle, drawerOpen }) => {
     drawerOpen,
     headerNavModules,
     pricingRequireAuth,
+    registerEnabled,
 
     // Actions
     logout,

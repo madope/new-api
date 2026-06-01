@@ -25,6 +25,7 @@ import { AnimateInView } from '@/components/animate-in-view'
 interface CTAProps {
   className?: string
   isAuthenticated?: boolean
+  showRegisterEntry?: boolean
 }
 
 export function CTA(props: CTAProps) {
@@ -65,10 +66,12 @@ export function CTA(props: CTAProps) {
           )}
         </p>
         <div className='mt-8 flex items-center justify-center gap-3'>
-          <Button className='group rounded-lg' render={<Link to='/sign-up' />}>
-            {t('Get Started')}
-            <ArrowRight className='ml-1 size-3.5 transition-transform duration-200 group-hover:translate-x-0.5' />
-          </Button>
+          {props.showRegisterEntry !== false && (
+            <Button className='group rounded-lg' render={<Link to='/sign-up' />}>
+              {t('Get Started')}
+              <ArrowRight className='ml-1 size-3.5 transition-transform duration-200 group-hover:translate-x-0.5' />
+            </Button>
+          )}
           <Button
             variant='outline'
             className='border-border/50 hover:border-border hover:bg-muted/50 rounded-lg'

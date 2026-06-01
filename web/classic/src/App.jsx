@@ -18,7 +18,13 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React, { lazy, Suspense, useContext, useMemo } from 'react';
-import { Route, Routes, useLocation, useParams } from 'react-router-dom';
+import {
+  Navigate,
+  Route,
+  Routes,
+  useLocation,
+  useParams,
+} from 'react-router-dom';
 import Loading from './components/common/ui/Loading';
 import User from './pages/User';
 import { AuthRedirect, PrivateRoute, AdminRoute } from './helpers';
@@ -49,6 +55,7 @@ import OAuth2Callback from './components/auth/OAuth2Callback';
 import PersonalSetting from './components/settings/PersonalSetting';
 import Setup from './pages/Setup';
 import SetupCheck from './components/layout/SetupCheck';
+import { getCachedStatus, isRegisterEnabled } from './helpers/register-entry';
 
 const Home = lazy(() => import('./pages/Home'));
 const Dashboard = lazy(() => import('./pages/Dashboard'));
@@ -64,6 +71,7 @@ function DynamicOAuth2Callback() {
 function App() {
   const location = useLocation();
   const [statusState] = useContext(StatusContext);
+  const cachedStatus = useMemo(() => getCachedStatus(), []);
 
   // 获取模型广场权限配置
   const pricingRequireAuth = useMemo(() => {
@@ -86,6 +94,13 @@ function App() {
     }
     return false; // 默认不需要登录
   }, [statusState?.status?.HeaderNavModules]);
+
+  const registerEnabled = useMemo(() => {
+    const effectiveStatus = statusState?.status || cachedStatus || {};
+    return isRegisterEnabled(effectiveStatus);
+  }, [cachedStatus, statusState?.status]);
+
+  const registerStatusKnown = statusState?.status !== undefined || !!cachedStatus;
 
   return (
     <SetupCheck>
@@ -193,9 +208,15 @@ function App() {
           path='/register'
           element={
             <Suspense fallback={<Loading></Loading>} key={location.pathname}>
-              <AuthRedirect>
-                <RegisterForm />
-              </AuthRedirect>
+              {!registerStatusKnown ? (
+                <Loading></Loading>
+              ) : registerEnabled ? (
+                <AuthRedirect>
+                  <RegisterForm />
+                </AuthRedirect>
+              ) : (
+                <Navigate to='/login' replace />
+              )}
             </Suspense>
           }
         />

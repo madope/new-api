@@ -66,6 +66,10 @@ import LinuxDoIcon from '../common/logo/LinuxDoIcon';
 import TwoFAVerification from './TwoFAVerification';
 import { useTranslation } from 'react-i18next';
 import { SiDiscord } from 'react-icons/si';
+import {
+  getCachedStatus,
+  isRegisterEnabled,
+} from '../../helpers/register-entry';
 
 const LoginForm = () => {
   let navigate = useNavigate();
@@ -133,6 +137,11 @@ const LoginForm = () => {
   }, [statusState?.status]);
   const hasCustomOAuthProviders =
     (status.custom_oauth_providers || []).length > 0;
+  const hasRegisterStatusSnapshot = Boolean(statusState?.status || getCachedStatus());
+  const canShowRegisterEntry =
+    hasRegisterStatusSnapshot &&
+    !status.self_use_mode_enabled &&
+    isRegisterEnabled(status);
   const hasOAuthLoginOptions = Boolean(
     status.github_oauth ||
       status.discord_oauth ||
@@ -696,7 +705,7 @@ const LoginForm = () => {
                 </div>
               )}
 
-              {!status.self_use_mode_enabled && (
+              {canShowRegisterEntry && (
                 <div className='mt-6 text-center text-sm'>
                   <Text>
                     {t('没有账户？')}{' '}
@@ -849,7 +858,7 @@ const LoginForm = () => {
                 </>
               )}
 
-              {!status.self_use_mode_enabled && (
+              {canShowRegisterEntry && (
                 <div className='mt-6 text-center text-sm'>
                   <Text>
                     {t('没有账户？')}{' '}

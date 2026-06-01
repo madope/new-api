@@ -16,9 +16,22 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, redirect } from '@tanstack/react-router'
+import { getStatus } from '@/lib/api'
 import { SignUp } from '@/features/auth/sign-up'
+import { getCachedStatus, isRegisterEnabled } from '@/features/auth'
 
 export const Route = createFileRoute('/(auth)/sign-up')({
   component: SignUp,
+  beforeLoad: async () => {
+    const cachedStatus = getCachedStatus()
+    if (cachedStatus && !isRegisterEnabled(cachedStatus)) {
+      throw redirect({ to: '/sign-in' })
+    }
+
+    const status = await getStatus()
+    if (!isRegisterEnabled(status)) {
+      throw redirect({ to: '/sign-in' })
+    }
+  },
 })

@@ -23,17 +23,29 @@ import { Button } from '@/components/ui/button'
 
 interface HeroButtonsProps {
   isAuthenticated: boolean
+  showRegisterEntry?: boolean
 }
 
 /**
  * Hero section action buttons
  */
-export function HeroButtons({ isAuthenticated }: HeroButtonsProps) {
+export function HeroButtons({
+  isAuthenticated,
+  showRegisterEntry = true,
+}: HeroButtonsProps) {
   const { t } = useTranslation()
   if (isAuthenticated) {
     return (
       <Button size='lg' render={<Link to='/dashboard' />}>
         {t('Go to Dashboard')} <ArrowRight className='ml-2 h-5 w-5' />
+      </Button>
+    )
+  }
+
+  if (!showRegisterEntry) {
+    return (
+      <Button size='lg' variant='outline' render={<Link to='/sign-in' />}>
+        {t('Sign In')}
       </Button>
     )
   }

@@ -100,6 +100,8 @@ export {
   isValidEmail,
 } from './lib/validation'
 
+export { getCachedStatus, isRegisterEnabled } from './lib/register-entry'
+
 // ============================================================================
 // Hooks
 // ============================================================================
