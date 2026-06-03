@@ -1,0 +1,380 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "New API Billing Service",
+    "version": "1.0.0",
+    "description": "TimescaleDB billing query service for logsagg aggregated billing data."
+  },
+  "servers": [
+    {
+      "url": "/"
+    }
+  ],
+  "paths": {
+    "/api/v1/billing/healthz": {
+      "get": {
+        "summary": "Health check",
+        "responses": {
+          "200": {
+            "description": "Service healthy",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Database unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/billing/query": {
+      "get": {
+        "summary": "Query billing aggregates",
+        "parameters": [
+          {
+            "name": "start_timestamp",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "description": "Start time in Unix seconds"
+          },
+          {
+            "name": "end_timestamp",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "description": "End time in Unix seconds"
+          },
+          {
+            "name": "user_id",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "username",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "token_id",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "token_name",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "channel_id",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "channel_name",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "model_name",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "group_name",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "is_stream",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 2
+            },
+            "description": "Default is 2 for consume logs"
+          },
+          {
+            "name": "group_by",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Comma separated values from user,token,channel,model,group,stream,type"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 1,
+              "minimum": 1
+            }
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 20,
+              "minimum": 1
+            }
+          },
+          {
+            "name": "order_by",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "amount",
+                "quota",
+                "requests",
+                "total_tokens",
+                "prompt_tokens",
+                "completion_tokens",
+                "avg_use_time_ms",
+                "max_use_time_ms"
+              ],
+              "default": "amount"
+            }
+          },
+          {
+            "name": "order",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "default": "desc"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Billing query response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BillingQueryResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "HealthResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "status": {
+                "type": "string",
+                "example": "ok"
+              }
+            }
+          }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": false
+          },
+          "message": {
+            "type": "string",
+            "example": "invalid group_by: bad"
+          },
+          "data": {
+            "nullable": true
+          }
+        }
+      },
+      "BillingSummary": {
+        "type": "object",
+        "properties": {
+          "requests": { "type": "integer", "format": "int64" },
+          "quota": { "type": "integer", "format": "int64" },
+          "amount": { "type": "number", "format": "double" },
+          "prompt_tokens": { "type": "integer", "format": "int64" },
+          "completion_tokens": { "type": "integer", "format": "int64" },
+          "total_tokens": { "type": "integer", "format": "int64" },
+          "avg_use_time_ms": { "type": "integer", "format": "int64" },
+          "max_use_time_ms": { "type": "integer", "format": "int64" }
+        }
+      },
+      "BillingItem": {
+        "type": "object",
+        "description": "Dynamic aggregate row. Grouping fields appear only when group_by is provided.",
+        "properties": {
+          "user_id": { "type": "integer", "format": "int64" },
+          "username": { "type": "string" },
+          "token_id": { "type": "integer", "format": "int64" },
+          "token_name": { "type": "string" },
+          "channel_id": { "type": "integer", "format": "int64" },
+          "channel_name": { "type": "string" },
+          "model_name": { "type": "string" },
+          "group_name": { "type": "string" },
+          "is_stream": { "type": "boolean" },
+          "type": { "type": "integer" },
+          "requests": { "type": "integer", "format": "int64" },
+          "quota": { "type": "integer", "format": "int64" },
+          "amount": { "type": "number", "format": "double" },
+          "prompt_tokens": { "type": "integer", "format": "int64" },
+          "completion_tokens": { "type": "integer", "format": "int64" },
+          "total_tokens": { "type": "integer", "format": "int64" },
+          "avg_use_time_ms": { "type": "integer", "format": "int64" },
+          "max_use_time_ms": { "type": "integer", "format": "int64" }
+        },
+        "additionalProperties": true
+      },
+      "BillingPage": {
+        "type": "object",
+        "properties": {
+          "page": { "type": "integer" },
+          "page_size": { "type": "integer" },
+          "total": { "type": "integer" },
+          "total_pages": { "type": "integer" }
+        }
+      },
+      "BillingMeta": {
+        "type": "object",
+        "properties": {
+          "group_by": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "order_by": {
+            "type": "string"
+          },
+          "order": {
+            "type": "string"
+          },
+          "amount_divisor": {
+            "type": "integer",
+            "example": 500000
+          },
+          "filters": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        }
+      },
+      "BillingQueryData": {
+        "type": "object",
+        "properties": {
+          "summary": {
+            "$ref": "#/components/schemas/BillingSummary"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BillingItem"
+            }
+          },
+          "page": {
+            "$ref": "#/components/schemas/BillingPage"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/BillingMeta"
+          }
+        }
+      },
+      "BillingQueryResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "message": {
+            "type": "string",
+            "example": ""
+          },
+          "data": {
+            "$ref": "#/components/schemas/BillingQueryData"
+          }
+        }
+      }
+    }
+  }
+}
